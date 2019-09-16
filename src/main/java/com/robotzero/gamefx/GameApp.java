@@ -35,7 +35,7 @@ public class GameApp extends GameApplication {
         rectangle.setY(540);
         line.setStartX(1920 / 2);
         line.setStartY(1080 / 2);
-        line.setEndX(1920 /2 + 520 );
+        line.setEndX((1920 /2) + 520 );
         line.setEndY(540);
         line.setStroke(Color.RED);
         line.setStrokeWidth(5);
@@ -56,12 +56,15 @@ public class GameApp extends GameApplication {
 //        float y = height / 2 + sin(a) * r;
         int bb = (int) (100 * Math.sin(0.2 * ax / 3.14));
         Vec2D norm = this.normalizeCoord(this.newV);
-        Vec2D circleNorm = this.normalizeCoord(this.circleCenter);
+        Vec2D circleNorm = this.normalizeCoord(new Vec2D(circleCenter.getX(), circleCenter.getY()));
+        Vec2D radiusNorm = this.normalizeCoord(new Vec2D((1920 / 2) + 520, 540));
         Vec2D sins = new Vec2D(norm.getX(), 1 * Math.sin(norm.getX() * 100 / Math.PI));
         Vec2D circleNorm2 = new Vec2D(this.circleCenter.getX() + Math.cos(theta) * 520, this.circleCenter.getY() + Math.sin(theta) * 520);
+        Vec2D circleNorm3 = new Vec2D(circleNorm.getX() + Math.cos(theta) * radiusNorm.getX(), circleNorm.getY() + Math.sin(theta));
         Vec2D backToScreen = toScreenCoord(sins);
-        Vec2D backToScreenCirle = toScreenCoord(circleNorm2);
+        Vec2D backToScreenCirle = toScreenCoord(circleNorm3);
         this.newV = new Vec2D(backToScreen.getX() + 1, backToScreen.getY());
+//        System.out.println(Math.cos(theta));
         theta = theta + tpf;
         try {
             Thread.sleep(10);
@@ -69,7 +72,8 @@ public class GameApp extends GameApplication {
             rectangle.setY(backToScreen.getY());
             line.setEndX(circleNorm2.getX());
             line.setEndY(circleNorm2.getY());
-            System.out.println(this.normalizeCoord(this.circleCenter));
+//            line.setEndX(backToScreenCirle.getX());
+//            line.setEndY(backToScreenCirle.getY());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
