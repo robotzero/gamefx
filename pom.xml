@@ -159,7 +159,7 @@
                                     <mainClass>com.robotzero.gamefx.Robot</mainClass>
                                 </transformer>
                             </transformers>
-                            <finalName>lwjgl3-demos</finalName>
+                            <finalName>thinkrobot</finalName>
                         </configuration>
                     </execution>
                 </executions>
