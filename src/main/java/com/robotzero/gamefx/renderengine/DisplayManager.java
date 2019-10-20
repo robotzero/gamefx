@@ -43,6 +43,9 @@ public class DisplayManager {
             if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
                 glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
         });
+        glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
+            glViewport(0, 0, width, height);
+        });
 
         try ( MemoryStack stack = stackPush() ) {
             IntBuffer pWidth = stack.mallocInt(1); // int*
@@ -76,17 +79,27 @@ public class DisplayManager {
 
         // Set the clear color
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
-
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-
+            drawTriangleOldWay();
             glfwSwapBuffers(window); // swap the color buffers
-
             // Poll for window events. The key callback above will only be
             // invoked during this call.
             glfwPollEvents();
         }
+    }
+
+    private void drawTriangleOldWay() {
+        glRotatef(1f, 0.0f, 1.0f, 0.0f);
+        glBegin(GL_TRIANGLES);
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(-0.5f, -0.5f, 0.0f);
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex3f(0.5f, -0.5f, 0.0f);
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(0.0f, 0.5f, 0.0f);
+        glEnd();
     }
 }
