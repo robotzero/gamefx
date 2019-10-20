@@ -6,7 +6,6 @@ import org.lwjgl.system.MemoryStack;
 
 import java.nio.*;
 
-import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -20,6 +19,8 @@ public class DisplayManager {
     private static final int HEIGHT = 720;
     private static final int FPS_CAP = 60;
     private static final String TITLE = "Our First Display";
+    private static float counter = 0.0f;
+    private static final double pi = 3.1415926535897932384626433832795;
 
     public void createDisplay() {
         GLFWErrorCallback.createPrint(System.err).set();
@@ -45,6 +46,9 @@ public class DisplayManager {
         });
         glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
             glViewport(0, 0, width, height);
+            // Creating perspective
+
+            this.applyProjection();
         });
 
         try ( MemoryStack stack = stackPush() ) {
@@ -65,8 +69,10 @@ public class DisplayManager {
             );
         } // the stack frame is popped automatically
 
+
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
+
         // Enable v-sync
         glfwSwapInterval(1);
 
@@ -74,11 +80,17 @@ public class DisplayManager {
         glfwShowWindow(window);
     }
 
+    // Main loop
     public void updateDisplay() {
         GL.createCapabilities();
 
         // Set the clear color
-        glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
+        glClearColor(0.8f, 0.0f, 0.0f, 0.0f);
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+
+        this.applyProjection();
+
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
@@ -92,14 +104,55 @@ public class DisplayManager {
     }
 
     private void drawTriangleOldWay() {
-        glRotatef(1f, 0.0f, 1.0f, 0.0f);
+        //Identity matrix for rotation every frame
+        glLoadIdentity();
+        glTranslatef(counter/150.0f, 0.0f, -4.0f);
+        glRotatef(counter, 0.0f, 1.0f, 0.0f);
+        counter += 0.5f;
+        if (counter > 200f) {
+            counter = -200.0f;
+        }
         glBegin(GL_TRIANGLES);
+
         glColor3f(0.0f, 1.0f, 0.0f);
         glVertex3f(-0.5f, -0.5f, 0.0f);
+
         glColor3f(1.0f, 0.0f, 0.0f);
         glVertex3f(0.5f, -0.5f, 0.0f);
+
         glColor3f(0.0f, 0.0f, 1.0f);
         glVertex3f(0.0f, 0.5f, 0.0f);
         glEnd();
+
+        glLoadIdentity();
+        glTranslatef(0.0f, -0.5f, -4.0f);
+        glRotatef(5f, 0.0f, 1.0f, 0.0f);
+        glBegin(GL_TRIANGLES);
+
+        glColor3f(1.0f, 0.0f, 0.0f);
+        glVertex3f(-0.9f, -0.1f, 0.0f);
+
+        glColor3f(0.0f, 0.0f, 1.0f);
+        glVertex3f(0.1f, -0.1f, 0.0f);
+
+        glColor3f(0.0f, 1.0f, 0.0f);
+        glVertex3f(-0.5f, 0.9f, 0.0f);
+
+        glEnd();
+    }
+
+    private void gluPerspective(float fovY, float zNear, float zFar, int width, int height) {
+        float aspect = (float) width/ (float) height;
+        float fH = (float) Math.tan( (fovY / 360.0f * pi) ) * zNear;
+        float fW = fH * aspect;
+        // gluPerspective
+        glFrustum( -fW, fW, -fH, fH, zNear, zFar );
+    }
+
+    private void applyProjection() {
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(60, 1.0f, 10.0f, WIDTH, HEIGHT);
+        glMatrixMode(GL_MODELVIEW);
     }
 }
