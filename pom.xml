@@ -17,7 +17,7 @@
         <joml.version>1.9.18-SNAPSHOT</joml.version>
         <!-- Can be overwritten via -D property during mvn invoke to specify
             a different demo. The package "org.lwjgl.demo." is prepended automatically. -->
-        <class>com.robotzero.gamefx.Robot</class>
+        <class>main.java.com.robotzero.gamefx.Robot</class>
     </properties>
     <profiles>
         <profile>
@@ -156,7 +156,7 @@
                             <transformers>
                                 <transformer
                                         implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>com.robotzero.gamefx.Robot</mainClass>
+                                    <mainClass>main.java.com.robotzero.gamefx.Robot</mainClass>
                                 </transformer>
                             </transformers>
                             <finalName>thinkrobot</finalName>

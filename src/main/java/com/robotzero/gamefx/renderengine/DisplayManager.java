@@ -1,4 +1,4 @@
-package com.robotzero.gamefx.renderengine;
+package main.java.com.robotzero.gamefx.renderengine;
 
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
@@ -19,8 +19,8 @@ public class DisplayManager {
     private long window;
     private GLFWErrorCallback errorCallback;
     private GLFWKeyCallback   keyCallback;
-    private static final int WIDTH = 1280;
-    private static final int HEIGHT = 720;
+    public static final int WIDTH = 1280;
+    public static final int HEIGHT = 720;
     private static final int FPS_CAP = 60;
     private static final String TITLE = "Our First Display";
     private static float counter = 0.0f;
@@ -38,6 +38,10 @@ public class DisplayManager {
             1f,  1f, -5 };
 
     FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.length).put(vertices).flip();
+
+    public long getWindow() {
+        return this.window;
+    }
 
     public void createDisplay() {
         floatBuffer.put(vertices);
