@@ -1,5 +1,6 @@
 package main.java.com.robotzero.gamefx.renderengine;
 
+import main.java.com.robotzero.gamefx.renderengine.math.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
@@ -19,32 +20,32 @@ public class DisplayManager {
     private long window;
     private GLFWErrorCallback errorCallback;
     private GLFWKeyCallback   keyCallback;
-    public static final int WIDTH = 1280;
-    public static final int HEIGHT = 720;
+    public static int WIDTH = 1280;
+    public static int HEIGHT = 720;
     private static final int FPS_CAP = 60;
     private static final String TITLE = "Our First Display";
     private static float counter = 0.0f;
     private static final double pi = 3.1415926535897932384626433832795;
-    private float[] vertices = {
-            -0.5f, -0.5f, 0.0f,
-            0.5f, -0.5f, 0.0f,
-            0.0f, 0.5f, 0.0f
-    };
-
-
-    private final float quadVertices[] =  { 1f,  1f, -5,
-            -1f, -1f, -5,
-            1f, -1f, -5,
-            1f,  1f, -5 };
-
-    FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.length).put(vertices).flip();
+//    private float[] vertices = {
+//            -0.5f, -0.5f, 0.0f,
+//            0.5f, -0.5f, 0.0f,
+//            0.0f, 0.5f, 0.0f
+//    };
+//
+//
+//    private final float quadVertices[] =  { 1f,  1f, -5,
+//            -1f, -1f, -5,
+//            1f, -1f, -5,
+//            1f,  1f, -5 };
+//
+//    FloatBuffer floatBuffer = BufferUtils.createFloatBuffer(vertices.length).put(vertices).flip();
 
     public long getWindow() {
         return this.window;
     }
 
     public void createDisplay() {
-        floatBuffer.put(vertices);
+//        floatBuffer.put(vertices);
         GLFWErrorCallback.createPrint(System.err).set();
 
         // Initialize GLFW. Most GLFW functions will not work before doing this.
@@ -55,6 +56,11 @@ public class DisplayManager {
         glfwDefaultWindowHints(); // optional, the current window hints are already the default
         glfwWindowHint(GLFW_VISIBLE, GL_FALSE); // the window will stay hidden after creation
         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE); // the window will be resizable
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 
         // Create the window
         window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, NULL, NULL);
@@ -75,39 +81,38 @@ public class DisplayManager {
         });
 
         glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
-            glViewport(0, 0, width, height);
+            if (width > 0
+                    && height > 0
+                    && (WIDTH != width || HEIGHT != height)) {
+                WIDTH = width;
+                HEIGHT = height;
+            }
             // Creating perspective
 
 //            this.applyProjection();
         });
 
         try ( MemoryStack stack = stackPush() ) {
-            IntBuffer pWidth = stack.mallocInt(1); // int*
-            IntBuffer pHeight = stack.mallocInt(1); // int*
-
-            // Get the window size passed to glfwCreateWindow
-            glfwGetWindowSize(window, pWidth, pHeight);
-
-            // Get the resolution of the primary monitor
-            GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-            // Center the window
-            glfwSetWindowPos(
-                    window,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
-            );
+            IntBuffer framebufferSize = stack.mallocInt(2);
+            nglfwGetFramebufferSize(window, memAddress(framebufferSize), memAddress(framebufferSize) + 4);
+            WIDTH = framebufferSize.get(0);
+            HEIGHT = framebufferSize.get(1);
         } // the stack frame is popped automatically
 
+
+        GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowPos(window, (vidmode.width() - WIDTH) / 2, (vidmode.height() - HEIGHT) / 2);
 
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
 
-        // Enable v-sync
-        glfwSwapInterval(1);
+        // Enable v-sync (1)
+        glfwSwapInterval(0);
 
         // Make the window visible
         glfwShowWindow(window);
+
+        GL.createCapabilities();
     }
 
     // Main loop
