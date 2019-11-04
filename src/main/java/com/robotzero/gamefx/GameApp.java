@@ -71,7 +71,6 @@ public class GameApp {
         background = new VertexArray(vertices, indices, tcs);
         bgTexture = new Texture("res/bg.jpeg");
 
-        System.out.println("RUN");
         long lastTime = System.nanoTime();
         double delta = 0.0;
         double ns = 1000000000.0 / 60.0;
