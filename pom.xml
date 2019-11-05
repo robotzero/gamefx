@@ -15,6 +15,7 @@
         <lwjgl.version>3.2.4-SNAPSHOT</lwjgl.version>
         <swt.version>4.6.1</swt.version>
         <joml.version>1.9.18-SNAPSHOT</joml.version>
+        <kotlin.version>1.3.50</kotlin.version>
         <!-- Can be overwritten via -D property during mvn invoke to specify
             a different demo. The package "org.lwjgl.demo." is prepended automatically. -->
         <class>main.java.com.robotzero.gamefx.Robot</class>
@@ -178,6 +179,26 @@
             <id>swt-repo</id>
             <url>http://maven-eclipse.github.io/maven</url>
         </repository>
+        <repository>
+            <id>dl.bintray.com</id>
+            <url>http://dl.bintray.com/kotlin/kotlin-dev</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>swt-repo</id>
+            <url>http://maven-eclipse.github.io/maven</url>
+        </repository>
+        <repository>
+            <id>gdx-nightlies</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+        <repository>
+            <id>gdx-releases</id>
+            <url>https://oss.sonatype.org/content/repositories/releases/</url>
+        </repository>
     </repositories>
     <dependencies>
         <dependency>
@@ -299,5 +320,26 @@
 	        <artifactId>la4j</artifactId>
 	        <version>0.6.0</version>
       </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.kotlin-graphics</groupId>
+            <artifactId>imgui</artifactId>
+            <version>v1.52</version>
+        </dependency>
+        <!-- core dependencies -->
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx</artifactId>
+            <version>1.9.10</version>
+        </dependency>
     </dependencies>
 </project>

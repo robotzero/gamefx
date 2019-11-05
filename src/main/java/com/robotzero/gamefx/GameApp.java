@@ -1,5 +1,6 @@
 package main.java.com.robotzero.gamefx;
 
+import imgui.ImGui;
 import main.java.com.robotzero.gamefx.renderengine.DisplayManager;
 import main.java.com.robotzero.gamefx.renderengine.Render;
 import main.java.com.robotzero.gamefx.renderengine.Shader;
