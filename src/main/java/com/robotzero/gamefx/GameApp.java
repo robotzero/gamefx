@@ -11,8 +11,7 @@ import org.lwjgl.opengl.GLUtil;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
+import static org.lwjgl.opengl.GL13.*;
 
 public class GameApp {
     private Thread thread;
@@ -24,18 +23,18 @@ public class GameApp {
     private float SIZE = 1.0f;
     private static float width = 284f, height = 512f;
 
-    float[] vertices = new float[] {
-            0, height, 0.0f,
-            0, 0, 0.0f,
-            width, 0, 0.0f,
-            width, height, 0.0f
+    float[] vertices1 = new float[] {
+            0.0f, 0.0f, 0.0f,
+            0.0f, height, 0.0f,
+            width, height, 0.0f,
+            width, 0, 0.0f
     };
 
-    float[] tcs = new float[] {
-            0, 1,
+    float[] tcs1 = new float[] {
             0, 0,
-            1, 0,
-            1, 1
+            0, 1,
+            1, 1,
+            1, 0
     };
 
     byte[] indices = new byte[] {
@@ -60,16 +59,16 @@ public class GameApp {
         GLUtil.setupDebugMessageCallback();
 
         glEnable(GL_DEPTH_TEST);
-        glActiveTexture(GL_TEXTURE1);
+        glActiveTexture(GL_TEXTURE0);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         Shader.loadAll();
         Matrix4f pr_matrix = Matrix4f.orthographic(0.0f, 1024f, 768f, 0, -1.0f, 1.0f);
         Shader.BG.setUniformMat4f("pr_matrix", pr_matrix);
-        Shader.BG.setUniform1i("tex", 1);
+        Shader.BG.setUniform1i("tex", 0);
 
-        background = new VertexArray(vertices, indices, tcs);
+        background = new VertexArray(vertices1, indices, tcs1);
         bgTexture = new Texture("res/bg.jpeg");
 
         long lastTime = System.nanoTime();
