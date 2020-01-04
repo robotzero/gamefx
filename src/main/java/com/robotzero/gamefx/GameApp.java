@@ -1,6 +1,5 @@
 package main.java.com.robotzero.gamefx;
 
-import imgui.ImGui;
 import main.java.com.robotzero.gamefx.renderengine.DisplayManager;
 import main.java.com.robotzero.gamefx.renderengine.Render;
 import main.java.com.robotzero.gamefx.renderengine.Shader;
@@ -12,7 +11,6 @@ import org.lwjgl.opengl.GLUtil;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 
@@ -23,17 +21,14 @@ public class GameApp {
     private final Render render2D;
     private VertexArray background;
     private Texture bgTexture;
+    private float SIZE = 1.0f;
+    private static float width = 284f, height = 512f;
 
     float[] vertices = new float[] {
-            -10.0f, -10.0f * 9.0f / 16.0f, 0.0f,
-            -10.0f,  10.0f * 9.0f / 16.0f, 0.0f,
-            0.0f,  10.0f * 9.0f / 16.0f, 0.0f,
-            0.0f, -10.0f * 9.0f / 16.0f, 0.0f
-    };
-
-    byte[] indices = new byte[] {
-            0, 1, 2,
-            2, 3, 0
+            0, height, 0.0f,
+            0, 0, 0.0f,
+            width, 0, 0.0f,
+            width, height, 0.0f
     };
 
     float[] tcs = new float[] {
@@ -41,6 +36,11 @@ public class GameApp {
             0, 0,
             1, 0,
             1, 1
+    };
+
+    byte[] indices = new byte[] {
+            0, 1, 2,
+            2, 3, 0
     };
 
     public GameApp(DisplayManager displayManager, Render render2D) {
@@ -65,7 +65,7 @@ public class GameApp {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         Shader.loadAll();
-        Matrix4f pr_matrix = Matrix4f.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f / 16.0f, -1.0f, 1.0f);
+        Matrix4f pr_matrix = Matrix4f.orthographic(0.0f, 1024f, 768f, 0, -1.0f, 1.0f);
         Shader.BG.setUniformMat4f("pr_matrix", pr_matrix);
         Shader.BG.setUniform1i("tex", 1);
 

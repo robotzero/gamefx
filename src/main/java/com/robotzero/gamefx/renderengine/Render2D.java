@@ -20,10 +20,12 @@ public class Render2D implements Render {
 
         bgTexture.bind();
         Shader.BG.enable();
-        Shader.BG.setUniform2f("bird", 0, 20);
+//        Shader.BG.setUniform2f("bird", 40, 200);
         background.bind();
-        for (int i = map; i < map + 4; i++) {
-            Shader.BG.setUniformMat4f("vw_matrix", Matrix4f.translate(new Vector3f(i * 10 + 0 * 0.03f, 0.0f, 0.0f)));
+        for (int i = map; i <=1; i++) {
+//            Shader.BG.setUniformMat4f("vw_matrix", Matrix4f.translate(new Vector3f(i * 10 + 0 * 0.03f, 0.0f, 0.0f)));
+//            Shader.BG.setUniformMat4f("vw_matrix", Matrix4f.translate(new Vector3f(i * 1 + 0 * 0.03f, 0.0f, 0.0f)));
+            Shader.BG.setUniformMat4f("vw_matrix", Matrix4f.identity());
             background.draw();
         }
         Shader.BG.disable();

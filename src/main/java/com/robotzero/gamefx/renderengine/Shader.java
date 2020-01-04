@@ -28,7 +28,7 @@ public class Shader {
     }
 
     public static void loadAll() {
-        BG = new Shader("shaders/background.vert", "shaders/background.frag");
+        BG = new Shader("shaders/background3.vert", "shaders/background3.frag");
     }
 
     public int getUniform(String name) {
