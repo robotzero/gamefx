@@ -1,9 +1,10 @@
 package main.java.com.robotzero.gamefx;
 
+import com.jogamp.opengl.math.Matrix4;
+import main.java.com.robotzero.gamefx.renderengine.Camera;
 import main.java.com.robotzero.gamefx.renderengine.DisplayManager;
 import main.java.com.robotzero.gamefx.renderengine.Render;
 import main.java.com.robotzero.gamefx.renderengine.Shader;
-import main.java.com.robotzero.gamefx.renderengine.math.Matrix4f;
 import main.java.com.robotzero.gamefx.renderengine.utils.Texture;
 import main.java.com.robotzero.gamefx.renderengine.utils.VertexArray;
 import org.lwjgl.opengl.GL;
@@ -21,6 +22,7 @@ public class GameApp {
     private VertexArray background;
     private Texture bgTexture;
     private float SIZE = 1.0f;
+    private Camera camera;
     private static float width = 284f, height = 512f;
 
     float[] vertices1 = new float[] {
@@ -42,9 +44,10 @@ public class GameApp {
             2, 3, 0
     };
 
-    public GameApp(DisplayManager displayManager, Render render2D) {
+    public GameApp(DisplayManager displayManager, Render render2D, Camera camera) {
         this.displayManager = displayManager;
         this.render2D = render2D;
+        this.camera = camera;
     }
 
     void start() {
@@ -64,8 +67,9 @@ public class GameApp {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         Shader.loadAll();
-        Matrix4f pr_matrix = Matrix4f.orthographic(0.0f, 1024f, 768f, 0, -1.0f, 1.0f);
-        Shader.BG.setUniformMat4f("pr_matrix", pr_matrix);
+        final Matrix4 perspective = new com.jogamp.opengl.math.Matrix4();
+        perspective.makeOrtho(0.0f, 1024f, 768f, 0, -1.0f, 1.0f);
+        Shader.BG.setUniformMat4f("pr_matrix", perspective.getMatrix());
         Shader.BG.setUniform1i("tex", 0);
 
         background = new VertexArray(vertices1, indices, tcs1);
@@ -88,7 +92,7 @@ public class GameApp {
                 updates++;
                 delta--;
             }
-            render2D.render(displayManager.getWindow(), bgTexture, background);
+            render2D.render(displayManager.getWindow(), bgTexture, background, camera.getViewMatrix());
             frames++;
             if (System.currentTimeMillis() - timer > 1000) {
                 timer += 1000;

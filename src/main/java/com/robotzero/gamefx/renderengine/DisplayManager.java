@@ -9,22 +9,24 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.GL_FALSE;
-import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAddress;
 
 public class DisplayManager {
     private long window;
-    private GLFWErrorCallback errorCallback;
-    private GLFWKeyCallback   keyCallback;
     public static int WIDTH = 1280;
     public static int HEIGHT = 720;
     private static final int FPS_CAP = 60;
     private static final String TITLE = "Our First Display";
     private static float counter = 0.0f;
     private static final double pi = 3.1415926535897932384626433832795;
+    private final Camera camera;
+
+    public DisplayManager(Camera camera) {
+        this.camera = camera;
+    }
 
     public long getWindow() {
         return this.window;
@@ -55,8 +57,10 @@ public class DisplayManager {
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
-            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
+            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE ) {
                 glfwSetWindowShouldClose(window, true); // We will detect this in the rendering loop
+            }
+            camera.update(key);
         });
 
         glfwSetErrorCallback(new GLFWErrorCallback() {
@@ -73,9 +77,6 @@ public class DisplayManager {
                 WIDTH = width;
                 HEIGHT = height;
             }
-            // Creating perspective
-
-//            this.applyProjection();
         });
 
         try ( MemoryStack stack = stackPush() ) {
@@ -88,7 +89,6 @@ public class DisplayManager {
 
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         glfwSetWindowPos(window, (vidmode.width() - WIDTH) / 2, (vidmode.height() - HEIGHT) / 2);
-
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
 
