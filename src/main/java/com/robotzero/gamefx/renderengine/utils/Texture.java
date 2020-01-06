@@ -16,7 +16,7 @@ public class Texture {
     }
 
     private int load(String path) {
-        int[] pixels = null;
+        int[] pixels;
         try {
             BufferedImage image = ImageIO.read(new FileInputStream(path));
             width = image.getWidth();
@@ -25,17 +25,18 @@ public class Texture {
             image.getRGB(0, 0, width, height, pixels, 0, width);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
 
         int[] data = new int[width * height];
-        for (int i = 0; i < width * height; i++) {
-            int a = (pixels[i] & 0xff000000) >> 24;
-            int r = (pixels[i] & 0xff0000) >> 16;
-            int g = (pixels[i] & 0xff00) >> 8;
-            int b = (pixels[i] & 0xff);
+            for (int i = 0; i < width * height; i++) {
+                int a = (pixels[i] & 0xff000000) >> 24;
+                int r = (pixels[i] & 0xff0000) >> 16;
+                int g = (pixels[i] & 0xff00) >> 8;
+                int b = (pixels[i] & 0xff);
 
-            data[i] = a << 24 | b << 16 | g << 8 | r;
-        }
+                data[i] = a << 24 | b << 16 | g << 8 | r;
+            }
 
         int result = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, result);
@@ -54,4 +55,15 @@ public class Texture {
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
+    public int getWidth() {
+        return this.width;
+    }
+
+    public int getHeight() {
+        return this.height;
+    }
+
+    public void cleanup() {
+        glDeleteTextures(texture);
+    }
 }

@@ -5,7 +5,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
-public class BufferUtils {
+final public class BufferUtils {
 
     private BufferUtils() {
     }

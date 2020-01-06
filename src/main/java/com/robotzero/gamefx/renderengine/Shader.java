@@ -1,9 +1,8 @@
 
 package main.java.com.robotzero.gamefx.renderengine;
 
-import main.java.com.robotzero.gamefx.renderengine.math.Matrix4f;
-import main.java.com.robotzero.gamefx.renderengine.math.Vector3f;
 import main.java.com.robotzero.gamefx.renderengine.utils.ShaderUtils;
+import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL20.*;
 
@@ -60,11 +59,6 @@ public class Shader {
     public void setUniform3f(String name, Vector3f vector) {
         if (!enabled) enable();
         glUniform3f(getUniform(name), vector.x, vector.y, vector.z);
-    }
-
-    public void setUniformMat4f(String name, Matrix4f matrix) {
-        if (!enabled) enable();
-        glUniformMatrix4fv(getUniform(name), false, matrix.toFloatBuffer());
     }
 
     public void setUniformMat4f(String name, float[] matrix) {
