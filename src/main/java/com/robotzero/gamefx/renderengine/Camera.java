@@ -1,4 +1,4 @@
-package main.java.com.robotzero.gamefx.renderengine;
+package com.robotzero.gamefx.renderengine;
 
 import com.jogamp.opengl.math.Matrix4;
 import org.joml.Vector3f;

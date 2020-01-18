@@ -1,38 +1,32 @@
-package main.java.com.robotzero.gamefx.renderengine.utils;
+package com.robotzero.gamefx.renderengine.utils;
 
+import org.apache.commons.io.IOUtils;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.system.MemoryUtil;
 
-import org.lwjgl.BufferUtils;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SeekableByteChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 final public class FileUtils {
-
     private FileUtils() {
     }
 
     public static String loadAsString(String file) {
-        StringBuilder result = new StringBuilder();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader(file));
-            String buffer;
-            while ((buffer = reader.readLine()) != null) {
-                result.append(buffer).append('\n');
-            }
-            reader.close();
+        try (InputStream inputStream = FileUtils.class.getClassLoader().getResourceAsStream(file)) {
+            return IOUtils.toString(Optional.ofNullable(inputStream).orElseThrow(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
+            throw new RuntimeException("Shader load failed.");
         }
-        return result.toString();
     }
 
     public static ByteBuffer ioResourceToByteBuffer(String resource, int bufferSize) throws IOException {

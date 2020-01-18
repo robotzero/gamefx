@@ -1,7 +1,7 @@
-package main.java.com.robotzero.gamefx.renderengine;
+package com.robotzero.gamefx.renderengine;
 
-import main.java.com.robotzero.gamefx.renderengine.utils.Texture;
-import main.java.com.robotzero.gamefx.renderengine.utils.VertexArray;
+import com.robotzero.gamefx.renderengine.utils.Texture;
+import com.robotzero.gamefx.renderengine.utils.VertexArray;
 
 import static org.lwjgl.glfw.GLFW.glfwPollEvents;
 import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;

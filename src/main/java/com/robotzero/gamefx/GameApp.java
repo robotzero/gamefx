@@ -1,18 +1,19 @@
-package main.java.com.robotzero.gamefx;
+package com.robotzero.gamefx;
 
 import com.jogamp.opengl.math.Matrix4;
-import main.java.com.robotzero.gamefx.renderengine.Camera;
-import main.java.com.robotzero.gamefx.renderengine.DisplayManager;
-import main.java.com.robotzero.gamefx.renderengine.Render;
-import main.java.com.robotzero.gamefx.renderengine.Shader;
-import main.java.com.robotzero.gamefx.renderengine.utils.Texture;
-import main.java.com.robotzero.gamefx.renderengine.utils.VertexArray;
+import com.robotzero.gamefx.renderengine.Camera;
+import com.robotzero.gamefx.renderengine.DisplayManager;
+import com.robotzero.gamefx.renderengine.Render;
+import com.robotzero.gamefx.renderengine.Shader;
+import com.robotzero.gamefx.renderengine.utils.Texture;
+import com.robotzero.gamefx.renderengine.utils.VertexArray;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL13.*;
+import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
+import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 public class GameApp {
     private Thread thread;
@@ -73,7 +74,7 @@ public class GameApp {
         Shader.BG.setUniform1i("tex", 0);
 
         background = new VertexArray(vertices1, indices, tcs1);
-        bgTexture = new Texture("res/bg.jpeg");
+        bgTexture = new Texture(this.getClass().getClassLoader().getResource("bg.jpeg").getPath());
 
         long lastTime = System.nanoTime();
         double delta = 0.0;

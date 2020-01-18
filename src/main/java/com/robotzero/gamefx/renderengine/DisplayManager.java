@@ -1,7 +1,6 @@
-package main.java.com.robotzero.gamefx.renderengine;
+package com.robotzero.gamefx.renderengine;
 
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
@@ -9,36 +8,32 @@ import org.lwjgl.system.MemoryStack;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL11.GL_FALSE;
+import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAddress;
 
 public class DisplayManager {
-    private long window;
     public static int WIDTH = 1280;
     public static int HEIGHT = 720;
     private static final int FPS_CAP = 60;
     private static final String TITLE = "Our First Display";
-    private static float counter = 0.0f;
-    private static final double pi = 3.1415926535897932384626433832795;
+    private long window;
     private final Camera camera;
 
     public DisplayManager(Camera camera) {
         this.camera = camera;
     }
 
-    public long getWindow() {
-        return this.window;
-    }
 
     public void createDisplay() {
-//        floatBuffer.put(vertices);
         GLFWErrorCallback.createPrint(System.err).set();
 
         // Initialize GLFW. Most GLFW functions will not work before doing this.
-        if ( !glfwInit())
+        if ( !glfwInit()) {
             throw new IllegalStateException("Unable to initialize GLFW");
+        }
 
         // Configure GLFW
         glfwDefaultWindowHints(); // optional, the current window hints are already the default
@@ -52,8 +47,9 @@ public class DisplayManager {
 
         // Create the window
         window = glfwCreateWindow(WIDTH, HEIGHT, TITLE, NULL, NULL);
-        if ( window == NULL )
+        if ( window == NULL ) {
             throw new RuntimeException("Failed to create the GLFW window");
+        }
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
         glfwSetKeyCallback(window, (window, key, scancode, action, mods) -> {
@@ -71,9 +67,7 @@ public class DisplayManager {
         });
 
         glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
-            if (width > 0
-                    && height > 0
-                    && (WIDTH != width || HEIGHT != height)) {
+            if (width > 0 && height > 0 && (WIDTH != width || HEIGHT != height)) {
                 WIDTH = width;
                 HEIGHT = height;
             }
@@ -99,5 +93,18 @@ public class DisplayManager {
         glfwShowWindow(window);
 
         GL.createCapabilities();
+    }
+
+    public static void updateDisplay() {
+//        Display.sync(FPS_CAP);
+//        Display.update();
+    }
+
+    public static void closeDisplay() {
+//        Display.destroy();
+    }
+
+    public long getWindow() {
+        return this.window;
     }
 }

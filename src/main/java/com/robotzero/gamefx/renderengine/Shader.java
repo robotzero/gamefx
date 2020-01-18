@@ -1,7 +1,6 @@
+package com.robotzero.gamefx.renderengine;
 
-package main.java.com.robotzero.gamefx.renderengine;
-
-import main.java.com.robotzero.gamefx.renderengine.utils.ShaderUtils;
+import com.robotzero.gamefx.renderengine.utils.ShaderUtils;
 import org.joml.Vector3f;
 
 import static org.lwjgl.opengl.GL20.*;

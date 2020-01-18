@@ -1,6 +1,6 @@
-package main.java.com.robotzero.gamefx.renderengine.utils;
+package com.robotzero.gamefx.renderengine.utils;
 
-import main.java.com.robotzero.gamefx.renderengine.Shader;
+import com.robotzero.gamefx.renderengine.Shader;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;

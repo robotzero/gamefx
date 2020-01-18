@@ -1,4 +1,4 @@
-package main.java.com.robotzero.gamefx.renderengine.utils;
+package com.robotzero.gamefx.renderengine.utils;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

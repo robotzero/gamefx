@@ -1,9 +1,9 @@
-package main.java.com.robotzero.gamefx;
+package com.robotzero.gamefx;
 
-import main.java.com.robotzero.gamefx.renderengine.Camera;
-import main.java.com.robotzero.gamefx.renderengine.DisplayManager;
-import main.java.com.robotzero.gamefx.renderengine.Render;
-import main.java.com.robotzero.gamefx.renderengine.Render2D;
+import com.robotzero.gamefx.renderengine.Camera;
+import com.robotzero.gamefx.renderengine.DisplayManager;
+import com.robotzero.gamefx.renderengine.Render;
+import com.robotzero.gamefx.renderengine.Render2D;
 
 public class Robot {
     public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package main.java.com.robotzero.gamefx.renderengine.utils;
+package com.robotzero.gamefx.renderengine.utils;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL20.*;
