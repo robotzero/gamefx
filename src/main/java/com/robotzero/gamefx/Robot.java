@@ -18,6 +18,8 @@ public class Robot {
             displayManager.createDisplay();
             gameApp.start();
         } catch (Throwable t) {
+            System.out.println(t.toString());
+            System.out.println(t.getMessage());
             System.exit(1);
         }
         System.exit(0);
