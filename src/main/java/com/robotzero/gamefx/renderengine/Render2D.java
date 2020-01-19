@@ -31,12 +31,9 @@ public class Render2D implements Render {
         clear();
         glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
         renderScene();
-
-//        Shader.BG.enable();
-//        Shader.BG.setUniformMat4f("vw_matrix", viewMatrix);
         background2.render();
-//        Shader.BG.disable();
         background2.endRender();
+        sceneShaderProgram.unbind();
 
         int error = glGetError();
         if (error != GL_NO_ERROR)
@@ -54,7 +51,7 @@ public class Render2D implements Render {
         sceneShaderProgram.setUniform("pr_matrix", projectionMatrix);
         sceneShaderProgram.setUniform("tex", 0);
 
-        sceneShaderProgram.unbind();
+//        sceneShaderProgram.unbind();
     }
 
     private void setupSceneShader() throws Exception {

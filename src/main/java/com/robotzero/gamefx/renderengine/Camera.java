@@ -1,6 +1,5 @@
 package com.robotzero.gamefx.renderengine;
 
-import com.jogamp.opengl.math.Matrix4;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -29,8 +28,6 @@ public class Camera {
 
     public Matrix4f getProjectionMatrix() {
         final Matrix4f p = new Matrix4f();
-        p.ortho2D(0.0f, 1024f, 768f, 0);
-
-        return p;
+        return p.ortho2D(0.0f, DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f);
     }
 }

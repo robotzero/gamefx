@@ -1,13 +1,10 @@
 package com.robotzero.gamefx;
 
-import com.jogamp.opengl.math.Matrix4;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Render;
-import com.robotzero.gamefx.renderengine.Shader;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.model.Texture;
-import com.robotzero.gamefx.renderengine.utils.VertexArray;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 
@@ -22,8 +19,6 @@ import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
 
 public class GameApp {
     private Thread thread;
@@ -69,20 +64,12 @@ public class GameApp {
 //        thread.start();
     }
 
-//    @Override
     public void run() {
         GLUtil.setupDebugMessageCallback();
 
         glEnable(GL_DEPTH_TEST);
-        glActiveTexture(GL_TEXTURE0);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-//        Shader.loadAll();
-//        final Matrix4 perspective = new com.jogamp.opengl.math.Matrix4();
-//        perspective.makeOrtho(0.0f, 1024f, 768f, 0, -1.0f, 1.0f);
-//        Shader.BG.setUniformMat4f("pr_matrix", perspective.getMatrix());
-//        Shader.BG.setUniform1i("tex", 0);
 
         bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
         background = new Mesh(vertices1, tcs1, indices, bgTexture);
