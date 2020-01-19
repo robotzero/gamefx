@@ -5,13 +5,23 @@ import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.Shader;
-import com.robotzero.gamefx.renderengine.utils.Texture;
+import com.robotzero.gamefx.renderengine.model.Mesh;
+import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.renderengine.utils.VertexArray;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 
-import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
+import java.util.Optional;
+
+import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
+import static org.lwjgl.glfw.GLFW.glfwTerminate;
+import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 import static org.lwjgl.opengl.GL13.glActiveTexture;
 
@@ -20,7 +30,7 @@ public class GameApp {
     private boolean running = false;
     private final DisplayManager displayManager;
     private final Render render2D;
-    private VertexArray background;
+    private Mesh background;
     private Texture bgTexture;
     private float SIZE = 1.0f;
     private Camera camera;
@@ -40,7 +50,7 @@ public class GameApp {
             1, 0
     };
 
-    byte[] indices = new byte[] {
+    int[] indices = new int[] {
             0, 1, 2,
             2, 3, 0
     };
@@ -51,8 +61,9 @@ public class GameApp {
         this.camera = camera;
     }
 
-    void start() {
+    void start() throws Exception {
         running = true;
+        render2D.init();
         run();
 //        thread = new Thread(this, "Game");
 //        thread.start();
@@ -67,14 +78,14 @@ public class GameApp {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        Shader.loadAll();
-        final Matrix4 perspective = new com.jogamp.opengl.math.Matrix4();
-        perspective.makeOrtho(0.0f, 1024f, 768f, 0, -1.0f, 1.0f);
-        Shader.BG.setUniformMat4f("pr_matrix", perspective.getMatrix());
-        Shader.BG.setUniform1i("tex", 0);
+//        Shader.loadAll();
+//        final Matrix4 perspective = new com.jogamp.opengl.math.Matrix4();
+//        perspective.makeOrtho(0.0f, 1024f, 768f, 0, -1.0f, 1.0f);
+//        Shader.BG.setUniformMat4f("pr_matrix", perspective.getMatrix());
+//        Shader.BG.setUniform1i("tex", 0);
 
-        background = new VertexArray(vertices1, indices, tcs1);
-        bgTexture = new Texture(this.getClass().getClassLoader().getResource("bg.jpeg").getPath());
+        bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
+        background = new Mesh(vertices1, tcs1, indices, bgTexture);
 
         long lastTime = System.nanoTime();
         double delta = 0.0;
@@ -93,7 +104,7 @@ public class GameApp {
                 updates++;
                 delta--;
             }
-            render2D.render(displayManager.getWindow(), bgTexture, background, camera.getViewMatrix());
+            render2D.render(displayManager.getWindow(), background);
             frames++;
             if (System.currentTimeMillis() - timer > 1000) {
                 timer += 1000;

@@ -1,8 +1,8 @@
 package com.robotzero.gamefx.renderengine;
 
-import com.robotzero.gamefx.renderengine.utils.Texture;
-import com.robotzero.gamefx.renderengine.utils.VertexArray;
+import com.robotzero.gamefx.renderengine.model.Mesh;
 
 public interface Render {
-    void render(final long window, Texture bgTexture, VertexArray background, float[] viewMatrix);
+    void render(final long window, Mesh background2);
+    void init() throws Exception;
 }

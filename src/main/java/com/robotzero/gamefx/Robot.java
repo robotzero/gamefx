@@ -13,7 +13,7 @@ public class Robot {
             });
             Camera camera = new Camera();
             DisplayManager displayManager = new DisplayManager(camera);
-            Render render = new Render2D();
+            Render render = new Render2D(camera);
             GameApp gameApp = new GameApp(displayManager, render, camera);
             displayManager.createDisplay();
             gameApp.start();

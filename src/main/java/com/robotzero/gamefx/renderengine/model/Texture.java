@@ -1,5 +1,6 @@
-package com.robotzero.gamefx.renderengine.utils;
+package com.robotzero.gamefx.renderengine.model;
 
+import com.robotzero.gamefx.renderengine.utils.FileUtils;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;

@@ -1,6 +1,7 @@
 package com.robotzero.gamefx.renderengine;
 
 import com.jogamp.opengl.math.Matrix4;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -20,10 +21,16 @@ public class Camera {
         }
     }
 
-    public float[] getViewMatrix() {
-        final Matrix4 id = new com.jogamp.opengl.math.Matrix4();
-        id.loadIdentity();
-        id.translate(position.x, position.y, position.z);
-        return id.getMatrix();
+    public Matrix4f getViewMatrix() {
+        final Matrix4f v = new Matrix4f();
+        return v.identity().translate(position.x, position.y, position.z);
+    }
+
+
+    public Matrix4f getProjectionMatrix() {
+        final Matrix4f p = new Matrix4f();
+        p.ortho2D(0.0f, 1024f, 768f, 0);
+
+        return p;
     }
 }

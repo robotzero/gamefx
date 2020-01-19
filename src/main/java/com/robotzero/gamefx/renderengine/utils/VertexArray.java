@@ -11,12 +11,7 @@ public class VertexArray {
     private int vao, vbo, ibo, tbo;
     private int count;
 
-    public VertexArray(int count) {
-        this.count = count;
-        vao = glGenVertexArrays();
-    }
-
-    public VertexArray(float[] vertices, byte[] indices, float[] textureCoordinates) {
+    public VertexArray(float[] vertices, int[] indices, float[] textureCoordinates) {
         count = indices.length;
 
         vao = glGenVertexArrays();
@@ -36,7 +31,7 @@ public class VertexArray {
 
         ibo = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, BufferUtils.createByteBuffer(indices), GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, BufferUtils.createIntBuffer(indices), GL_STATIC_DRAW);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
