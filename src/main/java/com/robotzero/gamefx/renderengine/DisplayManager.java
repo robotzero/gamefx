@@ -3,13 +3,21 @@ package com.robotzero.gamefx.renderengine;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.GL11.GL_BLEND;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_FALSE;
+import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
+import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL11.glBlendFunc;
+import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAddress;
@@ -18,7 +26,7 @@ public class DisplayManager {
     public static int WIDTH = 1280;
     public static int HEIGHT = 720;
     private static final int FPS_CAP = 60;
-    private static final String TITLE = "Our First Display";
+    public static String TITLE = "Fred64";
     private long window;
     private final Camera camera;
 
@@ -93,11 +101,31 @@ public class DisplayManager {
         glfwShowWindow(window);
 
         GL.createCapabilities();
+        GLUtil.setupDebugMessageCallback();
+
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        glfwWindowHint(GLFW_SAMPLES, 4);
     }
 
-    public static void updateDisplay() {
-//        Display.sync(FPS_CAP);
-//        Display.update();
+    public void setClearColor(float r, float g, float b, float alpha) {
+        glClearColor(r, g, b, alpha);
+    }
+
+    public boolean isKeyPressed(int keyCode) {
+        return glfwGetKey(window, keyCode) == GLFW_PRESS;
+    }
+
+    public boolean windowShouldClose() {
+        return glfwWindowShouldClose(window);
+    }
+
+    public void updateDisplay() {
+        glfwSwapBuffers(window);
+        glfwPollEvents();
     }
 
     public static void closeDisplay() {

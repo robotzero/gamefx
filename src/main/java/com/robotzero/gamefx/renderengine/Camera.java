@@ -20,7 +20,7 @@ public class Camera {
         }
     }
 
-    public Matrix4f getViewMatrix() {
+    public Matrix4f updateViewMatrix() {
         final Matrix4f v = new Matrix4f();
         return v.identity().translate(position.x, position.y, position.z);
     }
@@ -29,5 +29,10 @@ public class Camera {
     public Matrix4f getProjectionMatrix() {
         final Matrix4f p = new Matrix4f();
         return p.ortho2D(0.0f, DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f);
+    }
+
+    public void movePosition(float offsetX, float offsetY, float offsetZ) {
+        position.x += offsetX;
+        position.y += offsetY;
     }
 }

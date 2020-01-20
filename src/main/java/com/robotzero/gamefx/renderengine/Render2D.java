@@ -5,10 +5,10 @@ import com.robotzero.gamefx.renderengine.utils.FileUtils;
 import com.robotzero.gamefx.renderengine.utils.ShaderProgram;
 import org.joml.Matrix4f;
 
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
+import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
+import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glViewport;
 
 public class Render2D implements Render {
     private ShaderProgram sceneShaderProgram;
@@ -27,7 +27,6 @@ public class Render2D implements Render {
     }
 
     public void render(final long window, Mesh background2) {
-        glfwPollEvents();
         clear();
         glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
         renderScene();
@@ -35,17 +34,17 @@ public class Render2D implements Render {
         background2.endRender();
         sceneShaderProgram.unbind();
 
-        int error = glGetError();
-        if (error != GL_NO_ERROR)
-            System.out.println(error);
-
-        glfwSwapBuffers(window);
+//        int error = glGetError();
+//        if (error != GL_NO_ERROR)
+//            System.out.println(error);
+//
+//        glfwSwapBuffers(window);
     }
 
     private void renderScene() {
         sceneShaderProgram.bind();
 
-        Matrix4f viewMatrix = camera.getViewMatrix();
+        Matrix4f viewMatrix = camera.updateViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
         sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
         sceneShaderProgram.setUniform("pr_matrix", projectionMatrix);
@@ -64,5 +63,9 @@ public class Render2D implements Render {
         sceneShaderProgram.createUniform("vw_matrix");
         sceneShaderProgram.createUniform("pr_matrix");
         sceneShaderProgram.createUniform("tex");
+    }
+
+    public void cleanup() {
+        sceneShaderProgram.cleanup();
     }
 }

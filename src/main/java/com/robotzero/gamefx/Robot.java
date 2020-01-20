@@ -4,6 +4,7 @@ import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.Render2D;
+import com.robotzero.gamefx.renderengine.utils.Timer;
 
 public class Robot {
     public static void main(String[] args) {
@@ -12,11 +13,11 @@ public class Robot {
                 throw new RuntimeException("There was an unhandled exception in thread " + t.getName(), e);
             });
             Camera camera = new Camera();
+            Timer timer = new Timer();
             DisplayManager displayManager = new DisplayManager(camera);
             Render render = new Render2D(camera);
-            GameApp gameApp = new GameApp(displayManager, render, camera);
-            displayManager.createDisplay();
-            gameApp.start();
+            GameApp gameApp = new GameApp(displayManager, render, camera, timer);
+            gameApp.run();
         } catch (Throwable t) {
             System.out.println(t.toString());
             System.out.println(t.getMessage());
