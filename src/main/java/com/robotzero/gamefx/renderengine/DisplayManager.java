@@ -135,4 +135,8 @@ public class DisplayManager {
     public long getWindow() {
         return this.window;
     }
+
+    public void setWindowTitle(String title) {
+        glfwSetWindowTitle(window, title);
+    }
 }

@@ -29,10 +29,8 @@ public class Render2D implements Render {
     public void render(final long window, Mesh background2) {
         clear();
         glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
-        renderScene();
-        background2.render();
-        background2.endRender();
-        sceneShaderProgram.unbind();
+        renderScene(background2);
+
 
 //        int error = glGetError();
 //        if (error != GL_NO_ERROR)
@@ -41,7 +39,7 @@ public class Render2D implements Render {
 //        glfwSwapBuffers(window);
     }
 
-    private void renderScene() {
+    private void renderScene(Mesh background) {
         sceneShaderProgram.bind();
 
         Matrix4f viewMatrix = camera.updateViewMatrix();
@@ -49,8 +47,9 @@ public class Render2D implements Render {
         sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
         sceneShaderProgram.setUniform("pr_matrix", projectionMatrix);
         sceneShaderProgram.setUniform("tex", 0);
-
-//        sceneShaderProgram.unbind();
+        background.render();
+        background.endRender();
+        sceneShaderProgram.unbind();
     }
 
     private void setupSceneShader() throws Exception {

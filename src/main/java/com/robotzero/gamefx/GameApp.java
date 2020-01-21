@@ -112,7 +112,7 @@ public class GameApp implements Runnable {
     private void render() {
         if ( timer.getLastLoopTime() - lastFps > 1 ) {
             lastFps = timer.getLastLoopTime();
-            DisplayManager.TITLE = DisplayManager.TITLE + " - " + fps + " FPS";
+            displayManager.setWindowTitle(DisplayManager.TITLE + " - " + fps + " FPS");
             fps = 0;
         }
         fps++;
@@ -121,12 +121,13 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
+        cameraInc.set(0, 0, 0);
         if (displayManager.isKeyPressed(GLFW_KEY_W)) {
             sceneChanged = true;
-            cameraInc.z = -1;
+            cameraInc.y = -1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_S)) {
             sceneChanged = true;
-            cameraInc.z = 1;
+            cameraInc.y = 1;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_A)) {
             sceneChanged = true;
@@ -137,10 +138,10 @@ public class GameApp implements Runnable {
         }
         if (displayManager.isKeyPressed(GLFW_KEY_Z)) {
             sceneChanged = true;
-            cameraInc.y = -1;
+            cameraInc.z = -1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_X)) {
             sceneChanged = true;
-            cameraInc.y = 1;
+            cameraInc.z = 1;
         }
     }
 

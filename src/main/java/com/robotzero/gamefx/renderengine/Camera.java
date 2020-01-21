@@ -10,13 +10,13 @@ public class Camera {
 
     public void update(int key) {
         if ( key == GLFW_KEY_W ) {
-            position.y-=10.02f;
+            position.y-=1.02f;
         } else if ( key == GLFW_KEY_A ) {
-            position.x+=10.02f;
+            position.x+=1.02f;
         } else if ( key == GLFW_KEY_S ) {
-            position.y+=10.02f;
+            position.y+=1.02f;
         } else if ( key == GLFW_KEY_D ) {
-            position.x+=10.02f;
+            position.x+=1.02f;
         }
     }
 
