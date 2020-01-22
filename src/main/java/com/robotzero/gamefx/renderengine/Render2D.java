@@ -12,6 +12,7 @@ import static org.lwjgl.opengl.GL11.glViewport;
 
 public class Render2D implements Render {
     private ShaderProgram sceneShaderProgram;
+    private ShaderProgram birdShaderProgram;
     private final Camera camera;
 
     public Render2D(Camera camera) {
@@ -20,16 +21,17 @@ public class Render2D implements Render {
 
     public void init() throws Exception {
         setupSceneShader();
+        setupBirdShader();
     }
 
     public void clear() {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void render(final long window, Mesh background2) {
+    public void render(final long window, Mesh background2, Mesh bird) {
         clear();
         glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
-        renderScene(background2);
+        renderScene(background2, bird);
 
 
 //        int error = glGetError();
@@ -39,17 +41,25 @@ public class Render2D implements Render {
 //        glfwSwapBuffers(window);
     }
 
-    private void renderScene(Mesh background) {
+    private void renderScene(Mesh background, Mesh bird) {
         sceneShaderProgram.bind();
-
         Matrix4f viewMatrix = camera.updateViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
         sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
         sceneShaderProgram.setUniform("pr_matrix", projectionMatrix);
         sceneShaderProgram.setUniform("tex", 0);
+        birdShaderProgram.setUniform("vw_matrix", viewMatrix);
+        birdShaderProgram.setUniform("pr_matrix", projectionMatrix);
+        birdShaderProgram.setUniform("tex", 0);
+
         background.render();
         background.endRender();
         sceneShaderProgram.unbind();
+
+        birdShaderProgram.bind();
+        bird.render();
+        bird.endRender();
+        birdShaderProgram.unbind();
     }
 
     private void setupSceneShader() throws Exception {
@@ -64,7 +74,20 @@ public class Render2D implements Render {
         sceneShaderProgram.createUniform("tex");
     }
 
+    private void setupBirdShader() throws Exception {
+        birdShaderProgram = new ShaderProgram();
+        birdShaderProgram.createVertexShader(FileUtils.loadAsString("shaders/bird.vert"));
+        birdShaderProgram.createFragmentShader(FileUtils.loadAsString("shaders/bird.frag"));
+        birdShaderProgram.link();
+
+        // Create uniforms for view and projection matrices
+        birdShaderProgram.createUniform("vw_matrix");
+        birdShaderProgram.createUniform("pr_matrix");
+        birdShaderProgram.createUniform("tex");
+    }
+
     public void cleanup() {
         sceneShaderProgram.cleanup();
+        birdShaderProgram.cleanup();
     }
 }

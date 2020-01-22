@@ -4,11 +4,9 @@ import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.model.Mesh;
-import com.robotzero.gamefx.renderengine.model.Texture;
+import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import org.joml.Vector3f;
-
-import java.util.Optional;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
@@ -25,42 +23,24 @@ public class GameApp implements Runnable {
     private boolean running = false;
     private final DisplayManager displayManager;
     private final Render render2D;
-    private Mesh background;
-    private Texture bgTexture;
     private float SIZE = 1.0f;
     private Camera camera;
     private final Timer timer;
-    private static float width = 284f, height = 512f;
     private int fps;
     private double lastFps;
     public static final int TARGET_UPS = 30;
     private boolean sceneChanged;
     private final Vector3f cameraInc;
+    private final AssetFactory assetFactory;
+    private Mesh background;
+    private Mesh bird;
 
-    float[] vertices1 = new float[] {
-            0.0f, 0.0f, 0.0f,
-            0.0f, height, 0.0f,
-            width, height, 0.0f,
-            width, 0, 0.0f
-    };
-
-    float[] tcs1 = new float[] {
-            0, 0,
-            0, 1,
-            1, 1,
-            1, 0
-    };
-
-    int[] indices = new int[] {
-            0, 1, 2,
-            2, 3, 0
-    };
-
-    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer) {
+    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory) {
         this.displayManager = displayManager;
         this.render2D = render2D;
         this.camera = camera;
         this.timer = timer;
+        this.assetFactory = assetFactory;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
     }
 
@@ -82,8 +62,10 @@ public class GameApp implements Runnable {
         render2D.init();
         lastFps = timer.getTime();
         fps = 0;
-        bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
-        background = new Mesh(vertices1, tcs1, indices, bgTexture);
+        assetFactory.init();
+        background = assetFactory.getBackgroundMesh();
+        bird = assetFactory.getBirdMesh();
+
     }
 
     public void gameLoop() {
@@ -116,7 +98,7 @@ public class GameApp implements Runnable {
             fps = 0;
         }
         fps++;
-        render2D.render(displayManager.getWindow(), background);
+        render2D.render(displayManager.getWindow(), background, bird);
         displayManager.updateDisplay();
     }
 
