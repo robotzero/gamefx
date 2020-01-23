@@ -31,6 +31,11 @@ public class Camera {
         return p.ortho2D(0.0f, DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f);
     }
 
+    public Matrix4f getModelMatrix() {
+        final Matrix4f v = new Matrix4f();
+        return v.identity().translate(position.x, position.y, position.z);
+    }
+
     public void movePosition(float offsetX, float offsetY, float offsetZ) {
         position.x += offsetX;
         position.y += offsetY;

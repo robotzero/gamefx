@@ -1,6 +1,5 @@
 package com.robotzero.gamefx.renderengine.model;
 
-import com.robotzero.gamefx.renderengine.Shader;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
@@ -35,6 +34,8 @@ public class Mesh {
     private final Map<String, Integer> vboIdList = new HashMap<>();
     private final Texture texture;
     private final int vertexCount;
+    private static final int VERTEX_ATTRIB = 0;
+    private static final int TCOORD_ATTRIB = 1;
 
     public Mesh(float[] vertices, float[] textCoords, int[] indices, Texture texture) {
         FloatBuffer verticesBuffer = null;
@@ -53,8 +54,8 @@ public class Mesh {
             verticesBuffer.put(vertices).flip();
             glBindBuffer(GL_ARRAY_BUFFER, vvboId);
             glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
-            glVertexAttribPointer(Shader.VERTEX_ATTRIB, 3, GL_FLOAT, false, 0, 0);
-            glEnableVertexAttribArray(Shader.VERTEX_ATTRIB);
+            glVertexAttribPointer(VERTEX_ATTRIB, 3, GL_FLOAT, false, 0, 0);
+            glEnableVertexAttribArray(VERTEX_ATTRIB);
 
             // Texture VBO
             final int tvboId = glGenBuffers();
@@ -63,8 +64,8 @@ public class Mesh {
             textCoordsBuffer.put(textCoords).flip();
             glBindBuffer(GL_ARRAY_BUFFER, tvboId);
             glBufferData(GL_ARRAY_BUFFER, textCoordsBuffer, GL_STATIC_DRAW);
-            glVertexAttribPointer(Shader.TCOORD_ATTRIB, 2, GL_FLOAT, false, 0, 0);
-            glEnableVertexAttribArray(Shader.TCOORD_ATTRIB);
+            glVertexAttribPointer(TCOORD_ATTRIB, 2, GL_FLOAT, false, 0, 0);
+            glEnableVertexAttribArray(TCOORD_ATTRIB);
 
             // Index VBO
             final int ivboId = glGenBuffers();

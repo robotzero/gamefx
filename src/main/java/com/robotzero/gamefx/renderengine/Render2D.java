@@ -8,6 +8,7 @@ import org.joml.Matrix4f;
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glViewport;
 
 public class Render2D implements Render {
@@ -25,6 +26,7 @@ public class Render2D implements Render {
     }
 
     public void clear() {
+        glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
@@ -42,21 +44,23 @@ public class Render2D implements Render {
     }
 
     private void renderScene(Mesh background, Mesh bird) {
-        sceneShaderProgram.bind();
         Matrix4f viewMatrix = camera.updateViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
+        Matrix4f modelMatrix = camera.getModelMatrix();
+        sceneShaderProgram.bind();
         sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
         sceneShaderProgram.setUniform("pr_matrix", projectionMatrix);
-        sceneShaderProgram.setUniform("tex", 0);
-        birdShaderProgram.setUniform("vw_matrix", viewMatrix);
-        birdShaderProgram.setUniform("pr_matrix", projectionMatrix);
-        birdShaderProgram.setUniform("tex", 0);
+        sceneShaderProgram.setUniform("tex", 1);
 
         background.render();
         background.endRender();
         sceneShaderProgram.unbind();
 
         birdShaderProgram.bind();
+        birdShaderProgram.setUniform("vw_matrix", viewMatrix);
+        birdShaderProgram.setUniform("pr_matrix", projectionMatrix);
+        birdShaderProgram.setUniform("ml_matrix", modelMatrix);
+        birdShaderProgram.setUniform("tex", 1);
         bird.render();
         bird.endRender();
         birdShaderProgram.unbind();
@@ -84,6 +88,7 @@ public class Render2D implements Render {
         birdShaderProgram.createUniform("vw_matrix");
         birdShaderProgram.createUniform("pr_matrix");
         birdShaderProgram.createUniform("tex");
+        birdShaderProgram.createUniform("ml_matrix");
     }
 
     public void cleanup() {
