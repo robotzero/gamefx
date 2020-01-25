@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.renderengine.utils;
 
+import com.robotzero.gamefx.renderengine.model.Material;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.model.Texture;
 
@@ -8,6 +9,7 @@ import java.util.Optional;
 public class AssetFactory {
     private static float backgroundWidth = 284f, backgroundHeight = 512f;
     private static float birdWidth = 125f, birdHeight = 126f;
+    private static float tileWidth = 100f, tileHeight = 200f;
 
     private final float[] vertices1 = new float[] {
             0.0f, 0.0f, 0.0f,
@@ -21,6 +23,13 @@ public class AssetFactory {
             0.0f, birdHeight, 0.0f,
             birdWidth, birdHeight, 0.0f,
             birdWidth, 0, 0.0f
+    };
+
+    private final float[] vertices3 = new float[] {
+            0.0f, 0.0f, 0.0f,
+            0.0f, tileHeight, 0.0f,
+            tileWidth, tileHeight, 0.0f,
+            tileWidth, 0, 0.0f
     };
 
     private final float[] tcs1 = new float[] {
@@ -51,12 +60,14 @@ public class AssetFactory {
     private Texture bgTexture;
     private Texture birdTexture;
     private Mesh bird;
+    private Mesh quad2D;
 
     public void init() {
         bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
-        background = new Mesh(vertices1, tcs1, indices, bgTexture);
+        background = new Mesh(vertices1, tcs1, indices, bgTexture, null);
         birdTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bird.png")).orElseThrow().getPath());
-        bird = new Mesh(vertices2, tcs2, indices2, birdTexture);
+        bird = new Mesh(vertices2, tcs2, indices2, birdTexture, null);
+        quad2D = new Mesh(vertices3, tcs1, indices, null, new Material());
     }
 
     public Mesh getBirdMesh() {
@@ -65,5 +76,9 @@ public class AssetFactory {
 
     public Mesh getBackgroundMesh() {
         return background;
+    }
+
+    public Mesh getQuadMesh() {
+        return quad2D;
     }
 }

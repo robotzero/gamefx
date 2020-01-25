@@ -36,12 +36,14 @@ public class Mesh {
     private final int vertexCount;
     private static final int VERTEX_ATTRIB = 0;
     private static final int TCOORD_ATTRIB = 1;
+    private final Material material;
 
-    public Mesh(float[] vertices, float[] textCoords, int[] indices, Texture texture) {
+    public Mesh(float[] vertices, float[] textCoords, int[] indices, Texture texture, Material material) {
         FloatBuffer verticesBuffer = null;
         FloatBuffer textCoordsBuffer = null;
         IntBuffer indicesBuffer = null;
         this.texture = texture;
+        this.material = material;
         vertexCount = indices.length;
         try {
             vaoId = glGenVertexArrays();
@@ -103,15 +105,16 @@ public class Mesh {
         if (vboIdList.containsKey("ibo")) {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
-        texture.unbind();
+
+        Optional.ofNullable(texture).ifPresent(Texture::unbind);
     }
 
     private void initRender() {
-        if (this.texture != null) {
+        Optional.ofNullable(this.texture).ifPresent(t -> {
             // Activate first texture bank
             glActiveTexture(GL_TEXTURE1);
             texture.bind();
-        }
+        });
 
         // Draw the mesh
         glBindVertexArray(vaoId);
@@ -139,5 +142,9 @@ public class Mesh {
         // Delete the VAO
         glBindVertexArray(0);
         glDeleteVertexArrays(vaoId);
+    }
+
+    public Material getMaterial() {
+        return material;
     }
 }

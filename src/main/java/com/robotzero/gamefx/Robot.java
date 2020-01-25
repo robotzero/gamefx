@@ -2,6 +2,7 @@ package com.robotzero.gamefx;
 
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
+import com.robotzero.gamefx.renderengine.Player;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.Render2D;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
@@ -16,9 +17,10 @@ public class Robot {
             Camera camera = new Camera();
             Timer timer = new Timer();
             DisplayManager displayManager = new DisplayManager(camera);
-            Render render = new Render2D(camera);
             AssetFactory assetFactory = new AssetFactory();
-            GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory);
+            Player player = new Player();
+            Render render = new Render2D(camera, player);
+            GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, player);
             gameApp.run();
         } catch (Throwable t) {
             System.out.println(t.toString());

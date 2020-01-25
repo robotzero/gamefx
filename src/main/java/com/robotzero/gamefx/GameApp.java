@@ -2,6 +2,7 @@ package com.robotzero.gamefx;
 
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
+import com.robotzero.gamefx.renderengine.Player;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
@@ -18,7 +19,6 @@ import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 
 public class GameApp implements Runnable {
-    private static final float CAMERA_POS_STEP = 10.40f;
     public static final int TARGET_FPS = 75;
     private boolean running = false;
     private final DisplayManager displayManager;
@@ -34,14 +34,19 @@ public class GameApp implements Runnable {
     private final AssetFactory assetFactory;
     private Mesh background;
     private Mesh bird;
+    private Mesh quad;
+    private final Player player;
+    private final Vector3f playerInc;
 
-    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory) {
+    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, Player player) {
         this.displayManager = displayManager;
         this.render2D = render2D;
         this.camera = camera;
         this.timer = timer;
         this.assetFactory = assetFactory;
+        this.player = player;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
+        this.playerInc = new Vector3f(0.0f, 0.0f, 0.0f);
     }
 
     public void run() {
@@ -65,6 +70,7 @@ public class GameApp implements Runnable {
         assetFactory.init();
         background = assetFactory.getBackgroundMesh();
         bird = assetFactory.getBirdMesh();
+        quad = assetFactory.getQuadMesh();
 
     }
 
@@ -98,25 +104,30 @@ public class GameApp implements Runnable {
             fps = 0;
         }
         fps++;
-        render2D.render(displayManager.getWindow(), background, bird);
+        render2D.render(displayManager.getWindow(), background, bird, quad);
         displayManager.updateDisplay();
     }
 
     protected void input() {
-        cameraInc.set(0, 0, 0);
+        cameraInc.set(0f, 0f, 0f);
+        playerInc.set(0f, 0f, 0f);
         if (displayManager.isKeyPressed(GLFW_KEY_W)) {
             sceneChanged = true;
             cameraInc.y = -1;
+            playerInc.y = -1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_S)) {
             sceneChanged = true;
             cameraInc.y = 1;
+            playerInc.y = 1;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_A)) {
             sceneChanged = true;
             cameraInc.x = -1;
+            playerInc.x = -1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_D)) {
             sceneChanged = true;
             cameraInc.x = 1;
+            playerInc.x = 1;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_Z)) {
             sceneChanged = true;
@@ -147,7 +158,8 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
+        camera.movePosition(cameraInc.x, cameraInc.y, cameraInc.z);
+        player.movePosition(playerInc.x, playerInc.y, playerInc.z);
         camera.updateViewMatrix();
     }
 }

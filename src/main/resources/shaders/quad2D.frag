@@ -4,10 +4,10 @@ layout (location = 0) out vec4 color;
 
 in DATA
 {
-	vec3 position;
+    vec4 tc;
 } fs_in;
 
 void main()
 {
-	color = vec4(45, 45, 45, 45);
+    color = fs_in.tc;
 }
