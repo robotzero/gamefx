@@ -20,13 +20,14 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 
 public class GameApp implements Runnable {
     public static final int TARGET_FPS = 75;
+//    public static final int TARGET_FPS = (int) DisplayManager.refreshRate;
     private boolean running = false;
     private final DisplayManager displayManager;
     private final Render render2D;
     private float SIZE = 1.0f;
     private Camera camera;
     private final Timer timer;
-    private int fps;
+    public static int fps;
     private double lastFps;
     public static final int TARGET_UPS = 30;
     private boolean sceneChanged;
@@ -159,7 +160,7 @@ public class GameApp implements Runnable {
 
     private void update(float interval) {
         camera.movePosition(cameraInc.x, cameraInc.y, cameraInc.z);
-        player.movePosition(playerInc.x, playerInc.y, playerInc.z);
+        player.movePosition(playerInc);
         camera.updateViewMatrix();
     }
 }

@@ -16,7 +16,7 @@ public class Robot {
             });
             Camera camera = new Camera();
             Timer timer = new Timer();
-            DisplayManager displayManager = new DisplayManager(camera);
+            DisplayManager displayManager = new DisplayManager();
             AssetFactory assetFactory = new AssetFactory();
             Player player = new Player();
             Render render = new Render2D(camera, player);

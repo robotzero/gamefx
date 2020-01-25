@@ -6,23 +6,21 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.MemoryStack;
 
+import java.awt.*;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.GL_BLEND;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_TEST;
 import static org.lwjgl.opengl.GL11.GL_FALSE;
-import static org.lwjgl.opengl.GL11.GL_NEVER;
 import static org.lwjgl.opengl.GL11.GL_ONE_MINUS_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
-import static org.lwjgl.opengl.GL11.GL_TEXTURE_1D;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glClearColor;
-import static org.lwjgl.opengl.GL11.glDepthFunc;
 import static org.lwjgl.opengl.GL11.glEnable;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE1;
-import static org.lwjgl.opengl.GL13.glActiveTexture;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAddress;
@@ -30,17 +28,21 @@ import static org.lwjgl.system.MemoryUtil.memAddress;
 public class DisplayManager {
     public static int WIDTH = 1280;
     public static int HEIGHT = 720;
-    private static final int FPS_CAP = 60;
+    public static float refreshRate = 60f;
     public static String TITLE = "Fred64";
     private long window;
-    private final Camera camera;
-
-    public DisplayManager(Camera camera) {
-        this.camera = camera;
-    }
 
 
     public void createDisplay() {
+//        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+
+//        GraphicsDevice[] devices = env.getScreenDevices();
+//        refreshRate = Arrays.stream(devices)
+//                .filter(dinfo -> dinfo.getDisplayMode().getRefreshRate() != 0)
+//                .map(dinfo -> dinfo.getDisplayMode().getRefreshRate())
+//                .findAny()
+//                .orElse(60);
+
         GLFWErrorCallback.createPrint(System.err).set();
 
         // Initialize GLFW. Most GLFW functions will not work before doing this.
