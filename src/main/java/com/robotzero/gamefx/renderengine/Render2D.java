@@ -3,7 +3,10 @@ package com.robotzero.gamefx.renderengine;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.FileUtils;
 import com.robotzero.gamefx.renderengine.utils.ShaderProgram;
+import com.robotzero.gamefx.world.TileMap;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
@@ -15,14 +18,16 @@ import static org.lwjgl.opengl.GL11.glViewport;
 
 public class Render2D implements Render {
     private ShaderProgram sceneShaderProgram;
+    private TileMap tileMap;
     private ShaderProgram birdShaderProgram;
     private ShaderProgram quadShaderProgram;
     private final Camera camera;
     private final Player player;
 
-    public Render2D(Camera camera, Player player) {
+    public Render2D(Camera camera, Player player, TileMap tileMap) {
         this.camera = camera;
         this.player = player;
+        this.tileMap = tileMap;
     }
 
     public void init() throws Exception {
@@ -71,12 +76,14 @@ public class Render2D implements Render {
         birdShaderProgram.unbind();
 
         quadShaderProgram.bind();
-        quadShaderProgram.setUniform("vw_matrix", quadViewMatrix);
         quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
         quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
-        quad.render();
-        quad.endRender();
-
+        tileMap.getTilePositions().entrySet().forEach(p -> {
+            quadShaderProgram.setUniform("vw_matrix", new Matrix4f().identity().translate(p.getKey()));
+            quadShaderProgram.setUniform("t_color", new Vector4f(p.getValue(), p.getValue(), p.getValue(), 1.0f));
+            quad.render();
+            quad.endRender();
+        });
         quadShaderProgram.unbind();
     }
 

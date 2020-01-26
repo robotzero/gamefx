@@ -188,10 +188,6 @@
             <url>https://jitpack.io</url>
         </repository>
         <repository>
-            <id>swt-repo</id>
-            <url>http://maven-eclipse.github.io/maven</url>
-        </repository>
-        <repository>
             <id>gdx-nightlies</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>

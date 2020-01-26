@@ -7,6 +7,7 @@ import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.Render2D;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
+import com.robotzero.gamefx.world.TileMap;
 
 public class Robot {
     public static void main(String[] args) {
@@ -19,7 +20,8 @@ public class Robot {
             DisplayManager displayManager = new DisplayManager();
             AssetFactory assetFactory = new AssetFactory();
             Player player = new Player();
-            Render render = new Render2D(camera, player);
+            TileMap tileMap = new TileMap();
+            Render render = new Render2D(camera, player, tileMap);
             GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, player);
             gameApp.run();
         } catch (Throwable t) {

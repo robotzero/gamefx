@@ -3,13 +3,13 @@ package com.robotzero.gamefx.renderengine.utils;
 import com.robotzero.gamefx.renderengine.model.Material;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.model.Texture;
+import com.robotzero.gamefx.world.TileMap;
 
 import java.util.Optional;
 
 public class AssetFactory {
     private static float backgroundWidth = 284f, backgroundHeight = 512f;
     private static float birdWidth = 125f, birdHeight = 126f;
-    private static float tileWidth = 100f, tileHeight = 200f;
 
     private final float[] vertices1 = new float[] {
             0.0f, 0.0f, 0.0f,
@@ -27,9 +27,9 @@ public class AssetFactory {
 
     private final float[] vertices3 = new float[] {
             0.0f, 0.0f, 0.0f,
-            0.0f, tileHeight, 0.0f,
-            tileWidth, tileHeight, 0.0f,
-            tileWidth, 0, 0.0f
+            0.0f, TileMap.tileHeight, 0.0f,
+            TileMap.tileWidth, TileMap.tileHeight, 0.0f,
+            TileMap.tileWidth, 0.0f, 0.0f
     };
 
     private final float[] tcs1 = new float[] {
