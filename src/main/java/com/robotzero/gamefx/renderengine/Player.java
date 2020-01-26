@@ -5,7 +5,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 public class Player {
-    private static final float PLAYER_POS_STEP = 10.0f;
+    private static final float PLAYER_POS_STEP = 64;
     private static final float targetSecondsPerFrame = 1.0f / 60f;
     private static final float playerHeight = 1.4f;
     private static final float playerWidth = 0.75f * playerHeight;
@@ -17,9 +17,9 @@ public class Player {
     }
 
     public void movePosition(Vector3f ddPlayerP) {
-//        final var dPlayerPTemp = new Vector3f(ddPlayerP.x, ddPlayerP.y, ddPlayerP.z);
-//        dPlayerPTemp.mul(-1.5f);
-//        ddPlayerP.add(dPlayerPTemp);
+        //final var dPlayerPTemp = new Vector3f(ddPlayerP.x, ddPlayerP.y, ddPlayerP.z);
+        //dPlayerPTemp.mul(-1.5f);
+        //ddPlayerP.add(dPlayerPTemp);
         dPlayerP = dPlayerP.add(ddPlayerP.mul(PLAYER_POS_STEP).mul(targetSecondsPerFrame));
     }
 }
