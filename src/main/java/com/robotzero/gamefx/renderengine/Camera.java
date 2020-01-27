@@ -9,7 +9,7 @@ public class Camera {
 
     public Matrix4f updateViewMatrix() {
         final Matrix4f v = new Matrix4f();
-        return v.identity().translate(position.x, position.y, position.z);
+        return v.identity().translate(new Vector3f(-position.x, -position.y, -position.z));
     }
 
     public Matrix4f getProjectionMatrix() {
@@ -18,7 +18,6 @@ public class Camera {
     }
 
     public void movePosition(float offsetX, float offsetY, float offsetZ) {
-        position.x += offsetX * CAMERA_POS_STEP;
-        position.y += offsetY * CAMERA_POS_STEP;
+        position = position.add(offsetX * CAMERA_POS_STEP, offsetY * CAMERA_POS_STEP, 0);
     }
 }

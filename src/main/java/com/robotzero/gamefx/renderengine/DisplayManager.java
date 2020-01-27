@@ -101,7 +101,7 @@ public class DisplayManager {
         glfwMakeContextCurrent(window);
 
         // Enable v-sync (1)
-        glfwSwapInterval(0);
+        glfwSwapInterval(1);
 
         // Make the window visible
         glfwShowWindow(window);

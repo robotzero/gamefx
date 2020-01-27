@@ -59,7 +59,7 @@ public class TileMap {
         {1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, 1}
     };
 
-    private final TileMap[][] tileMaps;
+    //private final TileMap[][] tileMaps;
 
     public static final int tileWidth = 60;
     public static final int tileHeight = 60;

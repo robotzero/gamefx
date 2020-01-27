@@ -159,8 +159,7 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        //camera.movePosition(cameraInc.x, cameraInc.y, cameraInc.z);
+//        camera.movePosition(cameraInc.x, cameraInc.y, cameraInc.z);
         player.movePosition(playerInc);
-        //camera.updateViewMatrix();
     }
 }

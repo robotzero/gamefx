@@ -78,9 +78,10 @@ public class Render2D implements Render {
         quadShaderProgram.bind();
         quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
         quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
-        tileMap.getTilePositions().entrySet().forEach(p -> {
-            quadShaderProgram.setUniform("vw_matrix", new Matrix4f().identity().translate(p.getKey()));
-            quadShaderProgram.setUniform("t_color", new Vector4f(p.getValue(), p.getValue(), p.getValue(), 1.0f));
+        quadShaderProgram.setUniform("vw_matrix", viewMatrix);
+        tileMap.getTilePositions().forEach((key, value) -> {
+            quadShaderProgram.setUniform("ml_matrix", new Matrix4f().identity().translate(key));
+            quadShaderProgram.setUniform("t_color", new Vector4f(value, value, value, 1.0f));
             quad.render();
             quad.endRender();
         });
@@ -122,10 +123,11 @@ public class Render2D implements Render {
         quadShaderProgram.createUniform("vw_matrix");
         quadShaderProgram.createUniform("pr_matrix");
         quadShaderProgram.createUniform("t_color");
+        quadShaderProgram.createUniform("ml_matrix");
     }
 
     public void cleanup() {
-        sceneShaderProgram.cleanup();
+//        sceneShaderProgram.cleanup();
         birdShaderProgram.cleanup();
         quadShaderProgram.cleanup();
     }
