@@ -7,6 +7,7 @@ import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
@@ -37,7 +38,7 @@ public class GameApp implements Runnable {
     private Mesh bird;
     private Mesh quad;
     private final Player player;
-    private final Vector3f playerInc;
+    private final Vector2f playerInc;
 
     public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, Player player) {
         this.displayManager = displayManager;
@@ -47,7 +48,7 @@ public class GameApp implements Runnable {
         this.assetFactory = assetFactory;
         this.player = player;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
-        this.playerInc = new Vector3f(0.0f, 0.0f, 0.0f);
+        this.playerInc = new Vector2f(0.0f, 0.0f);
     }
 
     public void run() {
@@ -111,7 +112,7 @@ public class GameApp implements Runnable {
 
     protected void input() {
         cameraInc.set(0f, 0f, 0f);
-        playerInc.set(0f, 0f, 0f);
+        playerInc.set(0f, 0f);
         if (displayManager.isKeyPressed(GLFW_KEY_W)) {
             sceneChanged = true;
             cameraInc.y = -1;
@@ -160,6 +161,6 @@ public class GameApp implements Runnable {
 
     private void update(float interval) {
 //        camera.movePosition(cameraInc.x, cameraInc.y, cameraInc.z);
-        player.movePosition(playerInc);
+        player.movePosition(playerInc, interval);
     }
 }
