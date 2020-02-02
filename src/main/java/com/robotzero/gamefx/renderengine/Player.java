@@ -7,14 +7,15 @@ import org.joml.Vector3f;
 
 public class Player {
     private final TileMap tileMap;
-    private static final float PLAYER_POS_STEP = 264;
-    public static final float playerHeight = TileMap.TileHeight;
-    public static final float playerWidth = 0.75f * playerHeight;
-    private Vector3f dPlayerP = new Vector3f(200f, 300f, 1f);
-    private TileMapPosition position = new TileMapPosition(1, 3, new Vector2f(5.0f, 5.0f));
-    private Vector3f dPosition = new Vector3f(130f, 80f, 0f);
-    public static int playerTileMapX = 0;
-    public static int playerTileMapY = 0;
+    private static final float PLAYER_POS_STEP = 2f;
+    public static final float playerHeight = TileMap.TileSideInPixels;
+    public static final float playerWidth = 0.75f * TileMap.TileSideInPixels;
+    public static final float PlayerHeight = 1.4f;
+    public static final float PlayerWidth = 0.75f*PlayerHeight;
+//    private Vector3f dPlayerP = new Vector3f(200f, 300f, 1f);
+//    private TileMapPosition position = new TileMapPosition(1, 3, new Vector2f(5.0f, 5.0f));
+    public static TileMap.CannonicalPosition positionc = new TileMap.CannonicalPosition();
+//    private Vector3f dPosition = new Vector3f(130f, 140f, 0f);
 
     public Player(TileMap tileMap) {
         this.tileMap = tileMap;
@@ -22,29 +23,26 @@ public class Player {
 
     public Matrix4f getModelMatrix() {
         final Matrix4f v = new Matrix4f();
-        return v.identity().translate(dPosition);
+        float PlayerLeft = TileMap.UpperLeftX + TileMap.TileSideInPixels * positionc.TileX +
+                TileMap.MetersToPixels * positionc.TileRelX - 0.5f * TileMap.MetersToPixels * PlayerWidth;
+        float PlayerTop = TileMap.UpperLeftY + TileMap.TileSideInPixels * positionc.TileY +
+                TileMap.MetersToPixels * positionc.TileRelY - TileMap.MetersToPixels*PlayerHeight;
+        return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
     }
 
     public void movePosition(Vector2f ddPlayer, float interval) {
         ddPlayer = ddPlayer.mul(PLAYER_POS_STEP).mul(interval);
-        final var newPlayer = new Vector3f(dPosition.x(), dPosition.y(), 0).add(ddPlayer.x(), ddPlayer.y(), 0);
-        TileMap.RawPosition PlayerPos = new TileMap.RawPosition();
-        PlayerPos.TileMapX = Player.playerTileMapX;
-        PlayerPos.TileMapY = Player.playerTileMapY;
-        PlayerPos.X = newPlayer.x();
-        PlayerPos.Y = newPlayer.y();
+//        final var newPlayer = new Vector3f(dPosition.x(), dPosition.y(), 0).add(ddPlayer.x(), ddPlayer.y(), 0);
+        TileMap.CannonicalPosition NewPlayerP = positionc;
+        NewPlayerP.TileRelX += ddPlayer.x();
+        NewPlayerP.TileRelY += ddPlayer.y();
+        NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
-        if (tileMap.IsWorldPointEmpty(PlayerPos))
+        if (tileMap.IsWorldPointEmpty(NewPlayerP))
 //        IsWorldPointEmpty(&World, PlayerLeft) &&
 //        IsWorldPointEmpty(&World, PlayerRight))
         {
-            TileMap.CannonicalPosition CanPos = tileMap.GetCanonicalPosition(PlayerPos);
-
-            playerTileMapX = CanPos.TileMapX;
-            playerTileMapY = CanPos.TileMapY;
-            float x  = (float) (TileMap.UpperLeftX + TileMap.TileWidth*CanPos.TileX + CanPos.TileRelX);
-            float y = (float) (TileMap.UpperLeftY + TileMap.TileHeight*CanPos.TileY + CanPos.TileRelY);
-            dPosition = new Vector3f(x, y, dPosition.z());
+            positionc = NewPlayerP;
         }
     }
 

@@ -13,10 +13,11 @@ public class TileMap {
     private final static int TILEMAP_COUNT_Y = 9;
     private final int WorldTileMapCountX = 2;
     private final int WorldTileMapCountY = 2;
-    public static final int UpperLeftX = -30;
+    public static final int TileSideInPixels = 60;
+    public static final int UpperLeftX = - -(TileSideInPixels / 2);
     public static final int UpperLeftY = 0;
-    public static final int TileWidth = 60;
-    public static final int TileHeight = 60;
+    public static final float TileSideInMeters = 1.4f;
+    public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
     private final int[][] tiles00 =
             {
                     {1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, 1},
@@ -113,7 +114,7 @@ public class TileMap {
     }
 
     private void generateTilePositions() {
-        IntBuffer tileMap =  this.GetTileMap(Player.playerTileMapX, Player.playerTileMapY);
+        IntBuffer tileMap =  this.GetTileMap(Player.positionc.TileMapX, Player.positionc.TileMapY);
         for(int row = 0;
             row < 9;
             ++row)
@@ -177,101 +178,67 @@ public class TileMap {
         return(Empty);
     }
 
-    public boolean IsWorldPointEmpty(RawPosition TestPos)
+    public boolean IsWorldPointEmpty(CannonicalPosition CanPos)
     {
         boolean Empty = false;
 
-        CannonicalPosition CanPos = GetCanonicalPosition(TestPos);
         IntBuffer tileMap = GetTileMap(CanPos.TileMapX, CanPos.TileMapY);
         Empty = IsTileMapPointEmpty(tileMap, CanPos.TileX, CanPos.TileY);
 
         return(Empty);
     }
 
-    boolean IsWorldPointEmpty(int TileMapX, int TileMapY, double TestX, double TestY)
+    CannonicalPosition RecanonicalizeCoord(CannonicalPosition Pos)
     {
-        boolean Empty = false;
+        double OffsetX = Math.floor(Pos.TileRelX / TileSideInMeters);
+        double OffsetY = Math.floor(Pos.TileRelY / TileSideInMeters);
+        Pos.TileX += OffsetX;
+        Pos.TileY += OffsetY;
+        Pos.TileRelX -= OffsetX * TileSideInMeters;
+        Pos.TileRelY -= OffsetY * TileSideInMeters;
 
-        IntBuffer tileMap = GetTileMap(TileMapX, TileMapY);
-        if(tileMap != null && tileMap.array().length > 0)
+        if(Pos.TileX < 0)
         {
-            double PlayerTileX = Math.floor((TestX - UpperLeftX) / TileWidth);
-            double PlayerTileY = Math.floor((TestY - UpperLeftY) / TileHeight);
-
-            if((PlayerTileX >= 0) && (PlayerTileX < TILEMAP_COUNT_X) &&
-                    (PlayerTileY >= 0) && (PlayerTileY < TILEMAP_COUNT_Y))
-            {
-                int TileMapValue = GetTileValueUnchecked(tileMap, (int)PlayerTileX, (int)PlayerTileY);
-                Empty = (TileMapValue == 0);
-            }
+            Pos.TileX = TILEMAP_COUNT_X + Pos.TileX;
+            Pos.TileMapX = Pos.TileMapX - 1;
         }
 
-        return(Empty);
+        if(Pos.TileX >= TILEMAP_COUNT_X)
+        {
+            Pos.TileX = Pos.TileX - TILEMAP_COUNT_X;
+            Pos.TileMapX = Pos.TileMapX + 1;
+        }
+
+        if(Pos.TileY < 0)
+        {
+            Pos.TileY = TILEMAP_COUNT_Y + Pos.TileY;
+            Pos.TileMapY = Pos.TileMapY - 1;
+        }
+
+        if(Pos.TileY >= TILEMAP_COUNT_Y)
+        {
+            Pos.TileY = Pos.TileY - TILEMAP_COUNT_Y;
+            Pos.TileMapY = Pos.TileMapY + 1;
+        }
+
+        return Pos;
     }
 
-    public CannonicalPosition GetCanonicalPosition(RawPosition Pos)
+    public CannonicalPosition RecanonicalizePosition(CannonicalPosition Pos)
     {
-        CannonicalPosition Result = new CannonicalPosition();
-
-        Result.TileMapX = Pos.TileMapX;
-        Result.TileMapY = Pos.TileMapY;
-
-        double X = Pos.X - UpperLeftX;
-        double Y = Pos.Y - UpperLeftY;
-        Result.TileX = (int) Math.floor(X / TileWidth);
-        Result.TileY = (int) Math.floor(Y / TileHeight);
-
-        Result.TileRelX = X - Result.TileX*TileWidth;
-        Result.TileRelY = Y - Result.TileY*TileHeight;
-
-//        Assert(Result.TileRelX >= 0);
-//        Assert(Result.TileRelY >= 0);
-//        Assert(Result.TileRelX < World->TileWidth);
-//        Assert(Result.TileRelY < World->TileHeight);
-
-        if(Result.TileX < 0)
-        {
-            Result.TileX = TILEMAP_COUNT_X + Result.TileX;
-            --Result.TileMapX;
-        }
-
-        if(Result.TileY < 0)
-        {
-            Result.TileY = TILEMAP_COUNT_Y + Result.TileY;
-            --Result.TileMapY;
-        }
-
-        if(Result.TileX >= TILEMAP_COUNT_X)
-        {
-            Result.TileX = Result.TileX - TILEMAP_COUNT_X;
-            ++Result.TileMapX;
-        }
-
-        if(Result.TileY >= TILEMAP_COUNT_Y)
-        {
-            Result.TileY = Result.TileY - TILEMAP_COUNT_Y;
-            ++Result.TileMapY;
-        }
-
-        return(Result);
+        return RecanonicalizeCoord(Pos);
     }
-    public static class RawPosition {
-        public int TileMapX;
-        public int TileMapY;
 
-        public double X;
-        public double Y;
-    }
 
     public static class CannonicalPosition {
-        public int TileMapX;
-        public int TileMapY;
+        public int TileMapX = 0;
+        public int TileMapY = 0;
 
-        public int TileX;
-        public int TileY;
+        public int TileX = 3;
+        public int TileY = 3;
 
-        public double TileRelX;
-        public double TileRelY;
+        public float TileRelX = 5.0f;
+        public float TileRelY = 5.0f;
     }
 }
 
