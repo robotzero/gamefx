@@ -127,7 +127,14 @@ public class TileMap {
                 if (tileID == 1) {
                     color = 1.0f;
                 }
-                tilePositions.put(new Vector3f(column * tileWidth, row * tileHeight, 0), color);
+
+                if((column == Player.positionc.TileX) &&
+                        (row == Player.positionc.TileY))
+                {
+                    color = 0.0f;
+                }
+
+                tilePositions.put(new Vector3f(UpperLeftX + (column * TileSideInPixels), UpperLeftY + (row * TileSideInPixels), 0), color);
             }
         }
     }

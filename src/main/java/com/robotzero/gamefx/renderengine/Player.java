@@ -7,15 +7,10 @@ import org.joml.Vector3f;
 
 public class Player {
     private final TileMap tileMap;
-    private static final float PLAYER_POS_STEP = 2f;
-    public static final float playerHeight = TileMap.TileSideInPixels;
-    public static final float playerWidth = 0.75f * TileMap.TileSideInPixels;
+    private static final float PLAYER_POS_STEP = 10f;
     public static final float PlayerHeight = 1.4f;
     public static final float PlayerWidth = 0.75f*PlayerHeight;
-//    private Vector3f dPlayerP = new Vector3f(200f, 300f, 1f);
-//    private TileMapPosition position = new TileMapPosition(1, 3, new Vector2f(5.0f, 5.0f));
     public static TileMap.CannonicalPosition positionc = new TileMap.CannonicalPosition();
-//    private Vector3f dPosition = new Vector3f(130f, 140f, 0f);
 
     public Player(TileMap tileMap) {
         this.tileMap = tileMap;
@@ -38,9 +33,30 @@ public class Player {
         NewPlayerP.TileRelY += ddPlayer.y();
         NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
-        if (tileMap.IsWorldPointEmpty(NewPlayerP))
-//        IsWorldPointEmpty(&World, PlayerLeft) &&
-//        IsWorldPointEmpty(&World, PlayerRight))
+        TileMap.CannonicalPosition PlayerLeft = new TileMap.CannonicalPosition();
+        PlayerLeft.TileRelX = NewPlayerP.TileRelX;
+        PlayerLeft.TileRelY = NewPlayerP.TileRelY;
+        PlayerLeft.TileX = NewPlayerP.TileX;
+        PlayerLeft.TileY = NewPlayerP.TileY;
+        PlayerLeft.TileMapX = NewPlayerP.TileMapX;
+        PlayerLeft.TileMapY = NewPlayerP.TileMapY;
+        PlayerLeft.TileRelX -= 0.5f*PlayerWidth;
+        PlayerLeft = tileMap.RecanonicalizePosition(PlayerLeft);
+
+        TileMap.CannonicalPosition PlayerRight = new TileMap.CannonicalPosition();
+        PlayerRight.TileRelX = NewPlayerP.TileRelX;
+        PlayerRight.TileRelY = NewPlayerP.TileRelY;
+        PlayerRight.TileX = NewPlayerP.TileX;
+        PlayerRight.TileY = NewPlayerP.TileY;
+        PlayerRight.TileMapX = NewPlayerP.TileMapX;
+        PlayerRight.TileMapY = NewPlayerP.TileMapY;
+        PlayerRight.TileRelX += 0.5f*PlayerWidth;
+        PlayerRight = tileMap.RecanonicalizePosition(PlayerRight);
+
+
+        if (tileMap.IsWorldPointEmpty(NewPlayerP) &&
+            tileMap.IsWorldPointEmpty(PlayerLeft) &&
+            tileMap.IsWorldPointEmpty(PlayerRight))
         {
             positionc = NewPlayerP;
         }
