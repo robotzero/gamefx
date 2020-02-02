@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.renderengine.utils;
 
+import com.robotzero.gamefx.renderengine.Player;
 import com.robotzero.gamefx.renderengine.model.Material;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.model.Texture;
@@ -20,9 +21,9 @@ public class AssetFactory {
 
     private final float[] vertices2 = new float[] {
             0.0f, 0.0f, 0.0f,
-            0.0f, birdHeight, 0.0f,
-            birdWidth, birdHeight, 0.0f,
-            birdWidth, 0, 0.0f
+            0.0f, Player.playerHeight, 0.0f,
+            Player.playerWidth, Player.playerHeight, 0.0f,
+            Player.playerWidth, 0, 0.0f
     };
 
     private final float[] vertices3 = new float[] {

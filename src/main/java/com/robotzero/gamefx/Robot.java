@@ -19,8 +19,8 @@ public class Robot {
             Timer timer = new Timer();
             DisplayManager displayManager = new DisplayManager();
             AssetFactory assetFactory = new AssetFactory();
-            Player player = new Player();
             TileMap tileMap = new TileMap();
+            Player player = new Player(tileMap);
             Render render = new Render2D(camera, player, tileMap);
             GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, player);
             gameApp.run();
