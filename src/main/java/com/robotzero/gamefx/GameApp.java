@@ -116,11 +116,11 @@ public class GameApp implements Runnable {
         if (displayManager.isKeyPressed(GLFW_KEY_W)) {
             sceneChanged = true;
             cameraInc.y = -1;
-            playerInc.y = -1;
+            playerInc.y = 1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_S)) {
             sceneChanged = true;
             cameraInc.y = 1;
-            playerInc.y = 1;
+            playerInc.y = -1;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_A)) {
             sceneChanged = true;

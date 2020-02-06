@@ -10,7 +10,7 @@ public class Player {
     private static final float PLAYER_POS_STEP = 10f;
     public static final float PlayerHeight = 1.4f;
     public static final float PlayerWidth = 0.75f*PlayerHeight;
-    public static TileMap.CannonicalPosition positionc = new TileMap.CannonicalPosition();
+    public static TileMap.WorldPosition positionc = new TileMap.WorldPosition();
 
     public Player(TileMap tileMap) {
         this.tileMap = tileMap;
@@ -18,39 +18,35 @@ public class Player {
 
     public Matrix4f getModelMatrix() {
         final Matrix4f v = new Matrix4f();
-        float PlayerLeft = TileMap.UpperLeftX + TileMap.TileSideInPixels * positionc.TileX +
-                TileMap.MetersToPixels * positionc.TileRelX - 0.5f * TileMap.MetersToPixels * PlayerWidth;
-        float PlayerTop = TileMap.UpperLeftY + TileMap.TileSideInPixels * positionc.TileY +
-                TileMap.MetersToPixels * positionc.TileRelY - TileMap.MetersToPixels*PlayerHeight;
+        float PlayerLeft = TileMap.CenterX + TileMap.MetersToPixels * positionc.TileRelX -
+                0.5f * TileMap.MetersToPixels * PlayerWidth;
+        float PlayerTop = TileMap.CenterY + TileMap.MetersToPixels * positionc.TileRelY -
+                TileMap.MetersToPixels * PlayerHeight;
         return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
     }
 
     public void movePosition(Vector2f ddPlayer, float interval) {
         ddPlayer = ddPlayer.mul(PLAYER_POS_STEP).mul(interval);
 //        final var newPlayer = new Vector3f(dPosition.x(), dPosition.y(), 0).add(ddPlayer.x(), ddPlayer.y(), 0);
-        TileMap.CannonicalPosition NewPlayerP = positionc;
+        TileMap.WorldPosition NewPlayerP = positionc;
         NewPlayerP.TileRelX += ddPlayer.x();
         NewPlayerP.TileRelY += ddPlayer.y();
         NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
-        TileMap.CannonicalPosition PlayerLeft = new TileMap.CannonicalPosition();
+        TileMap.WorldPosition PlayerLeft = new TileMap.WorldPosition();
         PlayerLeft.TileRelX = NewPlayerP.TileRelX;
         PlayerLeft.TileRelY = NewPlayerP.TileRelY;
-        PlayerLeft.TileX = NewPlayerP.TileX;
-        PlayerLeft.TileY = NewPlayerP.TileY;
-        PlayerLeft.TileMapX = NewPlayerP.TileMapX;
-        PlayerLeft.TileMapY = NewPlayerP.TileMapY;
-        PlayerLeft.TileRelX -= 0.5f*PlayerWidth;
+        PlayerLeft.AbsTileX = NewPlayerP.AbsTileX;
+        PlayerLeft.AbsTileY = NewPlayerP.AbsTileY;
+//        PlayerLeft.TileRelX -= 0.5f*PlayerWidth;
         PlayerLeft = tileMap.RecanonicalizePosition(PlayerLeft);
 
-        TileMap.CannonicalPosition PlayerRight = new TileMap.CannonicalPosition();
+        TileMap.WorldPosition PlayerRight = new TileMap.WorldPosition();
         PlayerRight.TileRelX = NewPlayerP.TileRelX;
         PlayerRight.TileRelY = NewPlayerP.TileRelY;
-        PlayerRight.TileX = NewPlayerP.TileX;
-        PlayerRight.TileY = NewPlayerP.TileY;
-        PlayerRight.TileMapX = NewPlayerP.TileMapX;
-        PlayerRight.TileMapY = NewPlayerP.TileMapY;
-        PlayerRight.TileRelX += 0.5f*PlayerWidth;
+        PlayerRight.AbsTileX = NewPlayerP.AbsTileX;
+        PlayerRight.AbsTileY = NewPlayerP.AbsTileY;
+//        PlayerRight.TileRelX += 0.5f*PlayerWidth;
         PlayerRight = tileMap.RecanonicalizePosition(PlayerRight);
 
 
