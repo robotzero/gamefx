@@ -7,7 +7,7 @@ import org.joml.Vector3f;
 
 public class Player {
     private final TileMap tileMap;
-    private static final float PLAYER_POS_STEP = 10f;
+    private static final float PLAYER_POS_STEP = 2f;
     public static final float PlayerHeight = 1.4f;
     public static final float PlayerWidth = 0.75f*PlayerHeight;
     public static TileMap.WorldPosition positionc = new TileMap.WorldPosition();
@@ -18,19 +18,21 @@ public class Player {
 
     public Matrix4f getModelMatrix() {
         final Matrix4f v = new Matrix4f();
-        float PlayerLeft = TileMap.CenterX + TileMap.MetersToPixels * positionc.TileRelX -
-                0.5f * TileMap.MetersToPixels * PlayerWidth;
-        float PlayerTop = TileMap.CenterY + TileMap.MetersToPixels * positionc.TileRelY -
-                TileMap.MetersToPixels * PlayerHeight;
+        float PlayerLeft = TileMap.CenterX + TileMap.MetersToPixels * positionc.TileRelX - 0.5f * TileMap.MetersToPixels * PlayerWidth;
+        float PlayerTop = TileMap.CenterY - TileMap.MetersToPixels * positionc.TileRelY - TileMap.MetersToPixels * PlayerHeight;
         return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
     }
 
     public void movePosition(Vector2f ddPlayer, float interval) {
         ddPlayer = ddPlayer.mul(PLAYER_POS_STEP).mul(interval);
-//        final var newPlayer = new Vector3f(dPosition.x(), dPosition.y(), 0).add(ddPlayer.x(), ddPlayer.y(), 0);
-        TileMap.WorldPosition NewPlayerP = positionc;
-        NewPlayerP.TileRelX += ddPlayer.x();
-        NewPlayerP.TileRelY += ddPlayer.y();
+
+        TileMap.WorldPosition NewPlayerP = new TileMap.WorldPosition();
+        NewPlayerP.TileRelX = positionc.TileRelX;
+        NewPlayerP.TileRelY = positionc.TileRelY;
+        NewPlayerP.AbsTileX = positionc.AbsTileX;
+        NewPlayerP.AbsTileY = positionc.AbsTileY;
+        NewPlayerP.TileRelX = NewPlayerP.TileRelX + ddPlayer.x();
+        NewPlayerP.TileRelY = NewPlayerP.TileRelY + ddPlayer.y;
         NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
         TileMap.WorldPosition PlayerLeft = new TileMap.WorldPosition();
@@ -38,7 +40,7 @@ public class Player {
         PlayerLeft.TileRelY = NewPlayerP.TileRelY;
         PlayerLeft.AbsTileX = NewPlayerP.AbsTileX;
         PlayerLeft.AbsTileY = NewPlayerP.AbsTileY;
-//        PlayerLeft.TileRelX -= 0.5f*PlayerWidth;
+        PlayerLeft.TileRelX -= 0.5f*PlayerWidth;
         PlayerLeft = tileMap.RecanonicalizePosition(PlayerLeft);
 
         TileMap.WorldPosition PlayerRight = new TileMap.WorldPosition();
@@ -46,7 +48,7 @@ public class Player {
         PlayerRight.TileRelY = NewPlayerP.TileRelY;
         PlayerRight.AbsTileX = NewPlayerP.AbsTileX;
         PlayerRight.AbsTileY = NewPlayerP.AbsTileY;
-//        PlayerRight.TileRelX += 0.5f*PlayerWidth;
+        PlayerRight.TileRelX += 0.5f*PlayerWidth;
         PlayerRight = tileMap.RecanonicalizePosition(PlayerRight);
 
 
@@ -54,7 +56,11 @@ public class Player {
             tileMap.IsWorldPointEmpty(PlayerLeft) &&
             tileMap.IsWorldPointEmpty(PlayerRight))
         {
-            positionc = NewPlayerP;
+            positionc = new TileMap.WorldPosition();
+            positionc.AbsTileX = NewPlayerP.AbsTileX;
+            positionc.AbsTileY = NewPlayerP.AbsTileY;
+            positionc.TileRelX = NewPlayerP.TileRelX;
+            positionc.TileRelY = NewPlayerP.TileRelY;
         }
     }
 

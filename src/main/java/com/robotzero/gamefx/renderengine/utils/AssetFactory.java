@@ -21,9 +21,9 @@ public class AssetFactory {
 
     private final float[] vertices2 = new float[] {
             0.0f, 0.0f, 0.0f,
-            0.0f,  TileMap.MetersToPixels * Player.PlayerHeight, 0.0f,
+            0.0f, TileMap.MetersToPixels * Player.PlayerHeight, 0.0f,
             TileMap.MetersToPixels * Player.PlayerWidth, TileMap.MetersToPixels * Player.PlayerHeight, 0.0f,
-            TileMap.MetersToPixels * Player.PlayerWidth, 0, 0.0f
+            TileMap.MetersToPixels * Player.PlayerWidth, 0.0f, 0.0f
     };
 
     private final float[] vertices3 = new float[] {

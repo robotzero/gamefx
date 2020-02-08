@@ -56,28 +56,9 @@ public class TileMap {
     private Map<Vector3f, Float> tilePositions = new HashMap<>();
 
     public TileMap() {
-//        final var arr1 = convertTo1d(tiles00);
-//        final var arr2 = convertTo1d(tiles01);
-//        final var arr3 = convertTo1d(tiles10);
-//        final var arr4 = convertTo1d(tiles11);
-//        btiles00 = MemoryStack.stackMallocInt(arr1.length);
-//        btiles01 = MemoryStack.stackMallocInt(arr2.length);
-//        btiles10 = MemoryStack.stackMallocInt(arr3.length);
-//        btiles11 = MemoryStack.stackMallocInt(arr4.length);
-//        this.btiles00 = btiles00.put(arr1);
-//        this.btiles01 = btiles01.put(arr2);
-//        this.btiles10 = btiles10.put(arr3);
-//        this.btiles11 = btiles11.put(arr4);
         final var t = convertTo1d(TempTiles);
         tileChunk = new TileChunk(t);
         tileChunks.add(tileChunk);
-
-//        tileChunks = MemoryStack.stackMallocInt(t.length);
-//        tileChunks.put(t);
-//        tileMaps[0] = btiles00;
-//        tileMaps[1] = btiles10;
-//        tileMaps[2] = btiles01;
-//        tileMaps[3] = btiles11;
     }
 
     private byte[] convertTo1d(byte[][] tiles) {
@@ -179,36 +160,12 @@ public class TileMap {
 
     WorldPosition RecanonicalizeCoord(WorldPosition Pos)
     {
-        double OffsetX = Math.floor(Pos.TileRelX / TileSideInMeters);
-        double OffsetY = Math.floor(Pos.TileRelY / TileSideInMeters);
-        Pos.AbsTileX += OffsetX;
-        Pos.AbsTileY += OffsetY;
-        Pos.TileRelX -= OffsetX * TileSideInMeters;
-        Pos.TileRelY -= OffsetY * TileSideInMeters;
-
-//        if(Pos.TileX < 0)
-//        {
-//            Pos.TileX = TILEMAP_COUNT_X + Pos.TileX;
-//            Pos.TileMapX = Pos.TileMapX - 1;
-//        }
-//
-//        if(Pos.TileX >= TILEMAP_COUNT_X)
-//        {
-//            Pos.TileX = Pos.TileX - TILEMAP_COUNT_X;
-//            Pos.TileMapX = Pos.TileMapX + 1;
-//        }
-//
-//        if(Pos.TileY < 0)
-//        {
-//            Pos.TileY = TILEMAP_COUNT_Y + Pos.TileY;
-//            Pos.TileMapY = Pos.TileMapY - 1;
-//        }
-//
-//        if(Pos.TileY >= TILEMAP_COUNT_Y)
-//        {
-//            Pos.TileY = Pos.TileY - TILEMAP_COUNT_Y;
-//            Pos.TileMapY = Pos.TileMapY + 1;
-//        }
+        int OffsetX = (int) Math.floor(Pos.TileRelX / TileSideInMeters);
+        int OffsetY = (int) Math.floor(Pos.TileRelY / TileSideInMeters);
+        Pos.AbsTileX = Pos.AbsTileX + OffsetX;
+        Pos.AbsTileY = Pos.AbsTileY + OffsetY;
+        Pos.TileRelX = Pos.TileRelX -  OffsetX * TileSideInMeters;
+        Pos.TileRelY = Pos.TileRelY -  OffsetY * TileSideInMeters;
 
         return Pos;
     }
