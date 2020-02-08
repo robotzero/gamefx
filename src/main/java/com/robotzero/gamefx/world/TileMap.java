@@ -4,82 +4,55 @@ import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Player;
 import org.joml.Vector3f;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class TileMap {
-    public final static int TILE_MAP_COUNT_X = 256;
-    public final static int TILE_MAP_COUNT_Y = 256;
-    public static final int TileChunkCountX = 1;
-    public static final int TileChunkCountY = 1;
-    private final int ChunkShift = 8;
-    private final int ChunkMask = (1 << ChunkShift) - 1;
-    private final int ChunkDim = 256;
+    public static final int TileChunkCountX = 128;
+    public static final int TileChunkCountY = 128;
+    public static final int ChunkShift = 4;
+    public static final int ChunkMask = (1 << ChunkShift) - 1;
+    public static final int ChunkDim = 1 << ChunkShift;
     public static final int TileSideInPixels = 60;
     public static final int LowerLeftX = - (TileSideInPixels / 2);
-    public static final int LowerLeftY = 0;
+    public static final int LowerLeftY = DisplayManager.HEIGHT;
     public static final float TileSideInMeters = 1.4f;
     public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
-    public static float CenterX = 0.5f * DisplayManager.WIDTH;
-    public static float CenterY = 0.5f * DisplayManager.HEIGHT;
-    private final byte TempTiles[][] =
-    {
-        {1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, 1},
-        {1, 1, 0, 0,  0, 1, 0, 0,  0, 0, 0, 0,  0, 1, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 1, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0, 1, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 0, 0, 0,  0, 0, 0, 0,  1, 0, 0, 0,  0, 0, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 0, 0, 0,  0, 1, 0, 0,  1, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 1, 0, 0,  0, 1, 0, 0,  1, 0, 0, 0,  0, 1, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 0, 0, 0,  0, 1, 0, 0,  1, 0, 0, 0,  1, 0, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 1, 1, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 1, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 1, 1, 1,  1, 1, 1, 1,  0, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  0, 1, 1, 1,  1, 1, 1, 1, 1},
-        {1, 1, 1, 1,  1, 1, 1, 1,  0, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  0, 1, 1, 1,  1, 1, 1, 1, 1},
-        {1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1,  1, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, 1},
-        {1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, 1},
-    };
+    public static float ScreenCenterX = 0.5f * DisplayManager.WIDTH;
+    public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
+    public static int TilesPerWidth = 17;
+    public static int TilesPerHeight = 9;
 
     private List<TileChunk> tileChunks = new ArrayList<>();
 
     public static final int tileWidth = 60;
     public static final int tileHeight = 60;
-    private TileChunk tileChunk;
 
     private Map<Vector3f, Float> tilePositions = new HashMap<>();
 
     public TileMap() {
-        final var t = convertTo1d(TempTiles);
-        tileChunk = new TileChunk(t);
-        tileChunks.add(tileChunk);
-    }
+        for (int y = 0; y < TileChunkCountY; ++y) {
+            for (int x = 0; x < TileChunkCountX; ++x) {
+                tileChunks.add(y * TileChunkCountX + x, new TileChunk());
+            }
+        }
 
-    private byte[] convertTo1d(byte[][] tiles) {
-        byte[] array = new byte[256 * 256];
-        for (int i = 0; i < 256; i++)
-        {
-            for (int j = 0; j < 256; j++)
-            {
-                int k = i * 256 + j;
-                try {
-                    array[k] = tiles[i][j];
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    array[k] = 0;
+        for(int ScreenY = 0; ScreenY < 32; ++ScreenY) {
+            for(int ScreenX = 0; ScreenX < 32; ++ScreenX) {
+                for(int TileY = 0; TileY < TilesPerHeight; ++TileY) {
+                    for(int TileX = 0; TileX < TilesPerWidth; ++TileX) {
+                        int AbsTileX = ScreenX * TilesPerWidth + TileX;
+                        int AbsTileY = ScreenY * TilesPerHeight + TileY;
+                        SetTileValue(AbsTileX, AbsTileY, (TileX == TileY) && ((TileY % 2) == 1) ? (byte) 1 : 0);
+                    }
                 }
             }
         }
-        return array;
     }
 
     private void generateTilePositions() {
-//        IntBuffer tileMap =  this.GetTileChunk(Player.positionc.TileMapX, Player.positionc.TileMapY);
         for(int RelRow = -10;
             RelRow < 10;
             ++RelRow)
@@ -102,8 +75,14 @@ public class TileMap {
                     color = 0.0f;
                 }
 
-                //tilePositions.put(new Vector3f(UpperLeftX + (column * TileSideInPixels), UpperLeftY + (row * TileSideInPixels), 0), color);
-                tilePositions.put(new Vector3f(CenterX + (RelColumn * TileSideInPixels), CenterY - (RelRow * TileSideInPixels), 0), color);
+                float CenX = ScreenCenterX - MetersToPixels * Player.positionc.TileRelX + RelColumn * TileSideInPixels;
+                float CenY = ScreenCenterY + MetersToPixels * Player.positionc.TileRelY - RelRow * TileSideInPixels;
+                float MinX = CenX - 0.5f * TileSideInPixels;
+                float MinY = CenY - 0.5f * TileSideInPixels;
+                float MaxX = CenX + 0.5f * TileSideInPixels;
+                float MaxY = CenY + 0.5f * TileSideInPixels;
+
+                tilePositions.put(new Vector3f(MinX, MinY, 0), color);
             }
         }
     }
@@ -114,33 +93,33 @@ public class TileMap {
         return this.tilePositions;
     }
 
-    private ByteBuffer GetTileChunk(int TileChunkX, int TileChunkY)
+    private TileChunk GetTileChunk(int TileChunkX, int TileChunkY)
     {
-        ByteBuffer tileMap = null;
+        TileChunk tileMap = null;
 
         if((TileChunkX >= 0) && (TileChunkX < TileChunkCountX) &&
                 (TileChunkY >= 0) && (TileChunkY < TileChunkCountY))
         {
-            tileMap = tileChunks.get(TileChunkY * TileChunkCountX + TileChunkX).getTiles();
+            tileMap = tileChunks.get(TileChunkY * TileChunkCountX + TileChunkX);
         }
 
         return tileMap;
     }
 
-    int GetTileValueUnchecked(ByteBuffer tileChunk, int TileX, int TileY)
+    int GetTileValueUnchecked(TileChunk tileChunk, int TileX, int TileY)
     {
 //        Assert(TileMap);
 //        Assert((TileX >= 0) && (TileX < World->CountX) &&
 //                (TileY >= 0) && (TileY < World->CountY));
 
-        return tileChunk.get(TileY * ChunkDim + TileX);
+        return tileChunk.getTiles().get(TileY * ChunkDim + TileX);
     }
 
-    int GetTileValue(ByteBuffer TileChunk, int TestTileX, int TestTileY)
+    int GetTileValue(TileChunk TileChunk, int TestTileX, int TestTileY)
     {
         int TileChunkValue = 0;
 
-        if(TileChunk != null && TileChunk.limit() > 0)
+        if(TileChunk != null && TileChunk.getTiles().limit() > 0)
         {
             TileChunkValue = GetTileValueUnchecked(TileChunk, TestTileX, TestTileY);
         }
@@ -148,7 +127,7 @@ public class TileMap {
         return(TileChunkValue);
     }
 
-    public boolean IsWorldPointEmpty(WorldPosition CanPos)
+    public boolean IsWorldPointEmpty(TileMapPosition CanPos)
     {
         boolean Empty = false;
 
@@ -158,7 +137,7 @@ public class TileMap {
         return(Empty);
     }
 
-    WorldPosition RecanonicalizeCoord(WorldPosition Pos)
+    TileMapPosition RecanonicalizeCoord(TileMapPosition Pos)
     {
         int OffsetX = (int) Math.floor(Pos.TileRelX / TileSideInMeters);
         int OffsetY = (int) Math.floor(Pos.TileRelY / TileSideInMeters);
@@ -170,7 +149,7 @@ public class TileMap {
         return Pos;
     }
 
-    public WorldPosition RecanonicalizePosition(WorldPosition Pos)
+    public TileMapPosition RecanonicalizePosition(TileMapPosition Pos)
     {
         return RecanonicalizeCoord(Pos);
     }
@@ -189,21 +168,42 @@ public class TileMap {
 
     int GetTileValue(int AbsTileX, int AbsTileY)
     {
-        boolean Empty = false;
-
         TileChunkPosition ChunkPos = GetChunkPositionFor(AbsTileX, AbsTileY);
-        ByteBuffer TileMap = GetTileChunk(ChunkPos.TileChunkX, ChunkPos.TileChunkY);
-        int TileChunkValue = GetTileValue(TileMap, ChunkPos.RelTileX, ChunkPos.RelTileY);
+        TileChunk tileChunk = GetTileChunk(ChunkPos.TileChunkX, ChunkPos.TileChunkY);
+        int TileChunkValue = GetTileValue(tileChunk, ChunkPos.RelTileX, ChunkPos.RelTileY);
 
         return(TileChunkValue);
     }
 
+    public void SetTileValueUnchecked(TileChunk tileChunk, int TileX, int TileY, byte TileValue)
+    {
+        tileChunk.setTile(TileY * ChunkDim + TileX, TileValue);
+    }
 
-    public static class WorldPosition {
+    public void SetTileValue(int AbsTileX, int AbsTileY, byte TileValue)
+    {
+        TileChunkPosition ChunkPos = GetChunkPositionFor(AbsTileX, AbsTileY);
+        TileChunk tileChunk = GetTileChunk(ChunkPos.TileChunkX, ChunkPos.TileChunkY);
+
+        SetTileValue(tileChunk, ChunkPos.RelTileX, ChunkPos.RelTileY, TileValue);
+    }
+
+    public void SetTileValue(TileChunk tileChunk, int TestTileX, int TestTileY, byte TileValue)
+    {
+        byte TileChunkValue = 0;
+
+        if(tileChunk != null)
+        {
+            SetTileValueUnchecked(tileChunk, TestTileX, TestTileY, TileValue);
+        }
+    }
+
+
+    public static class TileMapPosition {
         public float TileRelX = 5.0f;
         public float TileRelY = 5.0f;
 
-        public int AbsTileX = 3;
+        public int AbsTileX = 1;
         public int AbsTileY = 3;
     }
 
