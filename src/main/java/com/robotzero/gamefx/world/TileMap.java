@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.world;
 
+import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Player;
 import org.joml.Vector3f;
@@ -41,17 +42,6 @@ public class TileMap {
         }
 
         this.worldGenerator.renderWorld(this);
-//        for(int ScreenY = 0; ScreenY < 32; ++ScreenY) {
-//            for(int ScreenX = 0; ScreenX < 32; ++ScreenX) {
-//                for(int TileY = 0; TileY < TilesPerHeight; ++TileY) {
-//                    for(int TileX = 0; TileX < TilesPerWidth; ++TileX) {
-//                        int AbsTileX = ScreenX * TilesPerWidth + TileX;
-//                        int AbsTileY = ScreenY * TilesPerHeight + TileY;
-//                        SetTileValue(AbsTileX, AbsTileY, (TileX == TileY) && ((TileY % 2) == 1) ? (byte) 1 : 0);
-//                    }
-//                }
-//            }
-//        }
     }
 
     private void generateTilePositions() {
@@ -62,8 +52,8 @@ public class TileMap {
             for(int RelColumn = -20;
                 RelColumn < 20;
                 ++RelColumn) {
-                int Column = Player.positionc.AbsTileX + RelColumn;
-                int Row = Player.positionc.AbsTileY + RelRow;
+                int Column = Camera.position.AbsTileX + RelColumn;
+                int Row = Camera.position.AbsTileY + RelRow;
                 int tileID = GetTileValue(Column, Row);
 
                 float color = 0.5f;
@@ -75,14 +65,14 @@ public class TileMap {
                     color = 0.25f;
                 }
 
-                if((Column == Player.positionc.AbsTileX) &&
-                        (Row == Player.positionc.AbsTileY))
+                if((Column == Camera.position.AbsTileX) &&
+                        (Row == Camera.position.AbsTileY))
                 {
                     color = 0.0f;
                 }
 
-                float CenX = ScreenCenterX - MetersToPixels * Player.positionc.OffsetX + RelColumn * TileSideInPixels;
-                float CenY = ScreenCenterY + MetersToPixels * Player.positionc.OffsetY - RelRow * TileSideInPixels;
+                float CenX = ScreenCenterX - MetersToPixels * Camera.position.OffsetX + RelColumn * TileSideInPixels;
+                float CenY = ScreenCenterY + MetersToPixels * Camera.position.OffsetY - RelRow * TileSideInPixels;
                 float MinX = CenX - 0.5f * TileSideInPixels;
                 float MinY = CenY - 0.5f * TileSideInPixels;
                 float MaxX = CenX + 0.5f * TileSideInPixels;
@@ -114,10 +104,6 @@ public class TileMap {
 
     int GetTileValueUnchecked(TileChunk tileChunk, int TileX, int TileY)
     {
-//        Assert(TileMap);
-//        Assert((TileX >= 0) && (TileX < World->CountX) &&
-//                (TileY >= 0) && (TileY < World->CountY));
-
         return tileChunk.getTiles().get(TileY * ChunkDim + TileX);
     }
 
@@ -134,7 +120,7 @@ public class TileMap {
 
     public boolean IsWorldPointEmpty(TileMapPosition CanPos)
     {
-        boolean Empty = false;
+        boolean Empty;
 
         int TileChunkValue = GetTileValue(CanPos.AbsTileX, CanPos.AbsTileY);
         Empty = (TileChunkValue == 1);
@@ -210,6 +196,20 @@ public class TileMap {
         }
     }
 
+    public TileMapDifference subtract(TileMapPosition A, TileMapPosition B)
+    {
+        TileMapDifference Result = new TileMapDifference();
+
+        float dTileX = (float) A.AbsTileX - (float) B.AbsTileX;
+        float dTileY = (float) A.AbsTileY - (float) B.AbsTileY;
+
+        Result.dX = TileMap.TileSideInMeters * dTileX + (A.OffsetX - B.OffsetX);
+        Result.dY = TileMap.TileSideInMeters * dTileY + (A.OffsetY - B.OffsetY);
+
+        return(Result);
+    }
+
+
 
     public static class TileMapPosition {
         public float OffsetX = 5.0f;
@@ -224,6 +224,11 @@ public class TileMap {
         public int TileChunkY;
         public int RelTileX;
         public int RelTileY;
+    }
+
+    public static class TileMapDifference {
+        public float dX;
+        public float dY;
     }
 }
 

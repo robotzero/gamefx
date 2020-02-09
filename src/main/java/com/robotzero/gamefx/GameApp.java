@@ -54,6 +54,10 @@ public class GameApp implements Runnable {
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         this.playerInc = new Vector2f(0.0f, 0.0f);
         this.gameMemory = g;
+        Camera.position.OffsetX = 0;
+        Camera.position.OffsetY = 0;
+        Camera.position.AbsTileX = 17/2;
+        Camera.position.AbsTileY = 9/2;
     }
 
     public void run() {
@@ -118,23 +122,28 @@ public class GameApp implements Runnable {
         playerSpeed = 2f;
         cameraInc.set(0f, 0f, 0f);
         playerInc.set(0f, 0f);
+        int heroFacingDirection = 0;
         if (displayManager.isKeyPressed(GLFW_KEY_W)) {
             sceneChanged = true;
             cameraInc.y = -1;
             playerInc.y = 1;
+            heroFacingDirection = 1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_S)) {
             sceneChanged = true;
             cameraInc.y = 1;
             playerInc.y = -1;
+            heroFacingDirection = 2;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_A)) {
             sceneChanged = true;
             cameraInc.x = -1;
             playerInc.x = -1;
+            heroFacingDirection = 3;
         } else if (displayManager.isKeyPressed(GLFW_KEY_D)) {
             sceneChanged = true;
             cameraInc.x = 1;
             playerInc.x = 1;
+            heroFacingDirection = 4;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_Z)) {
             sceneChanged = true;
@@ -171,5 +180,6 @@ public class GameApp implements Runnable {
 
     private void update(float interval) {
         player.movePosition(playerInc, interval, playerSpeed);
+        camera.movePosition(Player.positionc, Camera.position);
     }
 }

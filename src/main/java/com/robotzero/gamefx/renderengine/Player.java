@@ -8,7 +8,7 @@ import org.joml.Vector3f;
 public class Player {
     private final TileMap tileMap;
     public static final float PlayerHeight = 1.4f;
-    public static final float PlayerWidth = 0.75f*PlayerHeight;
+    public static final float PlayerWidth = 0.75f * PlayerHeight;
     public static TileMap.TileMapPosition positionc = new TileMap.TileMapPosition();
 
     public Player(TileMap tileMap) {
@@ -17,8 +17,11 @@ public class Player {
 
     public Matrix4f getModelMatrix() {
         final Matrix4f v = new Matrix4f();
-        float PlayerLeft = TileMap.ScreenCenterX - 0.5f * TileMap.MetersToPixels * PlayerWidth;
-        float PlayerTop = TileMap.ScreenCenterY - TileMap.MetersToPixels * PlayerHeight;
+        TileMap.TileMapDifference diff = tileMap.subtract(positionc, Camera.position);
+        float PlayerGroundPointX = TileMap.ScreenCenterX + TileMap.MetersToPixels * diff.dX;
+        float PlayerGroundPointY = TileMap.ScreenCenterY - TileMap.MetersToPixels * diff.dY;
+        float PlayerLeft = PlayerGroundPointX - 0.5f * TileMap.MetersToPixels * PlayerWidth;
+        float PlayerTop = PlayerGroundPointY - TileMap.MetersToPixels * PlayerHeight;
         return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
     }
 
@@ -61,37 +64,5 @@ public class Player {
             positionc.OffsetX = NewPlayerP.OffsetX;
             positionc.OffsetY = NewPlayerP.OffsetY;
         }
-    }
-
-    public TileMapPosition recanonicalizePosition(TileMapPosition position) {
-        TileMapPosition result = new TileMapPosition(position.getAbsTileX(), position.getAbsTileY(), new Vector2f(position.getOffset().x(), position.getOffset().y()));
-        this.recanonicalizeCoord(result);
-        return result;
-    }
-
-    private void recanonicalizeCoord(TileMapPosition tileMapPosition) {
-        int offsetX = Math.round(tileMapPosition.getOffset().x() / 1.4f);
-        int offsetY = Math.round(tileMapPosition.getOffset().y() / 1.4f);
-
-        tileMapPosition.setAbsTileX(tileMapPosition.getAbsTileX() + offsetX);
-        tileMapPosition.setAbsTileY(tileMapPosition.getAbsTileY() + offsetY);
-        tileMapPosition.setOffset(
-                tileMapPosition.getOffset().x() - offsetX * 1.4f,
-                tileMapPosition.getOffset().y() - offsetY * 1.4f
-        );
-    }
-
-    public Vector2f subtract(TileMapPosition tileMapPositionA, TileMapPosition tileMapPositionB) {
-
-        Vector2f dTileXY = new Vector2f(
-                tileMapPositionA.getAbsTileX() - tileMapPositionB.getAbsTileX(),
-                tileMapPositionA.getAbsTileY() - tileMapPositionB.getAbsTileY()
-        );
-
-        Vector2f substractV = new Vector2f();
-        tileMapPositionA.getOffset().sub(tileMapPositionB.getOffset(), substractV);
-        Vector2f multiplication = dTileXY.mul(1.4f);
-
-        return multiplication.add(substractV);
     }
 }
