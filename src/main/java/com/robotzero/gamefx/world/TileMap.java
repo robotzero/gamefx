@@ -81,8 +81,8 @@ public class TileMap {
                     color = 0.0f;
                 }
 
-                float CenX = ScreenCenterX - MetersToPixels * Player.positionc.TileRelX + RelColumn * TileSideInPixels;
-                float CenY = ScreenCenterY + MetersToPixels * Player.positionc.TileRelY - RelRow * TileSideInPixels;
+                float CenX = ScreenCenterX - MetersToPixels * Player.positionc.OffsetX + RelColumn * TileSideInPixels;
+                float CenY = ScreenCenterY + MetersToPixels * Player.positionc.OffsetY - RelRow * TileSideInPixels;
                 float MinX = CenX - 0.5f * TileSideInPixels;
                 float MinY = CenY - 0.5f * TileSideInPixels;
                 float MaxX = CenX + 0.5f * TileSideInPixels;
@@ -125,8 +125,7 @@ public class TileMap {
     {
         int TileChunkValue = 0;
 
-        if(TileChunk != null && TileChunk.getTiles().limit() > 0)
-        {
+        if(TileChunk != null && TileChunk.getTiles() != null && TileChunk.getTiles().limit() > 0) {
             TileChunkValue = GetTileValueUnchecked(TileChunk, TestTileX, TestTileY);
         }
 
@@ -145,12 +144,12 @@ public class TileMap {
 
     TileMapPosition RecanonicalizeCoord(TileMapPosition Pos)
     {
-        int OffsetX = (int) Math.floor(Pos.TileRelX / TileSideInMeters);
-        int OffsetY = (int) Math.floor(Pos.TileRelY / TileSideInMeters);
+        int OffsetX = (int) Math.floor(Pos.OffsetX / TileSideInMeters);
+        int OffsetY = (int) Math.floor(Pos.OffsetY / TileSideInMeters);
         Pos.AbsTileX = Pos.AbsTileX + OffsetX;
         Pos.AbsTileY = Pos.AbsTileY + OffsetY;
-        Pos.TileRelX = Pos.TileRelX -  OffsetX * TileSideInMeters;
-        Pos.TileRelY = Pos.TileRelY -  OffsetY * TileSideInMeters;
+        Pos.OffsetX = Pos.OffsetX -  OffsetX * TileSideInMeters;
+        Pos.OffsetY = Pos.OffsetY -  OffsetY * TileSideInMeters;
 
         return Pos;
     }
@@ -213,8 +212,8 @@ public class TileMap {
 
 
     public static class TileMapPosition {
-        public float TileRelX = 5.0f;
-        public float TileRelY = 5.0f;
+        public float OffsetX = 5.0f;
+        public float OffsetY = 5.0f;
 
         public int AbsTileX = 1;
         public int AbsTileY = 3;

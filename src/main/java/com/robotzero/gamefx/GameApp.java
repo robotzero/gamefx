@@ -14,6 +14,7 @@ import org.joml.Vector3f;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
@@ -41,6 +42,7 @@ public class GameApp implements Runnable {
     private final Player player;
     private final Vector2f playerInc;
     private final GameMemory gameMemory;
+    private float playerSpeed;
 
     public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, Player player, GameMemory g) {
         this.displayManager = displayManager;
@@ -113,6 +115,7 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
+        playerSpeed = 2f;
         cameraInc.set(0f, 0f, 0f);
         playerInc.set(0f, 0f);
         if (displayManager.isKeyPressed(GLFW_KEY_W)) {
@@ -140,6 +143,10 @@ public class GameApp implements Runnable {
             sceneChanged = true;
             cameraInc.z = 1;
         }
+
+        if (displayManager.isKeyPressed(GLFW_KEY_SPACE)) {
+            playerSpeed = 10f;
+        }
     }
 
     private void sync() {
@@ -163,6 +170,6 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        player.movePosition(playerInc, interval);
+        player.movePosition(playerInc, interval, playerSpeed);
     }
 }
