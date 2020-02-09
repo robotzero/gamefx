@@ -7,6 +7,7 @@ import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
+import com.robotzero.gamefx.world.GameMemory;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -39,8 +40,9 @@ public class GameApp implements Runnable {
     private Mesh quad;
     private final Player player;
     private final Vector2f playerInc;
+    private final GameMemory gameMemory;
 
-    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, Player player) {
+    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, Player player, GameMemory g) {
         this.displayManager = displayManager;
         this.render2D = render2D;
         this.camera = camera;
@@ -49,6 +51,7 @@ public class GameApp implements Runnable {
         this.player = player;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         this.playerInc = new Vector2f(0.0f, 0.0f);
+        this.gameMemory = g;
     }
 
     public void run() {
@@ -73,7 +76,6 @@ public class GameApp implements Runnable {
         background = assetFactory.getBackgroundMesh();
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
-
     }
 
     public void gameLoop() {
@@ -155,6 +157,7 @@ public class GameApp implements Runnable {
     protected void cleanup() {
         render2D.cleanup();
         background.cleanUp();
+        gameMemory.free();
         glfwDestroyWindow(this.displayManager.getWindow());
         glfwTerminate();
     }

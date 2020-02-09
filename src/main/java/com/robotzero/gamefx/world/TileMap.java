@@ -4,6 +4,7 @@ import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Player;
 import org.joml.Vector3f;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,8 +23,7 @@ public class TileMap {
     public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
     public static float ScreenCenterX = 0.5f * DisplayManager.WIDTH;
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
-    public static int TilesPerWidth = 17;
-    public static int TilesPerHeight = 9;
+    private final WorldGenerator worldGenerator;
 
     private List<TileChunk> tileChunks = new ArrayList<>();
 
@@ -32,24 +32,26 @@ public class TileMap {
 
     private Map<Vector3f, Float> tilePositions = new HashMap<>();
 
-    public TileMap() {
+    public TileMap(WorldGenerator worldGenerator) {
+        this.worldGenerator = worldGenerator;
         for (int y = 0; y < TileChunkCountY; ++y) {
             for (int x = 0; x < TileChunkCountX; ++x) {
                 tileChunks.add(y * TileChunkCountX + x, new TileChunk());
             }
         }
 
-        for(int ScreenY = 0; ScreenY < 32; ++ScreenY) {
-            for(int ScreenX = 0; ScreenX < 32; ++ScreenX) {
-                for(int TileY = 0; TileY < TilesPerHeight; ++TileY) {
-                    for(int TileX = 0; TileX < TilesPerWidth; ++TileX) {
-                        int AbsTileX = ScreenX * TilesPerWidth + TileX;
-                        int AbsTileY = ScreenY * TilesPerHeight + TileY;
-                        SetTileValue(AbsTileX, AbsTileY, (TileX == TileY) && ((TileY % 2) == 1) ? (byte) 1 : 0);
-                    }
-                }
-            }
-        }
+        this.worldGenerator.renderWorld(this);
+//        for(int ScreenY = 0; ScreenY < 32; ++ScreenY) {
+//            for(int ScreenX = 0; ScreenX < 32; ++ScreenX) {
+//                for(int TileY = 0; TileY < TilesPerHeight; ++TileY) {
+//                    for(int TileX = 0; TileX < TilesPerWidth; ++TileX) {
+//                        int AbsTileX = ScreenX * TilesPerWidth + TileX;
+//                        int AbsTileY = ScreenY * TilesPerHeight + TileY;
+//                        SetTileValue(AbsTileX, AbsTileY, (TileX == TileY) && ((TileY % 2) == 1) ? (byte) 1 : 0);
+//                    }
+//                }
+//            }
+//        }
     }
 
     private void generateTilePositions() {
@@ -65,8 +67,12 @@ public class TileMap {
                 int tileID = GetTileValue(Column, Row);
 
                 float color = 0.5f;
-                if (tileID == 1) {
+                if(tileID == 2) {
                     color = 1.0f;
+                }
+
+                if(tileID > 2) {
+                    color = 0.25f;
                 }
 
                 if((Column == Player.positionc.AbsTileX) &&
@@ -132,7 +138,7 @@ public class TileMap {
         boolean Empty = false;
 
         int TileChunkValue = GetTileValue(CanPos.AbsTileX, CanPos.AbsTileY);
-        Empty = (TileChunkValue == 0);
+        Empty = (TileChunkValue == 1);
 
         return(Empty);
     }
@@ -185,14 +191,21 @@ public class TileMap {
         TileChunkPosition ChunkPos = GetChunkPositionFor(AbsTileX, AbsTileY);
         TileChunk tileChunk = GetTileChunk(ChunkPos.TileChunkX, ChunkPos.TileChunkY);
 
+        if (tileChunk.getTiles() == null) {
+            int tileCount = ChunkDim * ChunkDim;
+            ByteBuffer tiles = GameMemory.allocateTiles(tileCount);
+            for (int tileIndex = 0; tileIndex < tileCount; ++tileIndex) {
+                tiles.put(tileIndex, (byte)1);
+            }
+            tileChunk.setTiles(tiles);
+
+        }
         SetTileValue(tileChunk, ChunkPos.RelTileX, ChunkPos.RelTileY, TileValue);
     }
 
     public void SetTileValue(TileChunk tileChunk, int TestTileX, int TestTileY, byte TileValue)
     {
-        byte TileChunkValue = 0;
-
-        if(tileChunk != null)
+        if(tileChunk != null && tileChunk.getTiles() != null && tileChunk.getTiles().limit() > 0)
         {
             SetTileValueUnchecked(tileChunk, TestTileX, TestTileY, TileValue);
         }

@@ -4,26 +4,17 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.Pointer;
 
-import static org.lwjgl.system.MemoryStack.stackPush;
-
 public class MemoryArena {
-    public static final int OBJECT_SHELL_SIZE   = 8;
-    public static final int OBJREF_SIZE         = 4;
-    public static final int LONG_FIELD_SIZE     = 8;
-    public static final int INT_FIELD_SIZE      = 4;
-    public static final int SHORT_FIELD_SIZE    = 2;
-    public static final int CHAR_FIELD_SIZE     = 2;
-    public static final int BYTE_FIELD_SIZE     = 1;
-    public static final int BOOLEAN_FIELD_SIZE  = 1;
-    public static final int DOUBLE_FIELD_SIZE   = 8;
-    public static final int FLOAT_FIELD_SIZE    = 4;
-
     private int Size;
     private int Used;
     private Pointer Base;
     private MemoryStack arena;
     private PointerBuffer test;
+    private final GameMemory gameMemory;
 
+    public MemoryArena(GameMemory gameMemory) {
+        this.gameMemory = gameMemory;
+    }
 
     public int getSize() {
         return Size;
@@ -45,10 +36,6 @@ public class MemoryArena {
         this.Base = base;
         this.Size = size;
         this.Used = 0;
-        try ( MemoryStack stack = stackPush() ) {
-            this.arena = stack;
-            this.test = stack.mallocPointer(size);
-        } // the stack frame is popped automatically
     }
 
     public int pushSize(int size) {
