@@ -34,7 +34,7 @@ public class Player {
         NewPlayerP.AbsTileX = positionc.AbsTileX;
         NewPlayerP.AbsTileY = positionc.AbsTileY;
         NewPlayerP.OffsetX = NewPlayerP.OffsetX + ddPlayer.x();
-        NewPlayerP.OffsetY = NewPlayerP.OffsetY + ddPlayer.y;
+        NewPlayerP.OffsetY = NewPlayerP.OffsetY + ddPlayer.y();
         NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
         TileMap.TileMapPosition PlayerLeft = new TileMap.TileMapPosition();
