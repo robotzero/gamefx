@@ -28,9 +28,9 @@ public class AssetFactory {
 
     private final float[] vertices3 = new float[] {
             0.0f, 0.0f, 0.0f,
-            0.0f, TileMap.tileHeight, 0.0f,
-            TileMap.tileWidth, TileMap.tileHeight, 0.0f,
-            TileMap.tileWidth, 0.0f, 0.0f
+            0.0f, TileMap.TileSideInPixels, 0.0f,
+            TileMap.TileSideInPixels, TileMap.TileSideInPixels, 0.0f,
+            TileMap.TileSideInPixels, 0.0f, 0.0f
     };
 
     private final float[] tcs1 = new float[] {

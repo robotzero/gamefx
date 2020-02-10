@@ -28,9 +28,6 @@ public class TileMap {
 
     private List<TileChunk> tileChunks = new ArrayList<>();
 
-    public static final int tileWidth = 60;
-    public static final int tileHeight = 60;
-
     private Map<Vector3f, Float> tilePositions = new HashMap<>();
 
     public TileMap(WorldGenerator worldGenerator) {
@@ -65,14 +62,14 @@ public class TileMap {
                     color = 0.25f;
                 }
 
-                if((Column == Camera.position.AbsTileX) &&
-                        (Row == Camera.position.AbsTileY))
+                if((Column == Player.positionc.AbsTileX) &&
+                        (Row == Player.positionc.AbsTileY))
                 {
                     color = 0.0f;
                 }
 
-                float CenX = ScreenCenterX - MetersToPixels * Camera.position.OffsetX + RelColumn * TileSideInPixels;
-                float CenY = ScreenCenterY + MetersToPixels * Camera.position.OffsetY - RelRow * TileSideInPixels;
+                float CenX = ScreenCenterX - MetersToPixels * Camera.position.OffsetX + (RelColumn * TileSideInPixels);
+                float CenY = ScreenCenterY + MetersToPixels * Camera.position.OffsetY - (RelRow * TileSideInPixels);
                 float MinX = CenX - 0.5f * TileSideInPixels;
                 float MinY = CenY - 0.5f * TileSideInPixels;
                 float MaxX = CenX + 0.5f * TileSideInPixels;
@@ -123,7 +120,9 @@ public class TileMap {
         boolean Empty;
 
         int TileChunkValue = GetTileValue(CanPos.AbsTileX, CanPos.AbsTileY);
-        Empty = (TileChunkValue == 1);
+        Empty = ((TileChunkValue == 1) ||
+                (TileChunkValue == 3) ||
+                (TileChunkValue == 4));
 
         return(Empty);
     }
