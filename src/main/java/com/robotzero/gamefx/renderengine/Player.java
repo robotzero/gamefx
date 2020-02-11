@@ -10,6 +10,7 @@ public class Player {
     public static final float PlayerHeight = 1.4f;
     public static final float PlayerWidth = 0.75f * PlayerHeight;
     public static TileMap.TileMapPosition positionc = new TileMap.TileMapPosition();
+    public static Vector2f dPlayerP = new Vector2f(0.0f, 0.0f);
 
     public Player(TileMap tileMap) {
         this.tileMap = tileMap;
@@ -26,16 +27,12 @@ public class Player {
     }
 
     public void movePosition(Vector2f ddPlayer, float interval, float speed) {
-        ddPlayer = ddPlayer.mul(speed).mul(interval);
-        if (ddPlayer.x != 0.0f && ddPlayer.y != 0.0f) {
-            ddPlayer = ddPlayer.mul(0.707106781187f);
-        }
-
         TileMap.TileMapPosition NewPlayerP = new TileMap.TileMapPosition();
         NewPlayerP.Offset = positionc.Offset;
         NewPlayerP.AbsTileX = positionc.AbsTileX;
         NewPlayerP.AbsTileY = positionc.AbsTileY;
-        NewPlayerP.Offset = NewPlayerP.Offset.add(ddPlayer);
+        NewPlayerP.Offset = ddPlayer.mul(0.5f).mul((float) Math.sqrt(interval)).add(dPlayerP.mul(positionc.Offset.mul(interval)));
+        dPlayerP = ddPlayer.mul(interval).add(dPlayerP);
         NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
         TileMap.TileMapPosition PlayerLeft = new TileMap.TileMapPosition();

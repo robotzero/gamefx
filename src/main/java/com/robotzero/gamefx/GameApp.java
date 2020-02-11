@@ -40,7 +40,7 @@ public class GameApp implements Runnable {
     private Mesh bird;
     private Mesh quad;
     private final Player player;
-    private final Vector2f playerInc;
+    private Vector2f ddPlayer;
     private final GameMemory gameMemory;
     private float playerSpeed;
 
@@ -52,7 +52,7 @@ public class GameApp implements Runnable {
         this.assetFactory = assetFactory;
         this.player = player;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
-        this.playerInc = new Vector2f(0.0f, 0.0f);
+        this.ddPlayer = new Vector2f(0.0f, 0.0f);
         this.gameMemory = g;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
@@ -119,30 +119,30 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
-        playerSpeed = 2f;
+        playerSpeed = 10f;
         cameraInc.set(0f, 0f, 0f);
-        playerInc.set(0f, 0f);
+        ddPlayer.set(0f, 0f);
         int heroFacingDirection = 0;
         if (displayManager.isKeyPressed(GLFW_KEY_W)) {
             sceneChanged = true;
             cameraInc.y = -1;
-            playerInc.y = 1;
+            ddPlayer.y = 1;
             heroFacingDirection = 1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_S)) {
             sceneChanged = true;
             cameraInc.y = 1;
-            playerInc.y = -1;
+            ddPlayer.y = -1;
             heroFacingDirection = 2;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_A)) {
             sceneChanged = true;
             cameraInc.x = -1;
-            playerInc.x = -1;
+            ddPlayer.x = -1;
             heroFacingDirection = 3;
         } else if (displayManager.isKeyPressed(GLFW_KEY_D)) {
             sceneChanged = true;
             cameraInc.x = 1;
-            playerInc.x = 1;
+            ddPlayer.x = 1;
             heroFacingDirection = 4;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_Z)) {
@@ -153,9 +153,17 @@ public class GameApp implements Runnable {
             cameraInc.z = 1;
         }
 
-        if (displayManager.isKeyPressed(GLFW_KEY_SPACE)) {
-            playerSpeed = 10f;
+        if((ddPlayer.x != 0.0f) && (ddPlayer.y != 0.0f))
+        {
+            ddPlayer = ddPlayer.mul(0.707106781187f);
         }
+
+        if (displayManager.isKeyPressed(GLFW_KEY_SPACE)) {
+            playerSpeed = 50f;
+        }
+
+        ddPlayer = ddPlayer.mul(playerSpeed);
+        ddPlayer = ddPlayer.add(Player.dPlayerP.mul(-1.5f));
     }
 
     private void sync() {
@@ -179,7 +187,7 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        player.movePosition(playerInc, interval, playerSpeed);
+        player.movePosition(ddPlayer, interval, playerSpeed);
         camera.movePosition(Player.positionc, Camera.position);
     }
 }
