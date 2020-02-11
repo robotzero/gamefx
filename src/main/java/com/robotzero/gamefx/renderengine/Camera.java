@@ -24,16 +24,16 @@ public class Camera {
 
     public void movePosition(TileMap.TileMapPosition playerPosition, TileMap.TileMapPosition cameraPosition) {
         TileMap.TileMapDifference diff = tileMap.subtract(playerPosition, cameraPosition);
-        if(diff.dX > (9.0f * TileMap.TileSideInMeters)) {
+        if(diff.dXY.x > (9.0f * TileMap.TileSideInMeters)) {
             position.AbsTileX += 17;
         }
-        if(diff.dX < -(9.0f * TileMap.TileSideInMeters)) {
+        if(diff.dXY.x < -(9.0f * TileMap.TileSideInMeters)) {
             position.AbsTileX -= 17;
         }
-        if(diff.dY > (5.0f * TileMap.TileSideInMeters)) {
+        if(diff.dXY.y > (5.0f * TileMap.TileSideInMeters)) {
             position.AbsTileY += 9;
         }
-        if(diff.dY < -(5.0f * TileMap.TileSideInMeters)) {
+        if(diff.dXY.y < -(5.0f * TileMap.TileSideInMeters)) {
             position.AbsTileY -= 9;
         }
 //        position = position.add(offsetX * CAMERA_POS_STEP, offsetY * CAMERA_POS_STEP, 0);

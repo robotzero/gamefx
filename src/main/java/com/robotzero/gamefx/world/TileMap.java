@@ -3,6 +3,7 @@ package com.robotzero.gamefx.world;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Player;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.nio.ByteBuffer;
@@ -68,14 +69,12 @@ public class TileMap {
                     color = 0.0f;
                 }
 
-                float CenX = ScreenCenterX - MetersToPixels * Camera.position.OffsetX + (RelColumn * TileSideInPixels);
-                float CenY = ScreenCenterY + MetersToPixels * Camera.position.OffsetY - (RelRow * TileSideInPixels);
-                float MinX = CenX - 0.5f * TileSideInPixels;
-                float MinY = CenY - 0.5f * TileSideInPixels;
-                float MaxX = CenX + 0.5f * TileSideInPixels;
-                float MaxY = CenY + 0.5f * TileSideInPixels;
+                Vector2f Cen =  new Vector2f(ScreenCenterX - MetersToPixels * Camera.position.Offset.x() + (RelColumn * TileSideInPixels),
+                    ScreenCenterY + MetersToPixels * Camera.position.Offset.y() - (RelRow * TileSideInPixels));
+                Vector2f Min = Cen.sub(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
+                Vector2f Max = Cen.add(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
 
-                tilePositions.put(new Vector3f(MinX, MinY, 0), color);
+                tilePositions.put(new Vector3f(Min.x, Min.y, 0), color);
             }
         }
     }
@@ -129,12 +128,12 @@ public class TileMap {
 
     TileMapPosition RecanonicalizeCoord(TileMapPosition Pos)
     {
-        int OffsetX = (int) Math.floor(Pos.OffsetX / TileSideInMeters);
-        int OffsetY = (int) Math.floor(Pos.OffsetY / TileSideInMeters);
+        int OffsetX = (int) Math.floor(Pos.Offset.x() / TileSideInMeters);
+        int OffsetY = (int) Math.floor(Pos.Offset.y() / TileSideInMeters);
         Pos.AbsTileX = Pos.AbsTileX + OffsetX;
         Pos.AbsTileY = Pos.AbsTileY + OffsetY;
-        Pos.OffsetX = Pos.OffsetX -  OffsetX * TileSideInMeters;
-        Pos.OffsetY = Pos.OffsetY -  OffsetY * TileSideInMeters;
+        Pos.Offset.x = Pos.Offset.x() -  OffsetX * TileSideInMeters;
+        Pos.Offset.y = Pos.Offset.y() -  OffsetY * TileSideInMeters;
 
         return Pos;
     }
@@ -198,12 +197,8 @@ public class TileMap {
     public TileMapDifference subtract(TileMapPosition A, TileMapPosition B)
     {
         TileMapDifference Result = new TileMapDifference();
-
-        float dTileX = (float) A.AbsTileX - (float) B.AbsTileX;
-        float dTileY = (float) A.AbsTileY - (float) B.AbsTileY;
-
-        Result.dX = TileMap.TileSideInMeters * dTileX + (A.OffsetX - B.OffsetX);
-        Result.dY = TileMap.TileSideInMeters * dTileY + (A.OffsetY - B.OffsetY);
+        Vector2f dTileXY = new Vector2f((float) A.AbsTileX - (float) B.AbsTileX, (float) A.AbsTileY - (float) B.AbsTileY);
+        Result.dXY = dTileXY.mul(TileMap.TileSideInMeters).add(A.Offset.sub(B.Offset));
 
         return(Result);
     }
@@ -211,8 +206,7 @@ public class TileMap {
 
 
     public static class TileMapPosition {
-        public float OffsetX = 5.0f;
-        public float OffsetY = 5.0f;
+        public Vector2f Offset = new Vector2f(5.0f, 5.0f);
 
         public int AbsTileX = 1;
         public int AbsTileY = 3;
@@ -226,8 +220,7 @@ public class TileMap {
     }
 
     public static class TileMapDifference {
-        public float dX;
-        public float dY;
+        public Vector2f dXY;
     }
 }
 

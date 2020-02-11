@@ -18,8 +18,8 @@ public class Player {
     public Matrix4f getModelMatrix() {
         final Matrix4f v = new Matrix4f();
         TileMap.TileMapDifference diff = tileMap.subtract(positionc, Camera.position);
-        float PlayerGroundPointX = TileMap.ScreenCenterX + TileMap.MetersToPixels * diff.dX;
-        float PlayerGroundPointY = TileMap.ScreenCenterY - TileMap.MetersToPixels * diff.dY;
+        float PlayerGroundPointX = TileMap.ScreenCenterX + TileMap.MetersToPixels * diff.dXY.x();
+        float PlayerGroundPointY = TileMap.ScreenCenterY - TileMap.MetersToPixels * diff.dXY.y();
         float PlayerLeft = PlayerGroundPointX - 0.5f * TileMap.MetersToPixels * PlayerWidth;
         float PlayerTop = PlayerGroundPointY - TileMap.MetersToPixels * PlayerHeight;
         return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
@@ -27,30 +27,29 @@ public class Player {
 
     public void movePosition(Vector2f ddPlayer, float interval, float speed) {
         ddPlayer = ddPlayer.mul(speed).mul(interval);
+        if (ddPlayer.x != 0.0f && ddPlayer.y != 0.0f) {
+            ddPlayer = ddPlayer.mul(0.707106781187f);
+        }
 
         TileMap.TileMapPosition NewPlayerP = new TileMap.TileMapPosition();
-        NewPlayerP.OffsetX = positionc.OffsetX;
-        NewPlayerP.OffsetY = positionc.OffsetY;
+        NewPlayerP.Offset = positionc.Offset;
         NewPlayerP.AbsTileX = positionc.AbsTileX;
         NewPlayerP.AbsTileY = positionc.AbsTileY;
-        NewPlayerP.OffsetX = NewPlayerP.OffsetX + ddPlayer.x();
-        NewPlayerP.OffsetY = NewPlayerP.OffsetY + ddPlayer.y();
+        NewPlayerP.Offset = NewPlayerP.Offset.add(ddPlayer);
         NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
         TileMap.TileMapPosition PlayerLeft = new TileMap.TileMapPosition();
-        PlayerLeft.OffsetX = NewPlayerP.OffsetX;
-        PlayerLeft.OffsetY = NewPlayerP.OffsetY;
+        PlayerLeft.Offset = NewPlayerP.Offset;
         PlayerLeft.AbsTileX = NewPlayerP.AbsTileX;
         PlayerLeft.AbsTileY = NewPlayerP.AbsTileY;
-        PlayerLeft.OffsetX -= 0.5f*PlayerWidth;
+        PlayerLeft.Offset.x -= 0.5f*PlayerWidth;
         PlayerLeft = tileMap.RecanonicalizePosition(PlayerLeft);
 
         TileMap.TileMapPosition PlayerRight = new TileMap.TileMapPosition();
-        PlayerRight.OffsetX = NewPlayerP.OffsetX;
-        PlayerRight.OffsetY = NewPlayerP.OffsetY;
+        PlayerRight.Offset = NewPlayerP.Offset;
         PlayerRight.AbsTileX = NewPlayerP.AbsTileX;
         PlayerRight.AbsTileY = NewPlayerP.AbsTileY;
-        PlayerRight.OffsetX += 0.5f*PlayerWidth;
+        PlayerRight.Offset.x += 0.5f*PlayerWidth;
         PlayerRight = tileMap.RecanonicalizePosition(PlayerRight);
 
 
@@ -61,8 +60,7 @@ public class Player {
             positionc = new TileMap.TileMapPosition();
             positionc.AbsTileX = NewPlayerP.AbsTileX;
             positionc.AbsTileY = NewPlayerP.AbsTileY;
-            positionc.OffsetX = NewPlayerP.OffsetX;
-            positionc.OffsetY = NewPlayerP.OffsetY;
+            positionc.Offset = NewPlayerP.Offset;
         }
     }
 }

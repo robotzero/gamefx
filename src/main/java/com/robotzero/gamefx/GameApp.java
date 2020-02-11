@@ -54,8 +54,8 @@ public class GameApp implements Runnable {
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         this.playerInc = new Vector2f(0.0f, 0.0f);
         this.gameMemory = g;
-        Camera.position.OffsetX = 0;
-        Camera.position.OffsetY = 0;
+        Camera.position.Offset.x = 0;
+        Camera.position.Offset.y = 0;
         Camera.position.AbsTileX = 17/2;
         Camera.position.AbsTileY = 9/2;
     }
