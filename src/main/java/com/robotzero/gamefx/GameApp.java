@@ -155,9 +155,9 @@ public class GameApp implements Runnable {
             cameraInc.z = 1;
         }
 
-        if((ddPlayer.x != 0.0f) && (ddPlayer.y != 0.0f))
-        {
-            ddPlayer = ddPlayer.mul(0.707106781187f);
+        float ddPLength = ddPlayer.lengthSquared();
+        if (ddPLength > 1.0f) {
+            ddPlayer = new Vector2f(ddPlayer.x(), ddPlayer.y()).mul((float) (1.0f/ Math.sqrt(ddPLength)));
         }
 
         if (displayManager.isKeyPressed(GLFW_KEY_SPACE)) {

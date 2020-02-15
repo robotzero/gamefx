@@ -1,7 +1,6 @@
 package com.robotzero.gamefx.renderengine;
 
 import com.robotzero.gamefx.world.TileMap;
-import imgui.Col;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -28,26 +27,17 @@ public class Player {
     }
 
     public void movePosition(Vector2f ddPlayer, float interval) {
-        TileMap.TileMapPosition NewPlayerP = new TileMap.TileMapPosition();
-        NewPlayerP.Offset = positionc.Offset;
-        NewPlayerP.AbsTileX = positionc.AbsTileX;
-        NewPlayerP.AbsTileY = positionc.AbsTileY;
+        TileMap.TileMapPosition NewPlayerP = new TileMap.TileMapPosition(positionc);
         Vector2f playerDelta = new Vector2f(ddPlayer.x(), ddPlayer.y()).mul(0.5f).mul(interval * interval).add(new Vector2f(dPlayerP.x(), dPlayerP.y()).mul(interval));
         NewPlayerP.Offset = new Vector2f(NewPlayerP.Offset.x(), NewPlayerP.Offset.y()).add(playerDelta);
         dPlayerP = new Vector2f(ddPlayer.x(), ddPlayer.y()).mul(interval).add(dPlayerP);
         NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
-        TileMap.TileMapPosition PlayerLeft = new TileMap.TileMapPosition();
-        PlayerLeft.Offset = NewPlayerP.Offset;
-        PlayerLeft.AbsTileX = NewPlayerP.AbsTileX;
-        PlayerLeft.AbsTileY = NewPlayerP.AbsTileY;
+        TileMap.TileMapPosition PlayerLeft = new TileMap.TileMapPosition(NewPlayerP);
         PlayerLeft.Offset.x -= 0.5f*PlayerWidth;
         PlayerLeft = tileMap.RecanonicalizePosition(PlayerLeft);
 
-        TileMap.TileMapPosition PlayerRight = new TileMap.TileMapPosition();
-        PlayerRight.Offset = NewPlayerP.Offset;
-        PlayerRight.AbsTileX = NewPlayerP.AbsTileX;
-        PlayerRight.AbsTileY = NewPlayerP.AbsTileY;
+        TileMap.TileMapPosition PlayerRight = new TileMap.TileMapPosition(NewPlayerP);
         PlayerRight.Offset.x += 0.5f*PlayerWidth;
         PlayerRight = tileMap.RecanonicalizePosition(PlayerRight);
 
