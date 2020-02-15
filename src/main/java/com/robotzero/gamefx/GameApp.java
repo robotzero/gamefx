@@ -8,6 +8,7 @@ import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
+import com.robotzero.gamefx.world.TileMap;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -119,6 +120,7 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
+        TileMap.TileMapPosition OldPlayerP = new TileMap.TileMapPosition(Player.positionc);
         playerSpeed = 10f;
         cameraInc.set(0f, 0f, 0f);
         ddPlayer.set(0f, 0f);

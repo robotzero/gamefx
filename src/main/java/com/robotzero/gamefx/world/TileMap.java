@@ -114,16 +114,33 @@ public class TileMap {
         return(TileChunkValue);
     }
 
-    public boolean IsWorldPointEmpty(TileMapPosition CanPos)
+    public boolean IsTileValueEmpty(int TileValue)
+    {
+        boolean Empty;
+
+        Empty = ((TileValue == 1) ||
+                (TileValue == 3) ||
+                (TileValue == 4));
+
+        return(Empty);
+    }
+
+    public boolean IsTileMapPointEmpty(TileMapPosition CanPos)
     {
         boolean Empty;
 
         int TileChunkValue = GetTileValue(CanPos.AbsTileX, CanPos.AbsTileY);
-        Empty = ((TileChunkValue == 1) ||
-                (TileChunkValue == 3) ||
-                (TileChunkValue == 4));
+        return IsTileValueEmpty(TileChunkValue);
+    }
 
-        return(Empty);
+    TileMapPosition CenteredTilePoint(int AbsTileX, int AbsTileY)
+    {
+        TileMapPosition Result = new TileMapPosition();
+
+        Result.AbsTileX = AbsTileX;
+        Result.AbsTileY = AbsTileY;
+
+        return(Result);
     }
 
     TileMapPosition RecanonicalizeCoord(TileMapPosition Pos)
@@ -206,6 +223,12 @@ public class TileMap {
 
 
     public static class TileMapPosition {
+        public TileMapPosition() {}
+        public TileMapPosition(TileMapPosition tileMapPosition) {
+            this.Offset = tileMapPosition.Offset;
+            this.AbsTileX = tileMapPosition.AbsTileX;
+            this.AbsTileY = tileMapPosition.AbsTileY;
+        }
         public Vector2f Offset = new Vector2f(5.0f, 5.0f);
 
         public int AbsTileX = 1;

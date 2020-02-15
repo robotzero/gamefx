@@ -32,7 +32,8 @@ public class Player {
         NewPlayerP.Offset = positionc.Offset;
         NewPlayerP.AbsTileX = positionc.AbsTileX;
         NewPlayerP.AbsTileY = positionc.AbsTileY;
-        NewPlayerP.Offset = (new Vector2f(ddPlayer.x(), ddPlayer.y()).mul(0.5f).mul(interval * interval)).add(new Vector2f(dPlayerP.x(), dPlayerP.y()).mul(interval)).add(NewPlayerP.Offset);
+        Vector2f playerDelta = new Vector2f(ddPlayer.x(), ddPlayer.y()).mul(0.5f).mul(interval * interval).add(new Vector2f(dPlayerP.x(), dPlayerP.y()).mul(interval));
+        NewPlayerP.Offset = new Vector2f(NewPlayerP.Offset.x(), NewPlayerP.Offset.y()).add(playerDelta);
         dPlayerP = new Vector2f(ddPlayer.x(), ddPlayer.y()).mul(interval).add(dPlayerP);
         NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
@@ -52,17 +53,17 @@ public class Player {
 
         boolean Collided = false;
         TileMap.TileMapPosition colP = new TileMap.TileMapPosition();
-        if (!tileMap.IsWorldPointEmpty(NewPlayerP)) {
+        if (!tileMap.IsTileMapPointEmpty(NewPlayerP)) {
             colP = NewPlayerP;
             Collided = true;
         }
 
-        if (!tileMap.IsWorldPointEmpty(PlayerLeft)) {
+        if (!tileMap.IsTileMapPointEmpty(PlayerLeft)) {
             colP = PlayerLeft;
             Collided = true;
         }
 
-        if (!tileMap.IsWorldPointEmpty(PlayerRight)) {
+        if (!tileMap.IsTileMapPointEmpty(PlayerRight)) {
             colP = PlayerRight;
             Collided = true;
         }
