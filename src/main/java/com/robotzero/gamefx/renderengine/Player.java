@@ -26,13 +26,13 @@ public class Player {
         return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
     }
 
-    public void movePosition(Vector2f ddPlayer, float interval, float speed) {
+    public void movePosition(Vector2f ddPlayer, float interval) {
         TileMap.TileMapPosition NewPlayerP = new TileMap.TileMapPosition();
         NewPlayerP.Offset = positionc.Offset;
         NewPlayerP.AbsTileX = positionc.AbsTileX;
         NewPlayerP.AbsTileY = positionc.AbsTileY;
-        NewPlayerP.Offset = ddPlayer.mul(0.5f).mul((float) Math.sqrt(interval)).add(dPlayerP.mul(positionc.Offset.mul(interval)));
-        dPlayerP = ddPlayer.mul(interval).add(dPlayerP);
+        NewPlayerP.Offset = (new Vector2f(ddPlayer.x(), ddPlayer.y()).mul(0.5f).mul(interval * interval)).add(new Vector2f(dPlayerP.x(), dPlayerP.y()).mul(interval)).add(NewPlayerP.Offset);
+        dPlayerP = new Vector2f(ddPlayer.x(), ddPlayer.y()).mul(interval).add(dPlayerP);
         NewPlayerP = tileMap.RecanonicalizePosition(NewPlayerP);
 
         TileMap.TileMapPosition PlayerLeft = new TileMap.TileMapPosition();

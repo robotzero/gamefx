@@ -163,7 +163,7 @@ public class GameApp implements Runnable {
         }
 
         ddPlayer = ddPlayer.mul(playerSpeed);
-        ddPlayer = ddPlayer.add(Player.dPlayerP.mul(-1.5f));
+        ddPlayer = ddPlayer.add(new Vector2f(Player.dPlayerP.x(), Player.dPlayerP.y()).mul(-1.5f));
     }
 
     private void sync() {
@@ -187,7 +187,7 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        player.movePosition(ddPlayer, interval, playerSpeed);
+        player.movePosition(ddPlayer, interval);
         camera.movePosition(Player.positionc, Camera.position);
     }
 }
