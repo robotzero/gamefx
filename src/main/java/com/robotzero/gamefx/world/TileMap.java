@@ -71,7 +71,7 @@ public class TileMap {
 
                 Vector2f Cen =  new Vector2f(ScreenCenterX - MetersToPixels * Camera.position.Offset.x() + (RelColumn * TileSideInPixels),
                     ScreenCenterY + MetersToPixels * Camera.position.Offset.y() - (RelRow * TileSideInPixels));
-                Vector2f Min = Cen.sub(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
+                Vector2f Min = Cen.sub(0.9f * 0.5f * TileSideInPixels, 0.9f * 0.5f * TileSideInPixels);
                 Vector2f Max = Cen.add(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
 
                 tilePositions.put(new Vector3f(Min.x, Min.y, 0), color);
@@ -133,7 +133,7 @@ public class TileMap {
         return IsTileValueEmpty(TileChunkValue);
     }
 
-    TileMapPosition CenteredTilePoint(int AbsTileX, int AbsTileY)
+    public TileMapPosition CenteredTilePoint(int AbsTileX, int AbsTileY)
     {
         TileMapPosition Result = new TileMapPosition();
 
@@ -172,11 +172,18 @@ public class TileMap {
         return(Result);
     }
 
-    int GetTileValue(int AbsTileX, int AbsTileY)
+    public int GetTileValue(int AbsTileX, int AbsTileY)
     {
         TileChunkPosition ChunkPos = GetChunkPositionFor(AbsTileX, AbsTileY);
         TileChunk tileChunk = GetTileChunk(ChunkPos.TileChunkX, ChunkPos.TileChunkY);
         int TileChunkValue = GetTileValue(tileChunk, ChunkPos.RelTileX, ChunkPos.RelTileY);
+
+        return(TileChunkValue);
+    }
+
+    public int GetTileValue(TileMapPosition Pos)
+    {
+        int TileChunkValue = GetTileValue(Pos.AbsTileX, Pos.AbsTileY);
 
         return(TileChunkValue);
     }
@@ -220,7 +227,37 @@ public class TileMap {
         return(Result);
     }
 
+    public float TestWall(float WallX, float RelX, float RelY, float PlayerDeltaX, float PlayerDeltaY,
+             float tMin, float MinY, float MaxY)
+    {
+        float tEpsilon = 0.0001f;
+        if(PlayerDeltaX != 0.0f)
+        {
+            float tResult = (WallX - RelX) / PlayerDeltaX;
+            float Y = RelY + tResult * PlayerDeltaY;
+            if((tResult >= 0.0f) && (tMin > tResult)) {
+                if((Y >= MinY) && (Y <= MaxY)) {
+                    tMin = Math.max(0.0f, tResult - tEpsilon);
+                }
+            }
+        }
 
+        return tMin;
+    }
+
+    public int SignOf(int Value)
+    {
+        int Result = (Value >= 0) ? 1 : -1;
+        return(Result);
+    }
+
+    public TileMapPosition Offset(TileMapPosition P, Vector2f Offset)
+    {
+        P.Offset = P.Offset.add(Offset);
+        P = RecanonicalizePosition(P);
+
+        return(P);
+    }
 
     public static class TileMapPosition {
         public TileMapPosition() {}
@@ -229,7 +266,7 @@ public class TileMap {
             this.AbsTileX = tileMapPosition.AbsTileX;
             this.AbsTileY = tileMapPosition.AbsTileY;
         }
-        public Vector2f Offset = new Vector2f(5.0f, 5.0f);
+        public Vector2f Offset = new Vector2f(0.0f, 0.0f);
 
         public int AbsTileX = 1;
         public int AbsTileY = 3;

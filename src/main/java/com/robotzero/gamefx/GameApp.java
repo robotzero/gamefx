@@ -120,7 +120,6 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
-        TileMap.TileMapPosition OldPlayerP = new TileMap.TileMapPosition(Player.positionc);
         playerSpeed = 10f;
         cameraInc.set(0f, 0f, 0f);
         ddPlayer.set(0f, 0f);
@@ -165,7 +164,7 @@ public class GameApp implements Runnable {
         }
 
         ddPlayer = ddPlayer.mul(playerSpeed);
-        ddPlayer = ddPlayer.add(new Vector2f(Player.dPlayerP.x(), Player.dPlayerP.y()).mul(-1.5f));
+        ddPlayer = ddPlayer.add(new Vector2f(Player.dPlayerP.x(), Player.dPlayerP.y()).mul(-8.0f));
     }
 
     private void sync() {
