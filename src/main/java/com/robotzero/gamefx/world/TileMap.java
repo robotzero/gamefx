@@ -227,22 +227,25 @@ public class TileMap {
         return(Result);
     }
 
-    public float TestWall(float WallX, float RelX, float RelY, float PlayerDeltaX, float PlayerDeltaY,
-             float tMin, float MinY, float MaxY)
+    public float[] TestWall(float WallX, float RelX, float RelY, float PlayerDeltaX, float PlayerDeltaY,
+                            float[] tMin, float MinY, float MaxY)
     {
+        float Hit = 0;
+        float tMinTemp = tMin[0];
         float tEpsilon = 0.0001f;
         if(PlayerDeltaX != 0.0f)
         {
             float tResult = (WallX - RelX) / PlayerDeltaX;
             float Y = RelY + tResult * PlayerDeltaY;
-            if((tResult >= 0.0f) && (tMin > tResult)) {
+            if((tResult >= 0.0f) && (tMinTemp > tResult)) {
                 if((Y >= MinY) && (Y <= MaxY)) {
-                    tMin = Math.max(0.0f, tResult - tEpsilon);
+                    tMinTemp = Math.max(0.0f, tResult - tEpsilon);
+                    Hit = 1;
                 }
             }
         }
 
-        return tMin;
+        return new float[]{tMinTemp, Hit};
     }
 
     public int SignOf(int Value)
