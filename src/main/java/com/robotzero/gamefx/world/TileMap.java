@@ -232,7 +232,7 @@ public class TileMap {
     {
         float Hit = 0;
         float tMinTemp = tMin[0];
-        float tEpsilon = 0.0001f;
+        float tEpsilon = 0.001f;
         if(PlayerDeltaX != 0.0f)
         {
             float tResult = (WallX - RelX) / PlayerDeltaX;
@@ -246,6 +246,16 @@ public class TileMap {
         }
 
         return new float[]{tMinTemp, Hit};
+    }
+
+    public TileMapPosition MapIntoTileSpace(TileMapPosition BasePos, Vector2f Offset)
+    {
+        TileMapPosition Result = BasePos;
+
+        Result.Offset = new Vector2f(Result.Offset).add(Offset);
+        RecanonicalizeCoord(Result);
+
+        return(Result);
     }
 
     public int SignOf(int Value)

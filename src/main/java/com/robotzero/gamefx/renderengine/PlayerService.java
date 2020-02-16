@@ -8,14 +8,14 @@ import org.joml.Vector3f;
 
 public class PlayerService {
     private final TileMap tileMap;
+    private final EntityService entityService;
     private final GameMemory gameMemory;
     public static final float PlayerHeight = 0.5f;
     public static final float PlayerWidth = 1.0f;
-//    public static TileMap.TileMapPosition positionc = new TileMap.TileMapPosition();
-//    public static Vector2f dPlayerP = new Vector2f(0.0f, 0.0f);
 
-    public PlayerService(TileMap tileMap, GameMemory gameMemory) {
+    public PlayerService(TileMap tileMap, EntityService entityService, GameMemory gameMemory) {
         this.tileMap = tileMap;
+        this.entityService = entityService;
         this.gameMemory = gameMemory;
     }
 
@@ -25,8 +25,8 @@ public class PlayerService {
                 Entity.HighEntity highEntity = gameMemory.HighEntities[EntityIndex];
                 Entity.LowEntity lowEntity = gameMemory.LowEntities[EntityIndex];
                 Entity.DormantEntity dormantEntity = gameMemory.DormantEntities[EntityIndex];
+                highEntity.P = new Vector2f(highEntity.P).add(Camera.EntityOffsetForFrame);
                 final Matrix4f v = new Matrix4f();
-//                TileMap.TileMapDifference diff = tileMap.subtract(positionc, Camera.position);
                 float PlayerGroundPointX = TileMap.ScreenCenterX + TileMap.MetersToPixels * highEntity.P.x();
                 float PlayerGroundPointY = TileMap.ScreenCenterY - TileMap.MetersToPixels * highEntity.P.y();
                 float PlayerLeft = PlayerGroundPointX - 0.5f * TileMap.MetersToPixels * dormantEntity.Width;
@@ -40,7 +40,7 @@ public class PlayerService {
     public void movePlayer(Entity entity, Vector2f ddP, float interval, int playerSpeed) {
         float ddPLength = ddP.lengthSquared();
         if (ddPLength > 1.0f) {
-            ddP = new Vector2f(ddP.x(), ddP.y()).mul((float) (1.0f/ Math.sqrt(ddPLength)));
+            ddP = new Vector2f(ddP.x(), ddP.y()).mul((float) (1.0f / Math.sqrt(ddPLength)));
         }
 
         ddP = ddP.mul(playerSpeed);
@@ -118,50 +118,64 @@ public class PlayerService {
 //        MaxTileX += EntityTileWidth;
 //        MaxTileY += EntityTileHeight;
 //
-//        float tRemaining = 1.0f;
-//        for(int Iteration = 0; (Iteration < 4) && (tRemaining > 0.0f); ++Iteration) {
-//            float[] tMin = {1, 0};
-//            Vector2f WallNormal = new Vector2f(0.0f, 0.0f);
-//
-//            for (int AbsTileY = MinTileY; AbsTileY <= MaxTileY; ++AbsTileY) {
-//                for (int AbsTileX = MinTileX; AbsTileX <= MaxTileX; ++AbsTileX) {
-//                    TileMap.TileMapPosition TestTileP = tileMap.CenteredTilePoint(AbsTileX, AbsTileY);
-//                    int TileValue = tileMap.GetTileValue(TestTileP);
-//                    if (!tileMap.IsTileValueEmpty(TileValue)) {
-//                        float DiameterW = TileMap.TileSideInMeters + PlayerWidth;
-//                        float DiameterH = TileMap.TileSideInMeters + PlayerHeight;
-//                        Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
-//                        Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
-//
-//                        TileMap.TileMapDifference RelOldPlayerP = tileMap.subtract(positionc, TestTileP);
-//                        Vector2f Rel = RelOldPlayerP.dXY;
-//
-//                        if (tileMap.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
-//                                tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
-//                            WallNormal = new Vector2f(-1, 0);
-//                        }
-//
-//                        if (tileMap.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
-//                                tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
-//                            WallNormal = new Vector2f(1, 0);
-//                        }
-//
-//                        if (tileMap.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
-//                                tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
-//                            WallNormal = new Vector2f(0, -1);
-//                        }
-//
-//                        if (tileMap.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
-//                                tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
-//                            WallNormal = new Vector2f(0, 1);
-//                        }
-//                    }
-//                }
-//            }
-//            positionc = tileMap.Offset(OldPlayerP, playerDelta.mul(tMin[0]));
-//            dPlayerP = new Vector2f(dPlayerP.x(), dPlayerP.y()).sub(new Vector2f(WallNormal).mul(new Vector2f(dPlayerP.x(), dPlayerP.y()).dot(WallNormal)));
-//            playerDelta = new Vector2f(playerDelta).sub(new Vector2f(WallNormal).mul(new Vector2f(playerDelta).dot(WallNormal)));
-//            tRemaining -= tMin[0] * tRemaining;
-//        }
+        float tRemaining = 1.0f;
+        for (int Iteration = 0; (Iteration < 4) && (tRemaining > 0.0f); ++Iteration) {
+            float[] tMin = {1, 0};
+            Vector2f WallNormal = new Vector2f(0.0f, 0.0f);
+            int HitEntityIndex = 0;
+            for (int EntityIndex = 0; EntityIndex < gameMemory.entityCount; ++EntityIndex) {
+                Entity TestEntity = entityService.GetEntity(Entity.EntityResidence.High, EntityIndex);
+                if (TestEntity.High != entity.High) {
+                    if (TestEntity.Dormant.Collides) {
+                        float DiameterW = TestEntity.Dormant.Width + entity.Dormant.Width;
+                        float DiameterH = TestEntity.Dormant.Height + entity.Dormant.Height;
+
+                        Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
+                        Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
+
+                        Vector2f Rel = entity.High.P.sub(TestEntity.High.P);
+
+                        if (tileMap.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                                tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
+                            WallNormal = new Vector2f(-1, 0);
+                            HitEntityIndex = EntityIndex;
+                        }
+
+                        if (tileMap.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                                tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
+                            WallNormal = new Vector2f(1, 0);
+                            HitEntityIndex = EntityIndex;
+                        }
+
+                        if (tileMap.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                                tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
+                            WallNormal = new Vector2f(0, -1);
+                            HitEntityIndex = EntityIndex;
+                        }
+
+                        if (tileMap.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                                tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
+                            WallNormal = new Vector2f(0, 1);
+                            HitEntityIndex = EntityIndex;
+                        }
+                    }
+                }
+            }
+
+            entity.High.P = new Vector2f(entity.High.P).add(new Vector2f(playerDelta).mul(tMin[0]));
+            if(HitEntityIndex > 0)
+            {
+                entity.High.dP = new Vector2f(entity.High.dP).sub(new Vector2f(WallNormal).mul(new Vector2f(entity.High.dP).dot(WallNormal)));
+                playerDelta = new Vector2f(playerDelta).sub(new Vector2f(WallNormal).mul(new Vector2f(playerDelta).dot(new Vector2f(WallNormal))));
+                tRemaining -= tMin[0] * tRemaining;
+
+                Entity HitEntity = entityService.GetEntity(Entity.EntityResidence.Dormant, HitEntityIndex);
+            }
+            else
+            {
+                break;
+            }
+        }
+        entity.Dormant.P = tileMap.MapIntoTileSpace(Camera.position, entity.High.P);
     }
 }

@@ -28,8 +28,8 @@ public class Robot {
             Timer timer = new Timer();
             DisplayManager displayManager = new DisplayManager();
             AssetFactory assetFactory = new AssetFactory();
-            EntityService entityService = new EntityService(gameMemory);
-            PlayerService playerService = new PlayerService(tileMap, gameMemory);
+            EntityService entityService = new EntityService(gameMemory, tileMap, camera);
+            PlayerService playerService = new PlayerService(tileMap, entityService, gameMemory);
             Render render = new Render2D(camera, playerService, tileMap);
             GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, playerService, entityService, gameMemory);
             gameApp.run();
