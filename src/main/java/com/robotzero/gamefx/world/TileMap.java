@@ -2,7 +2,7 @@ package com.robotzero.gamefx.world;
 
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
-import com.robotzero.gamefx.renderengine.Player;
+import com.robotzero.gamefx.renderengine.PlayerService;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -63,8 +63,8 @@ public class TileMap {
                     color = 0.25f;
                 }
 
-                if((Column == Player.positionc.AbsTileX) &&
-                        (Row == Player.positionc.AbsTileY))
+                if((Column == Camera.position.AbsTileX) &&
+                        (Row == Camera.position.AbsTileY))
                 {
                     color = 0.0f;
                 }

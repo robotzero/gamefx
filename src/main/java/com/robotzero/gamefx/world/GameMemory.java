@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.world;
 
+import com.robotzero.gamefx.renderengine.Entity;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
@@ -28,9 +29,19 @@ public class GameMemory {
     private ByteBuffer mainStorage;
     private PointerBuffer b;
     private static ByteBuffer tiles;
+    public Entity[] entities;
+    public Entity.EntityResidence[] EntityResidence = new Entity.EntityResidence[256];
+    public Entity.HighEntity[] HighEntities = new Entity.HighEntity[256];
+    public Entity.LowEntity[] LowEntities = new Entity.LowEntity[256];
+    public Entity.DormantEntity[] DormantEntities = new Entity.DormantEntity[256];
+    public int CameraFollowingEntityIndex;
+
+    public int entityCount;
 
     public GameMemory() {
         mainStorage = org.lwjgl.system.MemoryUtil.memAlloc(PermanentStorageSize + TransientStorageSize);
+        entities = new Entity[256];
+        entityCount = 0;
     }
 
     public boolean isInitialized() {

@@ -5,7 +5,6 @@ import com.robotzero.gamefx.renderengine.utils.FileUtils;
 import com.robotzero.gamefx.renderengine.utils.ShaderProgram;
 import com.robotzero.gamefx.world.TileMap;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
@@ -22,9 +21,9 @@ public class Render2D implements Render {
     private ShaderProgram birdShaderProgram;
     private ShaderProgram quadShaderProgram;
     private final Camera camera;
-    private final Player player;
+    private final PlayerService player;
 
-    public Render2D(Camera camera, Player player, TileMap tileMap) {
+    public Render2D(Camera camera, PlayerService player, TileMap tileMap) {
         this.camera = camera;
         this.player = player;
         this.tileMap = tileMap;

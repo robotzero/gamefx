@@ -2,13 +2,14 @@ package com.robotzero.gamefx;
 
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
-import com.robotzero.gamefx.renderengine.Player;
+import com.robotzero.gamefx.renderengine.Entity;
+import com.robotzero.gamefx.renderengine.EntityService;
+import com.robotzero.gamefx.renderengine.PlayerService;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
-import com.robotzero.gamefx.world.TileMap;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -40,21 +41,23 @@ public class GameApp implements Runnable {
     private Mesh background;
     private Mesh bird;
     private Mesh quad;
-    private final Player player;
+    private final PlayerService playerService;
+    private final EntityService entityService;
     private Vector2f ddPlayer;
     private final GameMemory gameMemory;
-    private float playerSpeed;
+    private int playerSpeed;
 
-    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, Player player, GameMemory g) {
+    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, PlayerService playerService, EntityService entityService, GameMemory g) {
         this.displayManager = displayManager;
         this.render2D = render2D;
         this.camera = camera;
         this.timer = timer;
         this.assetFactory = assetFactory;
-        this.player = player;
+        this.playerService = playerService;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         this.ddPlayer = new Vector2f(0.0f, 0.0f);
         this.gameMemory = g;
+        this.entityService = entityService;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
         Camera.position.AbsTileX = 17/2;
@@ -83,6 +86,8 @@ public class GameApp implements Runnable {
         background = assetFactory.getBackgroundMesh();
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
+        int index = entityService.AddEntity();
+        entityService.InitializePlayer(index);
     }
 
     public void gameLoop() {
@@ -120,7 +125,7 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
-        playerSpeed = 10f;
+        playerSpeed = 10;
         cameraInc.set(0f, 0f, 0f);
         ddPlayer.set(0f, 0f);
         int heroFacingDirection = 0;
@@ -154,17 +159,9 @@ public class GameApp implements Runnable {
             cameraInc.z = 1;
         }
 
-        float ddPLength = ddPlayer.lengthSquared();
-        if (ddPLength > 1.0f) {
-            ddPlayer = new Vector2f(ddPlayer.x(), ddPlayer.y()).mul((float) (1.0f/ Math.sqrt(ddPLength)));
-        }
-
         if (displayManager.isKeyPressed(GLFW_KEY_SPACE)) {
-            playerSpeed = 50f;
+            playerSpeed = 50;
         }
-
-        ddPlayer = ddPlayer.mul(playerSpeed);
-        ddPlayer = ddPlayer.add(new Vector2f(Player.dPlayerP.x(), Player.dPlayerP.y()).mul(-8.0f));
     }
 
     private void sync() {
@@ -188,7 +185,11 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        player.movePosition(ddPlayer, interval);
-        camera.movePosition(Player.positionc, Camera.position);
+        Entity entity = entityService.GetEntity(Entity.EntityResidence.High, 0);
+        playerService.movePlayer(entity, ddPlayer, interval, playerSpeed);
+        Entity cameraFollowingEntity = entityService.GetEntity(Entity.EntityResidence.High, 0);
+        if (cameraFollowingEntity.Residence != Entity.EntityResidence.Nonexistent) {
+//        camera.movePosition(PlayerService.positionc, Camera.position);
+        }
     }
 }
