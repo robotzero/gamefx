@@ -44,7 +44,7 @@ public class PlayerService {
         }
 
         ddP = ddP.mul(playerSpeed);
-        ddP = ddP.add(new Vector2f(entity.High.P.x(), entity.High.P.y()).mul(-8.0f));
+        ddP = ddP.add(new Vector2f(entity.High.dP.x(), entity.High.dP.y()).mul(-8.0f));
 
 
         Vector2f OldPlayerP = new Vector2f(entity.High.P);
@@ -133,7 +133,7 @@ public class PlayerService {
                         Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
                         Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
 
-                        Vector2f Rel = entity.High.P.sub(TestEntity.High.P);
+                        Vector2f Rel = new Vector2f(entity.High.P).sub(new Vector2f(TestEntity.High.P));
 
                         if (tileMap.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
                                 tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {

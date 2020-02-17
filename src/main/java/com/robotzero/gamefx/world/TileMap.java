@@ -69,9 +69,10 @@ public class TileMap {
                     color = 0.0f;
                 }
 
+                Vector2f TileSide = new Vector2f(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
                 Vector2f Cen =  new Vector2f(ScreenCenterX - MetersToPixels * Camera.position.Offset.x() + (RelColumn * TileSideInPixels),
                     ScreenCenterY + MetersToPixels * Camera.position.Offset.y() - (RelRow * TileSideInPixels));
-                Vector2f Min = Cen.sub(0.9f * 0.5f * TileSideInPixels, 0.9f * 0.5f * TileSideInPixels);
+                Vector2f Min = Cen.sub(TileSide.mul(0.9f));
                 Vector2f Max = Cen.add(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
 
                 tilePositions.put(new Vector3f(Min.x, Min.y, 0), color);
@@ -222,7 +223,7 @@ public class TileMap {
     {
         TileMapDifference Result = new TileMapDifference();
         Vector2f dTileXY = new Vector2f((float) A.AbsTileX - (float) B.AbsTileX, (float) A.AbsTileY - (float) B.AbsTileY);
-        Result.dXY = dTileXY.mul(TileMap.TileSideInMeters).add(A.Offset.sub(B.Offset));
+        Result.dXY = dTileXY.mul(TileMap.TileSideInMeters).add(new Vector2f(A.Offset).sub(B.Offset));
 
         return(Result);
     }

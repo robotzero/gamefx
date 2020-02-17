@@ -20,7 +20,7 @@ public class EntityService {
         Entity entity = new Entity();
 
         if((Index >= 0) && (Index < gameMemory.entityCount)) {
-            if (gameMemory.EntityResidence[Index].ordinal() < Residence.ordinal()) {
+            if (gameMemory.EntityResidence[Index] != Residence) {
                 ChangeEntityResidence(Index, Residence);
             }
 

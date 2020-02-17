@@ -34,7 +34,7 @@ public class GameMemory {
     public Entity.HighEntity[] HighEntities = new Entity.HighEntity[256];
     public Entity.LowEntity[] LowEntities = new Entity.LowEntity[256];
     public Entity.DormantEntity[] DormantEntities = new Entity.DormantEntity[256];
-    public int CameraFollowingEntityIndex;
+    public int CameraFollowingEntityIndex = 0;
 
     public int entityCount;
 

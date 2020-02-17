@@ -185,11 +185,11 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        Entity entity = entityService.GetEntity(Entity.EntityResidence.High, 0);
+        Entity entity = entityService.GetEntity(Entity.EntityResidence.High, gameMemory.CameraFollowingEntityIndex);
         playerService.movePlayer(entity, ddPlayer, interval, playerSpeed);
-        Entity cameraFollowingEntity = entityService.GetEntity(Entity.EntityResidence.High, 0);
+        Entity cameraFollowingEntity = entityService.GetEntity(Entity.EntityResidence.High, gameMemory.CameraFollowingEntityIndex);
         if (cameraFollowingEntity.Residence != Entity.EntityResidence.Nonexistent) {
-            camera.movePosition(cameraFollowingEntity, Camera.position);
+           camera.movePosition(cameraFollowingEntity, Camera.position);
         }
     }
 }
