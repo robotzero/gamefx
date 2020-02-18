@@ -6,13 +6,9 @@ import org.joml.Vector2f;
 
 public class EntityService {
     private final GameMemory gameMemory;
-    private final TileMap tileMap;
-    private final Camera camera;
 
-    public EntityService(GameMemory gameMemory, TileMap tileMap, Camera camera) {
+    public EntityService(GameMemory gameMemory) {
         this.gameMemory = gameMemory;
-        this.tileMap = tileMap;
-        this.camera = camera;
     }
 
     public Entity GetEntity(Entity.EntityResidence Residence, int Index)
@@ -41,7 +37,7 @@ public class EntityService {
                 Entity.HighEntity EntityHigh = gameMemory.HighEntities[EntityIndex];
                 Entity.DormantEntity EntityDormant = gameMemory.DormantEntities[EntityIndex];
 
-                TileMap.TileMapDifference Diff = tileMap.subtract(EntityDormant.P, Camera.position);
+                TileMap.TileMapDifference Diff = TileMap.subtract(EntityDormant.P, Camera.position);
                 EntityHigh.P = Diff.dXY;
                 EntityHigh.dP = new Vector2f(0f, 0f);
             }
@@ -70,7 +66,31 @@ public class EntityService {
         }
     }
 
-    public int AddEntity()
+    public int AddPlayer()
+    {
+        int EntityIndex = AddEntity(EntityType.HERO);
+        Entity entity = GetEntity(Entity.EntityResidence.Dormant, EntityIndex);
+
+        entity.Dormant.P.AbsTileX = 1;
+        entity.Dormant.P.AbsTileY = 3;
+        entity.Dormant.P.Offset.x = 0;
+        entity.Dormant.P.Offset.y = 0;
+        entity.Dormant.Height = 0.5f; // 1.4f;
+        entity.Dormant.Width = 1.0f;
+        entity.Dormant.Collides = true;
+
+        ChangeEntityResidence(EntityIndex, Entity.EntityResidence.High);
+
+        if(GetEntity(Entity.EntityResidence.Dormant, gameMemory.CameraFollowingEntityIndex).Residence ==
+                Entity.EntityResidence.Nonexistent)
+        {
+            gameMemory.CameraFollowingEntityIndex = EntityIndex;
+        }
+
+        return EntityIndex;
+    }
+
+    public int AddEntity(EntityType entityType)
     {
         int EntityIndex = gameMemory.entityCount++;
 
@@ -78,6 +98,21 @@ public class EntityService {
         gameMemory.LowEntities[EntityIndex] = new Entity.LowEntity();
         gameMemory.DormantEntities[EntityIndex] = new Entity.DormantEntity();
         gameMemory.HighEntities[EntityIndex] = new Entity.HighEntity();
+        gameMemory.DormantEntities[EntityIndex].Type = entityType;
+
+        return(EntityIndex);
+    }
+
+    public int AddWall(int AbsTileX, int AbsTileY)
+    {
+        int EntityIndex = AddEntity(EntityType.WALL);
+        Entity entity = GetEntity(Entity.EntityResidence.Dormant, EntityIndex);
+
+        entity.Dormant.P.AbsTileX = AbsTileX;
+        entity.Dormant.P.AbsTileY = AbsTileY;
+        entity.Dormant.Height = TileMap.TileSideInMeters;
+        entity.Dormant.Width = entity.Dormant.Height;
+        entity.Dormant.Collides = true;
 
         return(EntityIndex);
     }

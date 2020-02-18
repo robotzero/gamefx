@@ -1,11 +1,16 @@
 package com.robotzero.gamefx.world;
 
+import com.robotzero.gamefx.renderengine.EntityService;
 import com.robotzero.gamefx.renderengine.utils.Random;
 
 public class WorldGenerator {
     private final int tilesPerWidth = 17;
     private final int tilesPerHeight = 9;
+    private final EntityService entityService;
 
+    public WorldGenerator(EntityService entityService) {
+        this.entityService = entityService;
+    }
 
     public void renderWorld(TileMap tileMap) {
         int randomNumberIndex = 0;
@@ -19,7 +24,7 @@ public class WorldGenerator {
         boolean doorBottom = false;
 
         for (int screenIndex = 0;
-             screenIndex < 100;
+             screenIndex < 2;
              ++screenIndex) {
 
             int randomChoice;
@@ -58,6 +63,9 @@ public class WorldGenerator {
                     }
 
                     tileMap.SetTileValue(absTileX, absTileY, tileValue);
+                    if (tileValue == 2) {
+                        entityService.AddWall(absTileX, absTileY);
+                    }
                 }
             }
 

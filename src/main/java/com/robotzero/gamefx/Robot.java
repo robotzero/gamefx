@@ -22,13 +22,13 @@ public class Robot {
                 throw new RuntimeException("There was an unhandled exception in thread " + t.getName(), e);
             });
             gameMemory = new GameMemory();
-            WorldGenerator worldGenerator = new WorldGenerator();
-            TileMap tileMap = new TileMap(worldGenerator);
-            Camera camera = new Camera(tileMap);
             Timer timer = new Timer();
             DisplayManager displayManager = new DisplayManager();
             AssetFactory assetFactory = new AssetFactory();
-            EntityService entityService = new EntityService(gameMemory, tileMap, camera);
+            EntityService entityService = new EntityService(gameMemory);
+            WorldGenerator worldGenerator = new WorldGenerator(entityService);
+            TileMap tileMap = new TileMap(worldGenerator);
+            Camera camera = new Camera(tileMap, gameMemory, entityService);
             PlayerService playerService = new PlayerService(tileMap, entityService, gameMemory);
             Render render = new Render2D(camera, playerService, tileMap);
             GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, playerService, entityService, gameMemory);

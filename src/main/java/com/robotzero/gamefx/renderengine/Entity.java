@@ -23,6 +23,7 @@ public class Entity {
         public TileMap.TileMapPosition P = new TileMap.TileMapPosition();
         public float Width, Height;
         boolean Collides;
+        public EntityType Type;
     }
 
     public enum EntityResidence {

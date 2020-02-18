@@ -20,7 +20,7 @@ public class PlayerService {
     }
 
     public Matrix4f getModelMatrix() {
-        for (int EntityIndex = 0; EntityIndex < gameMemory.entityCount; ++EntityIndex) {
+        for (int EntityIndex = 1; EntityIndex < gameMemory.entityCount; ++EntityIndex) {
             if (gameMemory.EntityResidence[EntityIndex] == Entity.EntityResidence.High) {
                 Entity.HighEntity highEntity = gameMemory.HighEntities[EntityIndex];
                 Entity.LowEntity lowEntity = gameMemory.LowEntities[EntityIndex];
@@ -31,7 +31,10 @@ public class PlayerService {
                 float PlayerGroundPointY = TileMap.ScreenCenterY - TileMap.MetersToPixels * highEntity.P.y();
                 float PlayerLeft = PlayerGroundPointX - 0.5f * TileMap.MetersToPixels * dormantEntity.Width;
                 float PlayerTop = PlayerGroundPointY - 0.5f * TileMap.MetersToPixels * dormantEntity.Height;
-                return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
+
+                if (dormantEntity.Type == EntityType.HERO) {
+                    return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
+                }
             }
         }
         return new Matrix4f().identity();
@@ -118,11 +121,11 @@ public class PlayerService {
 //        MaxTileX += EntityTileWidth;
 //        MaxTileY += EntityTileHeight;
 //
-        float tRemaining = 1.0f;
-        for (int Iteration = 0; (Iteration < 4) && (tRemaining > 0.0f); ++Iteration) {
+        for (int Iteration = 0; (Iteration < 4); ++Iteration) {
             float[] tMin = {1, 0};
             Vector2f WallNormal = new Vector2f(0.0f, 0.0f);
             int HitEntityIndex = 0;
+            Vector2f DesiredPosition = new Vector2f(entity.High.P).add(playerDelta);
             for (int EntityIndex = 0; EntityIndex < gameMemory.entityCount; ++EntityIndex) {
                 Entity TestEntity = entityService.GetEntity(Entity.EntityResidence.High, EntityIndex);
                 if (TestEntity.High != entity.High) {
@@ -166,8 +169,8 @@ public class PlayerService {
             if(HitEntityIndex > 0)
             {
                 entity.High.dP = new Vector2f(entity.High.dP).sub(new Vector2f(WallNormal).mul(new Vector2f(entity.High.dP).dot(WallNormal)));
+                playerDelta = new Vector2f(DesiredPosition).sub(new Vector2f(entity.High.P));
                 playerDelta = new Vector2f(playerDelta).sub(new Vector2f(WallNormal).mul(new Vector2f(playerDelta).dot(new Vector2f(WallNormal))));
-                tRemaining -= tMin[0] * tRemaining;
 
                 Entity HitEntity = entityService.GetEntity(Entity.EntityResidence.Dormant, HitEntityIndex);
             }

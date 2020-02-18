@@ -2,7 +2,6 @@ package com.robotzero.gamefx.world;
 
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
-import com.robotzero.gamefx.renderengine.PlayerService;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -219,7 +218,7 @@ public class TileMap {
         }
     }
 
-    public TileMapDifference subtract(TileMapPosition A, TileMapPosition B)
+    public static TileMapDifference subtract(TileMapPosition A, TileMapPosition B)
     {
         TileMapDifference Result = new TileMapDifference();
         Vector2f dTileXY = new Vector2f((float) A.AbsTileX - (float) B.AbsTileX, (float) A.AbsTileY - (float) B.AbsTileY);

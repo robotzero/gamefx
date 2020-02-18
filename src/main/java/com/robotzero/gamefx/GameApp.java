@@ -4,12 +4,14 @@ import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Entity;
 import com.robotzero.gamefx.renderengine.EntityService;
+import com.robotzero.gamefx.renderengine.EntityType;
 import com.robotzero.gamefx.renderengine.PlayerService;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
+import com.robotzero.gamefx.world.TileMap;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -60,8 +62,9 @@ public class GameApp implements Runnable {
         this.entityService = entityService;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
-        Camera.position.AbsTileX = 17/2;
-        Camera.position.AbsTileY = 9/2;
+//        Camera.position.AbsTileX = 17/2;
+//        Camera.position.AbsTileY = 9/2;
+        entityService.AddEntity(EntityType.NULL);
     }
 
     public void run() {
@@ -86,7 +89,11 @@ public class GameApp implements Runnable {
         background = assetFactory.getBackgroundMesh();
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
-        int index = entityService.AddEntity();
+        TileMap.TileMapPosition NewCameraP = new TileMap.TileMapPosition();
+        NewCameraP.AbsTileX = 17 / 2;
+        NewCameraP.AbsTileY = 9 / 2;
+        camera.SetCamera(NewCameraP);
+        int index = entityService.AddPlayer();
         entityService.InitializePlayer(index);
     }
 
