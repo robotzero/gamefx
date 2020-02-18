@@ -189,7 +189,7 @@ public class GameApp implements Runnable {
         playerService.movePlayer(entity, ddPlayer, interval, playerSpeed);
         Entity cameraFollowingEntity = entityService.GetEntity(Entity.EntityResidence.High, gameMemory.CameraFollowingEntityIndex);
         if (cameraFollowingEntity.Residence != Entity.EntityResidence.Nonexistent) {
-           camera.movePosition(cameraFollowingEntity, Camera.position);
+           camera.movePosition(cameraFollowingEntity);
         }
     }
 }

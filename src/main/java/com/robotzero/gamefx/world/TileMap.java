@@ -251,7 +251,7 @@ public class TileMap {
 
     public TileMapPosition MapIntoTileSpace(TileMapPosition BasePos, Vector2f Offset)
     {
-        TileMapPosition Result = BasePos;
+        TileMapPosition Result = new TileMapPosition(BasePos);
 
         Result.Offset = new Vector2f(Result.Offset).add(Offset);
         RecanonicalizeCoord(Result);

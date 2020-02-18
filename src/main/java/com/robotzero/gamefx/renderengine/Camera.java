@@ -24,7 +24,7 @@ public class Camera {
         return p.ortho(0.0f, DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f, -1, 1);
     }
 
-    public void movePosition(Entity entity, TileMap.TileMapPosition cameraPosition) {
+    public void movePosition(Entity entity) {
         TileMap.TileMapPosition OldCameraP = new TileMap.TileMapPosition(position);
 
         if(entity.High.P.x()  > (9.0f * TileMap.TileSideInMeters)) {
