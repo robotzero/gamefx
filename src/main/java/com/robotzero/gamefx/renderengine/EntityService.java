@@ -16,7 +16,7 @@ public class EntityService {
         Entity entity = new Entity();
 
         if((Index >= 0) && (Index < gameMemory.entityCount)) {
-            if (gameMemory.EntityResidence[Index] != Residence) {
+            if (gameMemory.EntityResidence[Index].ordinal() < Residence.ordinal()) {
                 ChangeEntityResidence(Index, Residence);
             }
 
@@ -71,8 +71,8 @@ public class EntityService {
         int EntityIndex = AddEntity(EntityType.HERO);
         Entity entity = GetEntity(Entity.EntityResidence.Dormant, EntityIndex);
 
-        entity.Dormant.P.AbsTileX = 1;
-        entity.Dormant.P.AbsTileY = 3;
+        entity.Dormant.P.AbsTileX = 2;
+        entity.Dormant.P.AbsTileY = 1;
         entity.Dormant.P.Offset.x = 0;
         entity.Dormant.P.Offset.y = 0;
         entity.Dormant.Height = 0.5f; // 1.4f;
@@ -84,9 +84,9 @@ public class EntityService {
         if(GetEntity(Entity.EntityResidence.Dormant, gameMemory.CameraFollowingEntityIndex).Residence ==
                 Entity.EntityResidence.Nonexistent)
         {
-            gameMemory.CameraFollowingEntityIndex = EntityIndex;
+            //gameMemory.CameraFollowingEntityIndex = EntityIndex;
         }
-
+        gameMemory.CameraFollowingEntityIndex = EntityIndex;
         return EntityIndex;
     }
 
@@ -114,6 +114,6 @@ public class EntityService {
         entity.Dormant.Width = entity.Dormant.Height;
         entity.Dormant.Collides = true;
 
-        return(EntityIndex);
+        return EntityIndex;
     }
 }

@@ -126,7 +126,7 @@ public class PlayerService {
             Vector2f WallNormal = new Vector2f(0.0f, 0.0f);
             int HitEntityIndex = 0;
             Vector2f DesiredPosition = new Vector2f(entity.High.P).add(playerDelta);
-            for (int EntityIndex = 0; EntityIndex < gameMemory.entityCount; ++EntityIndex) {
+            for (int EntityIndex = 1; EntityIndex < gameMemory.entityCount; ++EntityIndex) {
                 Entity TestEntity = entityService.GetEntity(Entity.EntityResidence.High, EntityIndex);
                 if (TestEntity.High != entity.High) {
                     if (TestEntity.Dormant.Collides) {

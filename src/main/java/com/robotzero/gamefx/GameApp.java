@@ -48,6 +48,7 @@ public class GameApp implements Runnable {
     private Vector2f ddPlayer;
     private final GameMemory gameMemory;
     private int playerSpeed;
+    private int playerIndex;
 
     public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, PlayerService playerService, EntityService entityService, GameMemory g) {
         this.displayManager = displayManager;
@@ -93,8 +94,7 @@ public class GameApp implements Runnable {
         NewCameraP.AbsTileX = 17 / 2;
         NewCameraP.AbsTileY = 9 / 2;
         camera.SetCamera(NewCameraP);
-        int index = entityService.AddPlayer();
-        entityService.InitializePlayer(index);
+        playerIndex = entityService.AddPlayer();
     }
 
     public void gameLoop() {

@@ -4,7 +4,7 @@ import com.robotzero.gamefx.world.TileMap;
 import org.joml.Vector2f;
 
 public class Entity {
-    public EntityResidence Residence;
+    public EntityResidence Residence = EntityResidence.Nonexistent;
     public LowEntity Low;
     public HighEntity High;
     public DormantEntity Dormant;
