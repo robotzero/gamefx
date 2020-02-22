@@ -37,7 +37,9 @@ public class TileMap {
                 tileChunks.add(y * TileChunkCountX + x, new TileChunk());
             }
         }
+    }
 
+    public void renderWorld() {
         this.worldGenerator.renderWorld(this);
     }
 

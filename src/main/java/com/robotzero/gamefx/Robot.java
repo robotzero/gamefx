@@ -31,7 +31,7 @@ public class Robot {
             Camera camera = new Camera(tileMap, gameMemory, entityService);
             PlayerService playerService = new PlayerService(tileMap, entityService, gameMemory);
             Render render = new Render2D(camera, playerService, tileMap);
-            GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, playerService, entityService, gameMemory);
+            GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, playerService, entityService, gameMemory, tileMap);
             gameApp.run();
         } catch (Throwable t) {
             System.out.println(t.toString());

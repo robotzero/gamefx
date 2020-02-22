@@ -33,10 +33,11 @@ public class GameMemory {
     public Entity.EntityResidence[] EntityResidence = new Entity.EntityResidence[256];
     public Entity.HighEntity[] HighEntities = new Entity.HighEntity[256];
     public Entity.LowEntity[] LowEntities = new Entity.LowEntity[256];
-    public Entity.DormantEntity[] DormantEntities = new Entity.DormantEntity[256];
     public int CameraFollowingEntityIndex = 0;
+    public int LowEntityCount = 0;
+    public int HighEntityCount = 0;
 
-    public int entityCount;
+    public int entityCount = 0;
 
     public GameMemory() {
         mainStorage = org.lwjgl.system.MemoryUtil.memAlloc(PermanentStorageSize + TransientStorageSize);

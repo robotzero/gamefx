@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.renderengine;
 
+import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.TileMap;
 import org.joml.Vector2f;
@@ -11,109 +12,152 @@ public class EntityService {
         this.gameMemory = gameMemory;
     }
 
-    public Entity GetEntity(Entity.EntityResidence Residence, int Index)
-    {
-        Entity entity = new Entity();
-
-        if((Index >= 0) && (Index < gameMemory.entityCount)) {
-            if (gameMemory.EntityResidence[Index].ordinal() < Residence.ordinal()) {
-                ChangeEntityResidence(Index, Residence);
-            }
-
-            entity.Residence = Residence;
-            entity.Dormant = gameMemory.DormantEntities[Index];
-            entity.Low = gameMemory.LowEntities[Index];
-            entity.High = gameMemory.HighEntities[Index];
-        }
-
-        return(entity);
-    }
-
-    void ChangeEntityResidence(int EntityIndex, Entity.EntityResidence Residence) {
-
-        if (Residence == Entity.EntityResidence.High) {
-            if(gameMemory.EntityResidence[EntityIndex] != Entity.EntityResidence.High)
-            {
-                Entity.HighEntity EntityHigh = gameMemory.HighEntities[EntityIndex];
-                Entity.DormantEntity EntityDormant = gameMemory.DormantEntities[EntityIndex];
-
-                TileMap.TileMapDifference Diff = TileMap.subtract(EntityDormant.P, Camera.position);
-                EntityHigh.P = Diff.dXY;
-                EntityHigh.dP = new Vector2f(0f, 0f);
-            }
-        }
-        gameMemory.EntityResidence[EntityIndex] = Residence;
-    }
-
-    public void InitializePlayer(int EntityIndex)
-    {
-        Entity entity = GetEntity(Entity.EntityResidence.Dormant, EntityIndex);
-
-        entity.Dormant.P.AbsTileX = 1;
-        entity.Dormant.P.AbsTileY = 3;
-        entity.Dormant.P.Offset.x = 0;
-        entity.Dormant.P.Offset.y = 0;
-        entity.Dormant.Height = 0.5f; // 1.4f;
-        entity.Dormant.Width = 1.0f;
-        entity.Dormant.Collides = true;
-
-        ChangeEntityResidence(EntityIndex, Entity.EntityResidence.High);
-
-        if(GetEntity(Entity.EntityResidence.Dormant, gameMemory.CameraFollowingEntityIndex).Residence ==
-                Entity.EntityResidence.Nonexistent)
-        {
-            gameMemory.CameraFollowingEntityIndex = EntityIndex;
-        }
-    }
-
     public int AddPlayer()
     {
-        int EntityIndex = AddEntity(EntityType.HERO);
-        Entity entity = GetEntity(Entity.EntityResidence.Dormant, EntityIndex);
+        int EntityIndex = AddLowEntity(EntityType.HERO);
+        Entity.LowEntity entity = GetLowEntity(EntityIndex);
 
-        entity.Dormant.P.AbsTileX = 2;
-        entity.Dormant.P.AbsTileY = 1;
-        entity.Dormant.P.Offset.x = 0;
-        entity.Dormant.P.Offset.y = 0;
-        entity.Dormant.Height = 0.5f; // 1.4f;
-        entity.Dormant.Width = 1.0f;
-        entity.Dormant.Collides = true;
+        entity.P.AbsTileX = 5;
+        entity.P.AbsTileY = 4;
+        entity.P.Offset.x = 0;
+        entity.P.Offset.y = 0;
+        entity.Height = 0.5f; // 1.4f;
+        entity.Width = 1.0f;
+        entity.Collides = true;
 
-        ChangeEntityResidence(EntityIndex, Entity.EntityResidence.High);
-
-        if(GetEntity(Entity.EntityResidence.Dormant, gameMemory.CameraFollowingEntityIndex).Residence ==
-                Entity.EntityResidence.Nonexistent)
-        {
-            //gameMemory.CameraFollowingEntityIndex = EntityIndex;
+        if (gameMemory.CameraFollowingEntityIndex == 0) {
+            gameMemory.CameraFollowingEntityIndex = EntityIndex;
         }
-        gameMemory.CameraFollowingEntityIndex = EntityIndex;
         return EntityIndex;
     }
 
-    public int AddEntity(EntityType entityType)
+    public int AddLowEntity(EntityType Type)
     {
-        int EntityIndex = gameMemory.entityCount++;
+        int EntityIndex = gameMemory.LowEntityCount;
+        gameMemory.LowEntityCount = EntityIndex + 1;
 
-        gameMemory.EntityResidence[EntityIndex] = Entity.EntityResidence.Dormant;
         gameMemory.LowEntities[EntityIndex] = new Entity.LowEntity();
-        gameMemory.DormantEntities[EntityIndex] = new Entity.DormantEntity();
-        gameMemory.HighEntities[EntityIndex] = new Entity.HighEntity();
-        gameMemory.DormantEntities[EntityIndex].Type = entityType;
+        gameMemory.LowEntities[EntityIndex].Type = Type;
 
         return(EntityIndex);
     }
 
     public int AddWall(int AbsTileX, int AbsTileY)
     {
-        int EntityIndex = AddEntity(EntityType.WALL);
-        Entity entity = GetEntity(Entity.EntityResidence.Dormant, EntityIndex);
+        int EntityIndex = AddLowEntity(EntityType.WALL);
+        Entity.LowEntity entity = GetLowEntity(EntityIndex);
 
-        entity.Dormant.P.AbsTileX = AbsTileX;
-        entity.Dormant.P.AbsTileY = AbsTileY;
-        entity.Dormant.Height = TileMap.TileSideInMeters;
-        entity.Dormant.Width = entity.Dormant.Height;
-        entity.Dormant.Collides = true;
+        entity.P.AbsTileX = AbsTileX;
+        entity.P.AbsTileY = AbsTileY;
+        entity.Height = TileMap.TileSideInMeters;
+        entity.Width = entity.Height;
+        entity.Collides = true;
 
         return EntityIndex;
+    }
+
+    public Entity.LowEntity GetLowEntity(int Index)
+    {
+        Entity.LowEntity Result = null;
+
+        if((Index > 0) && (Index < gameMemory.LowEntityCount))
+        {
+            Result = gameMemory.LowEntities[Index];
+        }
+
+        return(Result);
+    }
+
+    public Entity.HighEntity MakeEntityHighFrequency(int LowIndex)
+    {
+        Entity.HighEntity EntityHigh = null;
+
+        Entity.LowEntity EntityLow = gameMemory.LowEntities[LowIndex];
+
+        if(EntityLow.HighEntityIndex > 0)
+        {
+            EntityHigh = gameMemory.HighEntities[EntityLow.HighEntityIndex];
+        }
+        else
+        {
+            if(gameMemory.HighEntityCount < gameMemory.HighEntities.length)
+            {
+                int HighIndex = gameMemory.HighEntityCount;
+                gameMemory.HighEntityCount = HighIndex + 1;
+                EntityHigh = gameMemory.HighEntities[HighIndex];
+                if (EntityHigh == null) {
+                    EntityHigh = new Entity.HighEntity();
+                    gameMemory.HighEntities[HighIndex] = EntityHigh;
+                }
+                // NOTE(casey): Map the entity into camera space
+                TileMap.TileMapDifference Diff = TileMap.subtract(EntityLow.P, Camera.position);
+                EntityHigh.P = Diff.dXY;
+                EntityHigh.dP = new Vector2f(0.0f, 0.0f);
+                EntityHigh.LowEntityIndex = LowIndex;
+
+                EntityLow.HighEntityIndex = HighIndex;
+            }
+            else
+            {
+                throw new RuntimeException("Invalid code path");
+            }
+        }
+
+        return(EntityHigh);
+    }
+
+    public Entity GetHighEntity(int LowIndex)
+    {
+        Entity Result = new Entity();
+
+        if((LowIndex > 0) && (LowIndex < gameMemory.LowEntityCount))
+        {
+            Result.LowIndex = LowIndex;
+            Result.Low = gameMemory.LowEntities[LowIndex];
+            Result.High = MakeEntityHighFrequency(LowIndex);
+        }
+
+        return(Result);
+    }
+
+    public void MakeEntityLowFrequency(int LowIndex)
+    {
+        Entity.LowEntity EntityLow = gameMemory.LowEntities[LowIndex];
+        int HighIndex = EntityLow.HighEntityIndex;
+        if(HighIndex > 0)
+        {
+            int LastHighIndex = gameMemory.HighEntityCount - 1;
+            if(HighIndex != LastHighIndex)
+            {
+                Entity.HighEntity LastEntity = gameMemory.HighEntities[LastHighIndex];
+                Entity.HighEntity DelEntity = gameMemory.HighEntities[HighIndex];
+
+                DelEntity.dP = LastEntity.dP;
+                DelEntity.P = LastEntity.P;
+                DelEntity.LowEntityIndex = LastEntity.LowEntityIndex;
+                gameMemory.LowEntities[LastEntity.LowEntityIndex].HighEntityIndex = HighIndex;
+            }
+
+            gameMemory.HighEntityCount = gameMemory.HighEntityCount - 1;
+            EntityLow.HighEntityIndex = 0;
+        }
+    }
+
+    public void OffsetAndCheckFrequencyByArea(Vector2f Offset, Rectangle CameraBounds)
+    {
+        for(int EntityIndex = 1; EntityIndex < gameMemory.HighEntityCount;)
+        {
+            Entity.HighEntity High = gameMemory.HighEntities[EntityIndex];
+
+            High.P = new Vector2f(High.P).add(Offset);
+            if(Rectangle.IsInRectangle(CameraBounds, High.P))
+            {
+                ++EntityIndex;
+            }
+            else
+            {
+                MakeEntityLowFrequency(High.LowEntityIndex);
+            }
+        }
     }
 }

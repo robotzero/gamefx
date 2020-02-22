@@ -20,22 +20,22 @@ public class PlayerService {
     }
 
     public Matrix4f getModelMatrix() {
-        for (int EntityIndex = 1; EntityIndex < gameMemory.entityCount; ++EntityIndex) {
-            if (gameMemory.EntityResidence[EntityIndex] == Entity.EntityResidence.High) {
-                Entity.HighEntity highEntity = gameMemory.HighEntities[EntityIndex];
-                Entity.LowEntity lowEntity = gameMemory.LowEntities[EntityIndex];
-                Entity.DormantEntity dormantEntity = gameMemory.DormantEntities[EntityIndex];
+        for (int HighEntityIndex = 1; HighEntityIndex < gameMemory.HighEntityCount; ++HighEntityIndex) {
+//            if (gameMemory.EntityResidence[EntityIndex] == Entity.EntityResidence.High) {
+                Entity.HighEntity highEntity = gameMemory.HighEntities[HighEntityIndex];
+                Entity.LowEntity lowEntity = gameMemory.LowEntities[highEntity.LowEntityIndex];
+
                 highEntity.P = new Vector2f(highEntity.P).add(Camera.EntityOffsetForFrame);
                 final Matrix4f v = new Matrix4f();
                 float PlayerGroundPointX = TileMap.ScreenCenterX + TileMap.MetersToPixels * highEntity.P.x();
                 float PlayerGroundPointY = TileMap.ScreenCenterY - TileMap.MetersToPixels * highEntity.P.y();
-                float PlayerLeft = PlayerGroundPointX - 0.5f * TileMap.MetersToPixels * dormantEntity.Width;
-                float PlayerTop = PlayerGroundPointY - 0.5f * TileMap.MetersToPixels * dormantEntity.Height;
+                float PlayerLeft = PlayerGroundPointX - 0.5f * TileMap.MetersToPixels * lowEntity.Width;
+                float PlayerTop = PlayerGroundPointY - 0.5f * TileMap.MetersToPixels * lowEntity.Height;
 
-                if (dormantEntity.Type == EntityType.HERO) {
+                if (lowEntity.Type == EntityType.HERO) {
                     return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
                 }
-            }
+//            }
         }
         return new Matrix4f().identity();
     }
@@ -124,61 +124,62 @@ public class PlayerService {
         for (int Iteration = 0; (Iteration < 4); ++Iteration) {
             float[] tMin = {1, 0};
             Vector2f WallNormal = new Vector2f(0.0f, 0.0f);
-            int HitEntityIndex = 0;
+            int HitHighEntityIndex = 0;
             Vector2f DesiredPosition = new Vector2f(entity.High.P).add(playerDelta);
-            for (int EntityIndex = 1; EntityIndex < gameMemory.entityCount; ++EntityIndex) {
-                Entity TestEntity = entityService.GetEntity(Entity.EntityResidence.High, EntityIndex);
-                if (TestEntity.High != entity.High) {
-                    if (TestEntity.Dormant.Collides) {
-                        float DiameterW = TestEntity.Dormant.Width + entity.Dormant.Width;
-                        float DiameterH = TestEntity.Dormant.Height + entity.Dormant.Height;
+            for (int TestHighEntityIndex = 1; TestHighEntityIndex < gameMemory.HighEntityCount; ++TestHighEntityIndex) {
+                    if (TestHighEntityIndex != entity.Low.HighEntityIndex) {
+                        Entity TestEntity = new Entity();
+                        TestEntity.High = gameMemory.HighEntities[TestHighEntityIndex];
+                        TestEntity.LowIndex = TestEntity.High.LowEntityIndex;
+                        TestEntity.Low = gameMemory.LowEntities[TestEntity.LowIndex];
+                        if (TestEntity.Low.Collides) {
+                            float DiameterW = TestEntity.Low.Width + entity.Low.Width;
+                            float DiameterH = TestEntity.Low.Height + entity.Low.Height;
+                            Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
+                            Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
+                            Vector2f Rel = new Vector2f(entity.High.P).sub(new Vector2f(TestEntity.High.P));
+                            if (tileMap.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                                    tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
+                                WallNormal = new Vector2f(-1, 0);
+                                HitHighEntityIndex = TestHighEntityIndex;
+                            }
 
-                        Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
-                        Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
+                            if (tileMap.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                                    tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
+                                WallNormal = new Vector2f(1, 0);
+                                HitHighEntityIndex = TestHighEntityIndex;
+                            }
 
-                        Vector2f Rel = new Vector2f(entity.High.P).sub(new Vector2f(TestEntity.High.P));
+                            if (tileMap.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                                    tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
+                                WallNormal = new Vector2f(0, -1);
+                                HitHighEntityIndex = TestHighEntityIndex;
+                            }
 
-                        if (tileMap.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
-                                tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
-                            WallNormal = new Vector2f(-1, 0);
-                            HitEntityIndex = EntityIndex;
-                        }
-
-                        if (tileMap.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
-                                tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
-                            WallNormal = new Vector2f(1, 0);
-                            HitEntityIndex = EntityIndex;
-                        }
-
-                        if (tileMap.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
-                                tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
-                            WallNormal = new Vector2f(0, -1);
-                            HitEntityIndex = EntityIndex;
-                        }
-
-                        if (tileMap.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
-                                tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
-                            WallNormal = new Vector2f(0, 1);
-                            HitEntityIndex = EntityIndex;
+                            if (tileMap.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                                    tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
+                                WallNormal = new Vector2f(0, 1);
+                                HitHighEntityIndex = TestHighEntityIndex;
+                            }
                         }
                     }
                 }
-            }
-
             entity.High.P = new Vector2f(entity.High.P).add(new Vector2f(playerDelta).mul(tMin[0]));
-            if(HitEntityIndex > 0)
+            if(HitHighEntityIndex > 0)
             {
                 entity.High.dP = new Vector2f(entity.High.dP).sub(new Vector2f(WallNormal).mul(new Vector2f(entity.High.dP).dot(WallNormal)));
                 playerDelta = new Vector2f(DesiredPosition).sub(new Vector2f(entity.High.P));
                 playerDelta = new Vector2f(playerDelta).sub(new Vector2f(WallNormal).mul(new Vector2f(playerDelta).dot(new Vector2f(WallNormal))));
 
-                Entity HitEntity = entityService.GetEntity(Entity.EntityResidence.Dormant, HitEntityIndex);
+                Entity.HighEntity HitHigh = gameMemory.HighEntities[HitHighEntityIndex];
+                Entity.LowEntity HitLow = gameMemory.LowEntities[HitHigh.LowEntityIndex];
             }
             else
             {
                 break;
             }
         }
-        entity.Dormant.P = tileMap.MapIntoTileSpace(Camera.position, entity.High.P);
+
+        entity.Low.P = tileMap.MapIntoTileSpace(Camera.position, entity.High.P);
     }
 }

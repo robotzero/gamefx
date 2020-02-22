@@ -47,10 +47,12 @@ public class GameApp implements Runnable {
     private final EntityService entityService;
     private Vector2f ddPlayer;
     private final GameMemory gameMemory;
+    private final TileMap tileMap;
     private int playerSpeed;
-    private int playerIndex;
+    private int LowIndex;
+    private Entity ControllingEntity;
 
-    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, PlayerService playerService, EntityService entityService, GameMemory g) {
+    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, PlayerService playerService, EntityService entityService, GameMemory g, TileMap tileMap) {
         this.displayManager = displayManager;
         this.render2D = render2D;
         this.camera = camera;
@@ -61,11 +63,11 @@ public class GameApp implements Runnable {
         this.ddPlayer = new Vector2f(0.0f, 0.0f);
         this.gameMemory = g;
         this.entityService = entityService;
+        this.tileMap = tileMap;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
-//        Camera.position.AbsTileX = 17/2;
-//        Camera.position.AbsTileY = 9/2;
-        entityService.AddEntity(EntityType.NULL);
+        entityService.AddLowEntity(EntityType.NULL);
+        this.tileMap.renderWorld();
     }
 
     public void run() {
@@ -94,7 +96,7 @@ public class GameApp implements Runnable {
         NewCameraP.AbsTileX = 17 / 2;
         NewCameraP.AbsTileY = 9 / 2;
         camera.SetCamera(NewCameraP);
-        playerIndex = entityService.AddPlayer();
+        LowIndex = entityService.AddPlayer();
     }
 
     public void gameLoop() {
@@ -132,6 +134,7 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
+        ControllingEntity = entityService.GetHighEntity(LowIndex);
         playerSpeed = 10;
         cameraInc.set(0f, 0f, 0f);
         ddPlayer.set(0f, 0f);
@@ -192,10 +195,9 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        Entity entity = entityService.GetEntity(Entity.EntityResidence.High, gameMemory.CameraFollowingEntityIndex);
-        playerService.movePlayer(entity, ddPlayer, interval, playerSpeed);
-        Entity cameraFollowingEntity = entityService.GetEntity(Entity.EntityResidence.High, gameMemory.CameraFollowingEntityIndex);
-        if (cameraFollowingEntity.Residence != Entity.EntityResidence.Nonexistent) {
+        playerService.movePlayer(ControllingEntity, ddPlayer, interval, playerSpeed);
+        Entity cameraFollowingEntity = entityService.GetHighEntity(gameMemory.CameraFollowingEntityIndex);
+        if (cameraFollowingEntity.High != null) {
            camera.movePosition(cameraFollowingEntity);
         }
     }

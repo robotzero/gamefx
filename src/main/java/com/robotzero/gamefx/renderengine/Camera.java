@@ -51,7 +51,7 @@ public class Camera {
 
     public void SetCamera(TileMap.TileMapPosition NewCameraP)
     {
-        TileMap.TileMapDifference dCameraP = tileMap.subtract(NewCameraP, position);
+        TileMap.TileMapDifference dCameraP = TileMap.subtract(NewCameraP, position);
         position = NewCameraP;
 
         int TileSpanX = 17 * 3;
@@ -60,38 +60,24 @@ public class Camera {
                 new Vector2f(TileSpanX, TileSpanY).mul(TileMap.TileSideInMeters));
 
         EntityOffsetForFrame = new Vector2f(-dCameraP.dXY.x(), -dCameraP.dXY.y());
-        for(int EntityIndex = 1; EntityIndex < gameMemory.HighEntities.length; ++EntityIndex)
-        {
-            if(gameMemory.EntityResidence[EntityIndex] == Entity.EntityResidence.High)
-            {
-                Entity.HighEntity High = gameMemory.HighEntities[EntityIndex];
 
-                High.P = new Vector2f(High.P).add(EntityOffsetForFrame);
-
-                if(!Rectangle.IsInRectangle(CameraBounds, High.P))
-                {
-                    entityService.ChangeEntityResidence(EntityIndex, Entity.EntityResidence.Dormant);
-                }
-            }
-        }
+        entityService.OffsetAndCheckFrequencyByArea(EntityOffsetForFrame, CameraBounds);
 
         int MinTileX = NewCameraP.AbsTileX - TileSpanX / 2;
         int MaxTileX = NewCameraP.AbsTileX + TileSpanX / 2;
         int MinTileY = NewCameraP.AbsTileY - TileSpanY / 2;
         int MaxTileY = NewCameraP.AbsTileY + TileSpanY / 2;
-        for(int EntityIndex = 1; EntityIndex < gameMemory.DormantEntities.length; ++EntityIndex)
+        for(int EntityIndex = 1; EntityIndex < gameMemory.LowEntityCount; ++EntityIndex)
         {
-            if(gameMemory.EntityResidence[EntityIndex] == Entity.EntityResidence.Dormant)
-            {
-                Entity.DormantEntity dormant = gameMemory.DormantEntities[EntityIndex];
-
-                if((dormant.P.AbsTileX >= MinTileX) &&
-                        (dormant.P.AbsTileX <= MaxTileX) &&
-                        (dormant.P.AbsTileY <= MinTileY) &&
-                        (dormant.P.AbsTileY >= MaxTileY))
+            Entity.LowEntity Low = gameMemory.LowEntities[EntityIndex];
+            if (Low.HighEntityIndex == 0) {
+                if((Low.P.AbsTileX >= MinTileX) &&
+                        (Low.P.AbsTileX <= MaxTileX) &&
+                        (Low.P.AbsTileY <= MinTileY) &&
+                        (Low.P.AbsTileY >= MaxTileY))
 
                 {
-                    entityService.ChangeEntityResidence(EntityIndex, Entity.EntityResidence.High);
+                    entityService.MakeEntityHighFrequency(EntityIndex);
                 }
             }
         }
