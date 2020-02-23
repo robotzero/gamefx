@@ -33,7 +33,7 @@ public class GameMemory {
     private static Map<Long, ByteBuffer> tiles = new LinkedHashMap<>();
     public Entity[] entities;
     public Entity.HighEntity[] HighEntities = new Entity.HighEntity[256];
-    public Entity.LowEntity[] LowEntities = new Entity.LowEntity[256];
+    public Entity.LowEntity[] LowEntities = new Entity.LowEntity[100000];
     public int CameraFollowingEntityIndex = 0;
     public int LowEntityCount = 0;
     public int HighEntityCount = 0;

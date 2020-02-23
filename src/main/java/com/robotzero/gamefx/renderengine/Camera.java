@@ -2,20 +2,17 @@ package com.robotzero.gamefx.renderengine;
 
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.world.GameMemory;
-import com.robotzero.gamefx.world.TileMap;
+import com.robotzero.gamefx.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
 public class Camera {
-    private static final float CAMERA_POS_STEP = 2f;
-    private final TileMap tileMap;
-    public static TileMap.TileMapPosition position = new TileMap.TileMapPosition();
+    public static World.WorldPosition position = new World.WorldPosition();
     public static Vector2f EntityOffsetForFrame = new Vector2f(0.0f, 0.0f);
     private final GameMemory gameMemory;
     private final EntityService entityService;
 
-    public Camera(TileMap tileMap, GameMemory gameMemory, EntityService entityService) {
-        this.tileMap = tileMap;
+    public Camera(GameMemory gameMemory, EntityService entityService) {
         this.gameMemory = gameMemory;
         this.entityService = entityService;
     }
@@ -31,33 +28,34 @@ public class Camera {
     }
 
     public void movePosition(Entity entity) {
-        TileMap.TileMapPosition NewCameraP = new TileMap.TileMapPosition(position);
+        World.WorldPosition NewCameraP = new World.WorldPosition(position);
 
-        if(entity.High.P.x()  > (9.0f * TileMap.TileSideInMeters)) {
-            NewCameraP.AbsTileX += 17;
-        }
-        if(entity.High.P.x() < -(9.0f * TileMap.TileSideInMeters)) {
-            NewCameraP.AbsTileX -= 17;
-        }
-        if(entity.High.P.y() > (5.0f * TileMap.TileSideInMeters)) {
-            NewCameraP.AbsTileY += 9;
-        }
-        if(entity.High.P.y() < -(5.0f * TileMap.TileSideInMeters)) {
-            NewCameraP.AbsTileY -= 9;
-        }
+//        if(entity.High.P.x()  > (9.0f * World.TileSideInMeters)) {
+//            NewCameraP.AbsTileX += 17;
+//        }
+//        if(entity.High.P.x() < -(9.0f * World.TileSideInMeters)) {
+//            NewCameraP.AbsTileX -= 17;
+//        }
+//        if(entity.High.P.y() > (5.0f * World.TileSideInMeters)) {
+//            NewCameraP.AbsTileY += 9;
+//        }
+//        if(entity.High.P.y() < -(5.0f * World.TileSideInMeters)) {
+//            NewCameraP.AbsTileY -= 9;
+//        }
+        NewCameraP = new World.WorldPosition(entity.Low.P);
 
         SetCamera(NewCameraP);
     }
 
-    public void SetCamera(TileMap.TileMapPosition NewCameraP)
+    public void SetCamera(World.WorldPosition NewCameraP)
     {
-        TileMap.TileMapDifference dCameraP = TileMap.subtract(NewCameraP, position);
+        World.WorldDifference dCameraP = World.subtract(NewCameraP, position);
         position = NewCameraP;
 
         int TileSpanX = 17 * 3;
         int TileSpanY = 9 * 3;
         Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector2f(0.0f, 0.0f),
-                new Vector2f(TileSpanX, TileSpanY).mul(TileMap.TileSideInMeters));
+                new Vector2f(TileSpanX, TileSpanY).mul(World.TileSideInMeters));
 
         EntityOffsetForFrame = new Vector2f(-dCameraP.dXY.x(), -dCameraP.dXY.y());
 

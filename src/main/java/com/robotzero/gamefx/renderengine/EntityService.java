@@ -2,7 +2,7 @@ package com.robotzero.gamefx.renderengine;
 
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.world.GameMemory;
-import com.robotzero.gamefx.world.TileMap;
+import com.robotzero.gamefx.world.World;
 import org.joml.Vector2f;
 
 public class EntityService {
@@ -17,7 +17,7 @@ public class EntityService {
         int EntityIndex = AddLowEntity(EntityType.HERO);
         Entity.LowEntity entity = GetLowEntity(EntityIndex);
 
-        entity.P = new TileMap.TileMapPosition(Camera.position);
+        entity.P = new World.WorldPosition(Camera.position);
         entity.P.Offset.x = 0;
         entity.P.Offset.y = 0;
         entity.Height = 0.5f; // 1.4f;
@@ -48,7 +48,7 @@ public class EntityService {
 
         entity.P.AbsTileX = AbsTileX;
         entity.P.AbsTileY = AbsTileY;
-        entity.Height = TileMap.TileSideInMeters;
+        entity.Height = World.TileSideInMeters;
         entity.Width = entity.Height;
         entity.Collides = true;
 
@@ -89,7 +89,7 @@ public class EntityService {
                     gameMemory.HighEntities[HighIndex] = EntityHigh;
                 }
                 // NOTE(casey): Map the entity into camera space
-                TileMap.TileMapDifference Diff = TileMap.subtract(EntityLow.P, Camera.position);
+                World.WorldDifference Diff = World.subtract(EntityLow.P, Camera.position);
                 EntityHigh.P = Diff.dXY;
                 EntityHigh.dP = new Vector2f(0.0f, 0.0f);
                 EntityHigh.LowEntityIndex = LowIndex;
@@ -142,14 +142,14 @@ public class EntityService {
         }
     }
 
-    public void OffsetAndCheckFrequencyByArea(Vector2f Offset, Rectangle CameraBounds)
+    public void OffsetAndCheckFrequencyByArea(Vector2f Offset, Rectangle HighFrequencyBounds)
     {
         for(int EntityIndex = 1; EntityIndex < gameMemory.HighEntityCount;)
         {
             Entity.HighEntity High = gameMemory.HighEntities[EntityIndex];
 
             High.P = new Vector2f(High.P).add(Offset);
-            if(Rectangle.IsInRectangle(CameraBounds, High.P))
+            if(Rectangle.IsInRectangle(HighFrequencyBounds, High.P))
             {
                 ++EntityIndex;
             }

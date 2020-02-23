@@ -1,6 +1,6 @@
 package com.robotzero.gamefx.renderengine;
 
-import com.robotzero.gamefx.world.TileMap;
+import com.robotzero.gamefx.world.World;
 import org.joml.Vector2f;
 
 public class Entity {
@@ -16,7 +16,7 @@ public class Entity {
     }
 
     public static class LowEntity {
-        public TileMap.TileMapPosition P = new TileMap.TileMapPosition();
+        public World.WorldPosition P = new World.WorldPosition();
         public float Width, Height;
         boolean Collides;
         public EntityType Type;

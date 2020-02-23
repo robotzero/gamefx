@@ -16,7 +16,7 @@ public class WorldGenerator {
         this.entityService = entityService;
     }
 
-    public void renderWorld(TileMap tileMap) {
+    public void renderWorld(World world) {
         // TODO(casey): Waiting for full sparseness
         int randomNumberIndex = 0;
         long screenX = screenBaseX;
@@ -65,7 +65,7 @@ public class WorldGenerator {
                         tileValue = 2;
                     }
 
-                    tileMap.SetTileValue(BigInteger.valueOf(absTileX).intValueExact(), BigInteger.valueOf(absTileY).intValueExact(), tileValue);
+                    //world.SetTileValue(BigInteger.valueOf(absTileX).intValueExact(), BigInteger.valueOf(absTileY).intValueExact(), tileValue);
                     if (tileValue == 2) {
                         entityService.AddWall(BigInteger.valueOf(absTileX).intValueExact(), BigInteger.valueOf(absTileY).intValueExact());
                     }
@@ -83,5 +83,11 @@ public class WorldGenerator {
                 screenY += 1;
             }
         }
+
+//        while(gameMemory.LowEntityCount < (ArrayCount(GameState->LowEntities) - 16))
+//        {
+//            uint32 Coordinate = 1024 + GameState->LowEntityCount;
+//            AddWall(GameState, Coordinate, Coordinate, Coordinate);
+//        }
     }
 }

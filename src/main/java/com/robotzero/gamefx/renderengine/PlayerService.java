@@ -1,20 +1,20 @@
 package com.robotzero.gamefx.renderengine;
 
 import com.robotzero.gamefx.world.GameMemory;
-import com.robotzero.gamefx.world.TileMap;
+import com.robotzero.gamefx.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 public class PlayerService {
-    private final TileMap tileMap;
+    private final World world;
     private final EntityService entityService;
     private final GameMemory gameMemory;
     public static final float PlayerHeight = 0.5f;
     public static final float PlayerWidth = 1.0f;
 
-    public PlayerService(TileMap tileMap, EntityService entityService, GameMemory gameMemory) {
-        this.tileMap = tileMap;
+    public PlayerService(World world, EntityService entityService, GameMemory gameMemory) {
+        this.world = world;
         this.entityService = entityService;
         this.gameMemory = gameMemory;
     }
@@ -27,10 +27,10 @@ public class PlayerService {
 
                 highEntity.P = new Vector2f(highEntity.P).add(Camera.EntityOffsetForFrame);
                 final Matrix4f v = new Matrix4f();
-                float PlayerGroundPointX = TileMap.ScreenCenterX + TileMap.MetersToPixels * highEntity.P.x();
-                float PlayerGroundPointY = TileMap.ScreenCenterY - TileMap.MetersToPixels * highEntity.P.y();
-                float PlayerLeft = PlayerGroundPointX - 0.5f * TileMap.MetersToPixels * lowEntity.Width;
-                float PlayerTop = PlayerGroundPointY - 0.5f * TileMap.MetersToPixels * lowEntity.Height;
+                float PlayerGroundPointX = World.ScreenCenterX + World.MetersToPixels * highEntity.P.x();
+                float PlayerGroundPointY = World.ScreenCenterY - World.MetersToPixels * highEntity.P.y();
+                float PlayerLeft = PlayerGroundPointX - 0.5f * World.MetersToPixels * lowEntity.Width;
+                float PlayerTop = PlayerGroundPointY - 0.5f * World.MetersToPixels * lowEntity.Height;
 
                 if (lowEntity.Type == EntityType.HERO) {
                     return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
@@ -138,25 +138,25 @@ public class PlayerService {
                             Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
                             Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
                             Vector2f Rel = new Vector2f(entity.High.P).sub(new Vector2f(TestEntity.High.P));
-                            if (tileMap.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                            if (world.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
                                     tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
                                 WallNormal = new Vector2f(-1, 0);
                                 HitHighEntityIndex = TestHighEntityIndex;
                             }
 
-                            if (tileMap.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                            if (world.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
                                     tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
                                 WallNormal = new Vector2f(1, 0);
                                 HitHighEntityIndex = TestHighEntityIndex;
                             }
 
-                            if (tileMap.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                            if (world.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
                                     tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
                                 WallNormal = new Vector2f(0, -1);
                                 HitHighEntityIndex = TestHighEntityIndex;
                             }
 
-                            if (tileMap.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                            if (world.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
                                     tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
                                 WallNormal = new Vector2f(0, 1);
                                 HitHighEntityIndex = TestHighEntityIndex;
@@ -180,6 +180,6 @@ public class PlayerService {
             }
         }
 
-        entity.Low.P = tileMap.MapIntoTileSpace(Camera.position, entity.High.P);
+        entity.Low.P = world.MapIntoTileSpace(Camera.position, entity.High.P);
     }
 }

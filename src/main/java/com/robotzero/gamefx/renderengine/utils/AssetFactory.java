@@ -4,7 +4,7 @@ import com.robotzero.gamefx.renderengine.PlayerService;
 import com.robotzero.gamefx.renderengine.model.Material;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.model.Texture;
-import com.robotzero.gamefx.world.TileMap;
+import com.robotzero.gamefx.world.World;
 
 import java.util.Optional;
 
@@ -21,16 +21,16 @@ public class AssetFactory {
 
     private final float[] vertices2 = new float[] {
             0.0f, 0.0f, 0.0f,
-            0.0f, TileMap.MetersToPixels * PlayerService.PlayerHeight, 0.0f,
-            TileMap.MetersToPixels * PlayerService.PlayerWidth, TileMap.MetersToPixels * PlayerService.PlayerHeight, 0.0f,
-            TileMap.MetersToPixels * PlayerService.PlayerWidth, 0.0f, 0.0f
+            0.0f, World.MetersToPixels * PlayerService.PlayerHeight, 0.0f,
+            World.MetersToPixels * PlayerService.PlayerWidth, World.MetersToPixels * PlayerService.PlayerHeight, 0.0f,
+            World.MetersToPixels * PlayerService.PlayerWidth, 0.0f, 0.0f
     };
 
     private final float[] vertices3 = new float[] {
             0.0f, 0.0f, 0.0f,
-            0.0f, TileMap.TileSideInPixels, 0.0f,
-            TileMap.TileSideInPixels, TileMap.TileSideInPixels, 0.0f,
-            TileMap.TileSideInPixels, 0.0f, 0.0f
+            0.0f, World.TileSideInPixels, 0.0f,
+            World.TileSideInPixels, World.TileSideInPixels, 0.0f,
+            World.TileSideInPixels, 0.0f, 0.0f
     };
 
     private final float[] tcs1 = new float[] {

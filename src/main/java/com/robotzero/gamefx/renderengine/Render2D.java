@@ -3,7 +3,7 @@ package com.robotzero.gamefx.renderengine;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.FileUtils;
 import com.robotzero.gamefx.renderengine.utils.ShaderProgram;
-import com.robotzero.gamefx.world.TileMap;
+import com.robotzero.gamefx.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -17,16 +17,16 @@ import static org.lwjgl.opengl.GL11.glViewport;
 
 public class Render2D implements Render {
     private ShaderProgram sceneShaderProgram;
-    private TileMap tileMap;
+    private World world;
     private ShaderProgram birdShaderProgram;
     private ShaderProgram quadShaderProgram;
     private final Camera camera;
     private final PlayerService player;
 
-    public Render2D(Camera camera, PlayerService player, TileMap tileMap) {
+    public Render2D(Camera camera, PlayerService player, World world) {
         this.camera = camera;
         this.player = player;
-        this.tileMap = tileMap;
+        this.world = world;
     }
 
     public void init() throws Exception {
@@ -78,7 +78,7 @@ public class Render2D implements Render {
         quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
         quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
         quadShaderProgram.setUniform("vw_matrix", viewMatrix);
-        tileMap.getTilePositions().forEach((key, value) -> {
+        world.getTilePositions().forEach((key, value) -> {
             quadShaderProgram.setUniform("ml_matrix", new Matrix4f().identity().translate(key));
             quadShaderProgram.setUniform("t_color", new Vector4f(value, value, value, 1.0f));
             quad.render();

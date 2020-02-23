@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class TileMap {
+public class World {
     public static final int TileChunkCountX = 128;
     public static final int TileChunkCountY = 128;
     public static final int ChunkShift = BigInteger.valueOf(4).intValueExact();
@@ -29,7 +29,7 @@ public class TileMap {
 
     private Map<Vector3f, Float> tilePositions = new HashMap<>();
 
-    public TileMap(WorldGenerator worldGenerator) {
+    public World(WorldGenerator worldGenerator) {
         this.worldGenerator = worldGenerator;
     }
 
@@ -124,7 +124,7 @@ public class TileMap {
         return(Empty);
     }
 
-    public boolean IsTileMapPointEmpty(TileMapPosition CanPos)
+    public boolean IsTileMapPointEmpty(WorldPosition CanPos)
     {
         boolean Empty;
 
@@ -132,9 +132,9 @@ public class TileMap {
         return IsTileValueEmpty(TileChunkValue);
     }
 
-    public TileMapPosition CenteredTilePoint(int AbsTileX, int AbsTileY)
+    public WorldPosition CenteredTilePoint(int AbsTileX, int AbsTileY)
     {
-        TileMapPosition Result = new TileMapPosition();
+        WorldPosition Result = new WorldPosition();
 
         Result.AbsTileX = AbsTileX;
         Result.AbsTileY = AbsTileY;
@@ -142,7 +142,7 @@ public class TileMap {
         return(Result);
     }
 
-    TileMapPosition RecanonicalizeCoord(TileMapPosition Pos)
+    WorldPosition RecanonicalizeCoord(WorldPosition Pos)
     {
         int OffsetX = (int) Math.floor(Pos.Offset.x() / TileSideInMeters);
         int OffsetY = (int) Math.floor(Pos.Offset.y() / TileSideInMeters);
@@ -154,7 +154,7 @@ public class TileMap {
         return Pos;
     }
 
-    public TileMapPosition RecanonicalizePosition(TileMapPosition Pos)
+    public WorldPosition RecanonicalizePosition(WorldPosition Pos)
     {
         return RecanonicalizeCoord(Pos);
     }
@@ -180,7 +180,7 @@ public class TileMap {
         return(TileChunkValue);
     }
 
-    public int GetTileValue(TileMapPosition Pos)
+    public int GetTileValue(WorldPosition Pos)
     {
         int TileChunkValue = GetTileValue(Pos.AbsTileX, Pos.AbsTileY);
 
@@ -208,11 +208,11 @@ public class TileMap {
         }
     }
 
-    public static TileMapDifference subtract(TileMapPosition A, TileMapPosition B)
+    public static WorldDifference subtract(WorldPosition A, WorldPosition B)
     {
-        TileMapDifference Result = new TileMapDifference();
+        WorldDifference Result = new WorldDifference();
         Vector2f dTileXY = new Vector2f((float) A.AbsTileX - (float) B.AbsTileX, (float) A.AbsTileY - (float) B.AbsTileY);
-        Result.dXY = dTileXY.mul(TileMap.TileSideInMeters).add(new Vector2f(A.Offset).sub(B.Offset));
+        Result.dXY = dTileXY.mul(World.TileSideInMeters).add(new Vector2f(A.Offset).sub(B.Offset));
 
         return(Result);
     }
@@ -238,9 +238,9 @@ public class TileMap {
         return new float[]{tMinTemp, Hit};
     }
 
-    public TileMapPosition MapIntoTileSpace(TileMapPosition BasePos, Vector2f Offset)
+    public WorldPosition MapIntoTileSpace(WorldPosition BasePos, Vector2f Offset)
     {
-        TileMapPosition Result = new TileMapPosition(BasePos);
+        WorldPosition Result = new WorldPosition(BasePos);
 
         Result.Offset = new Vector2f(Result.Offset).add(Offset);
         RecanonicalizeCoord(Result);
@@ -254,7 +254,7 @@ public class TileMap {
         return(Result);
     }
 
-    public TileMapPosition Offset(TileMapPosition P, Vector2f Offset)
+    public WorldPosition Offset(WorldPosition P, Vector2f Offset)
     {
         P.Offset = P.Offset.add(Offset);
         P = RecanonicalizePosition(P);
@@ -262,12 +262,12 @@ public class TileMap {
         return(P);
     }
 
-    public static class TileMapPosition {
-        public TileMapPosition() {}
-        public TileMapPosition(TileMapPosition tileMapPosition) {
-            this.Offset = tileMapPosition.Offset;
-            this.AbsTileX = tileMapPosition.AbsTileX;
-            this.AbsTileY = tileMapPosition.AbsTileY;
+    public static class WorldPosition {
+        public WorldPosition() {}
+        public WorldPosition(WorldPosition worldPosition) {
+            this.Offset = worldPosition.Offset;
+            this.AbsTileX = worldPosition.AbsTileX;
+            this.AbsTileY = worldPosition.AbsTileY;
         }
         public Vector2f Offset = new Vector2f(0.0f, 0.0f);
 
@@ -282,7 +282,7 @@ public class TileMap {
         public long RelTileY;
     }
 
-    public static class TileMapDifference {
+    public static class WorldDifference {
         public Vector2f dXY;
     }
 }

@@ -11,7 +11,7 @@ import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
-import com.robotzero.gamefx.world.TileMap;
+import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -50,12 +50,12 @@ public class GameApp implements Runnable {
     private final EntityService entityService;
     private Vector2f ddPlayer;
     private final GameMemory gameMemory;
-    private final TileMap tileMap;
+    private final World world;
     private int playerSpeed;
     private int LowIndex;
     private Entity ControllingEntity;
 
-    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, PlayerService playerService, EntityService entityService, GameMemory g, TileMap tileMap) {
+    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, PlayerService playerService, EntityService entityService, GameMemory g, World world) {
         this.displayManager = displayManager;
         this.render2D = render2D;
         this.camera = camera;
@@ -66,11 +66,11 @@ public class GameApp implements Runnable {
         this.ddPlayer = new Vector2f(0.0f, 0.0f);
         this.gameMemory = g;
         this.entityService = entityService;
-        this.tileMap = tileMap;
+        this.world = world;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
         entityService.AddLowEntity(EntityType.NULL);
-        this.tileMap.renderWorld();
+        this.world.renderWorld();
     }
 
     public void run() {
@@ -95,7 +95,7 @@ public class GameApp implements Runnable {
         background = assetFactory.getBackgroundMesh();
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
-        TileMap.TileMapPosition NewCameraP = new TileMap.TileMapPosition();
+        World.WorldPosition NewCameraP = new World.WorldPosition();
         NewCameraP.AbsTileX = BigInteger.valueOf(WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17 / 2).intValueExact();
         NewCameraP.AbsTileY = BigInteger.valueOf(WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9 / 2).intValueExact();
         camera.SetCamera(NewCameraP);

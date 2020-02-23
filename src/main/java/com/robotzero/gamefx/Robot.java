@@ -9,7 +9,7 @@ import com.robotzero.gamefx.renderengine.Render2D;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
-import com.robotzero.gamefx.world.TileMap;
+import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
 
 import java.util.Optional;
@@ -27,11 +27,11 @@ public class Robot {
             AssetFactory assetFactory = new AssetFactory();
             EntityService entityService = new EntityService(gameMemory);
             WorldGenerator worldGenerator = new WorldGenerator(entityService);
-            TileMap tileMap = new TileMap(worldGenerator);
-            Camera camera = new Camera(tileMap, gameMemory, entityService);
-            PlayerService playerService = new PlayerService(tileMap, entityService, gameMemory);
-            Render render = new Render2D(camera, playerService, tileMap);
-            GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, playerService, entityService, gameMemory, tileMap);
+            World world = new World(worldGenerator);
+            Camera camera = new Camera(gameMemory, entityService);
+            PlayerService playerService = new PlayerService(world, entityService, gameMemory);
+            Render render = new Render2D(camera, playerService, world);
+            GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, playerService, entityService, gameMemory, world);
             gameApp.run();
         } catch (Throwable t) {
             System.out.println(t.toString());
