@@ -4,14 +4,8 @@ import java.nio.ByteBuffer;
 
 public class TileChunk {
     private ByteBuffer tiles;
-
-    public TileChunk() {
-//        byte[] b = pushArray();
-//        try ( MemoryStack stack = stackPush() ) {
-//            this.tiles = stack.malloc(b.length);
-//            this.tiles.put(b);
-//        } // the stack frame is popped automatically
-    }
+    private long TileChunkX = 0;
+    private long TileChunkY = 0;
 
     public ByteBuffer getTiles() {
         return tiles;
@@ -25,11 +19,19 @@ public class TileChunk {
         this.tiles = tiles;
     }
 
-//    private byte[] pushArray() {
-//        byte[] arr = new byte[TileMap.ChunkDim * TileMap.ChunkDim];
-//        for (int i = 0; i < TileMap.ChunkDim * TileMap.ChunkDim; ++i) {
-//            arr[i] = 0;
-//        }
-//        return arr;
-//    }
+    public long getTileChunkX() {
+        return TileChunkX;
+    }
+
+    public void setTileChunkX(long tileChunkX) {
+        TileChunkX = tileChunkX;
+    }
+
+    public long getTileChunkY() {
+        return TileChunkY;
+    }
+
+    public void setTileChunkY(long tileChunkY) {
+        TileChunkY = tileChunkY;
+    }
 }

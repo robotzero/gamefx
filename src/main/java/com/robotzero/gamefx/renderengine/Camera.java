@@ -63,18 +63,18 @@ public class Camera {
 
         entityService.OffsetAndCheckFrequencyByArea(EntityOffsetForFrame, CameraBounds);
 
-        int MinTileX = NewCameraP.AbsTileX - TileSpanX / 2;
-        int MaxTileX = NewCameraP.AbsTileX + TileSpanX / 2;
-        int MinTileY = NewCameraP.AbsTileY - TileSpanY / 2;
-        int MaxTileY = NewCameraP.AbsTileY + TileSpanY / 2;
+        long MinTileX = Long.divideUnsigned(NewCameraP.AbsTileX - TileSpanX, 2);
+        long MaxTileX = Long.divideUnsigned(NewCameraP.AbsTileX + TileSpanX, 2);
+        long MinTileY = Long.divideUnsigned(NewCameraP.AbsTileY - TileSpanY, 2);
+        long MaxTileY = Long.divideUnsigned(NewCameraP.AbsTileY + TileSpanY, 2);
         for(int EntityIndex = 1; EntityIndex < gameMemory.LowEntityCount; ++EntityIndex)
         {
             Entity.LowEntity Low = gameMemory.LowEntities[EntityIndex];
             if (Low.HighEntityIndex == 0) {
                 if((Low.P.AbsTileX >= MinTileX) &&
                         (Low.P.AbsTileX <= MaxTileX) &&
-                        (Low.P.AbsTileY <= MinTileY) &&
-                        (Low.P.AbsTileY >= MaxTileY))
+                        (Low.P.AbsTileY >= MinTileY) &&
+                        (Low.P.AbsTileY <= MaxTileY))
 
                 {
                     entityService.MakeEntityHighFrequency(EntityIndex);

@@ -5,18 +5,17 @@ import com.robotzero.gamefx.renderengine.DisplayManager;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
+import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class TileMap {
     public static final int TileChunkCountX = 128;
     public static final int TileChunkCountY = 128;
-    public static final int ChunkShift = 4;
-    public static final int ChunkMask = (1 << ChunkShift) - 1;
-    public static final int ChunkDim = 1 << ChunkShift;
+    public static final int ChunkShift = BigInteger.valueOf(4).intValueExact();
+    public static final int ChunkMask = BigInteger.valueOf((1 << ChunkShift) - 1).intValueExact();
+    public static final int ChunkDim = BigInteger.valueOf(1 << ChunkShift).intValueExact();
     public static final int TileSideInPixels = 60;
     public static final int LowerLeftX = - (TileSideInPixels / 2);
     public static final int LowerLeftY = DisplayManager.HEIGHT;
@@ -26,17 +25,12 @@ public class TileMap {
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
     private final WorldGenerator worldGenerator;
 
-    private List<TileChunk> tileChunks = new ArrayList<>();
+    private Map<Long, TileChunk> tileChunkHash = new LinkedHashMap<>(4096);
 
     private Map<Vector3f, Float> tilePositions = new HashMap<>();
 
     public TileMap(WorldGenerator worldGenerator) {
         this.worldGenerator = worldGenerator;
-        for (int y = 0; y < TileChunkCountY; ++y) {
-            for (int x = 0; x < TileChunkCountX; ++x) {
-                tileChunks.add(y * TileChunkCountX + x, new TileChunk());
-            }
-        }
     }
 
     public void renderWorld() {
@@ -51,8 +45,8 @@ public class TileMap {
             for(int RelColumn = -20;
                 RelColumn < 20;
                 ++RelColumn) {
-                int Column = Camera.position.AbsTileX + RelColumn;
-                int Row = Camera.position.AbsTileY + RelRow;
+                long Column = Camera.position.AbsTileX + RelColumn;
+                long Row = Camera.position.AbsTileY + RelRow;
                 int tileID = GetTileValue(Column, Row);
 
                 float color = 0.5f;
@@ -87,25 +81,28 @@ public class TileMap {
         return this.tilePositions;
     }
 
-    private TileChunk GetTileChunk(int TileChunkX, int TileChunkY)
-    {
-        TileChunk tileMap = null;
+    private TileChunk GetTileChunk(long TileChunkX, long TileChunkY) {
+        long HashValue = 19*TileChunkX + 7*TileChunkY;
+        long HashSlot = HashValue & (tileChunkHash.size()) - 1;
 
-        if((TileChunkX >= 0) && (TileChunkX < TileChunkCountX) &&
-                (TileChunkY >= 0) && (TileChunkY < TileChunkCountY))
-        {
-            tileMap = tileChunks.get(TileChunkY * TileChunkCountX + TileChunkX);
-        }
+        TileChunk tileChunk = tileChunkHash.computeIfAbsent(HashSlot, (v) -> {
+            TileChunk t = new TileChunk();
+            t.setTileChunkX(TileChunkX);
+            t.setTileChunkY(TileChunkY);
+            final var tiles = GameMemory.allocateTiles(ChunkDim * ChunkDim, HashSlot);
+            t.setTiles(tiles);
+            return t;
+        });
 
-        return tileMap;
+        return tileChunk;
     }
 
-    int GetTileValueUnchecked(TileChunk tileChunk, int TileX, int TileY)
+    int GetTileValueUnchecked(TileChunk tileChunk, long TileX, long TileY)
     {
-        return tileChunk.getTiles().get(TileY * ChunkDim + TileX);
+        return tileChunk.getTiles().get((int) (TileY * ChunkDim + TileX));
     }
 
-    int GetTileValue(TileChunk TileChunk, int TestTileX, int TestTileY)
+    int GetTileValue(TileChunk TileChunk, long TestTileX, long TestTileY)
     {
         int TileChunkValue = 0;
 
@@ -162,7 +159,7 @@ public class TileMap {
         return RecanonicalizeCoord(Pos);
     }
 
-    TileChunkPosition GetChunkPositionFor(int AbsTileX, int AbsTileY)
+    TileChunkPosition GetChunkPositionFor(long AbsTileX, long AbsTileY)
     {
         TileChunkPosition Result = new TileChunkPosition();
 
@@ -174,7 +171,7 @@ public class TileMap {
         return(Result);
     }
 
-    public int GetTileValue(int AbsTileX, int AbsTileY)
+    public int GetTileValue(long AbsTileX, long AbsTileY)
     {
         TileChunkPosition ChunkPos = GetChunkPositionFor(AbsTileX, AbsTileY);
         TileChunk tileChunk = GetTileChunk(ChunkPos.TileChunkX, ChunkPos.TileChunkY);
@@ -190,9 +187,9 @@ public class TileMap {
         return(TileChunkValue);
     }
 
-    public void SetTileValueUnchecked(TileChunk tileChunk, int TileX, int TileY, byte TileValue)
+    public void SetTileValueUnchecked(TileChunk tileChunk, long TileX, long TileY, byte TileValue)
     {
-        tileChunk.setTile(TileY * ChunkDim + TileX, TileValue);
+        tileChunk.setTile((int) (TileY * ChunkDim + TileX), TileValue);
     }
 
     public void SetTileValue(int AbsTileX, int AbsTileY, byte TileValue)
@@ -200,19 +197,10 @@ public class TileMap {
         TileChunkPosition ChunkPos = GetChunkPositionFor(AbsTileX, AbsTileY);
         TileChunk tileChunk = GetTileChunk(ChunkPos.TileChunkX, ChunkPos.TileChunkY);
 
-        if (tileChunk.getTiles() == null) {
-            int tileCount = ChunkDim * ChunkDim;
-            ByteBuffer tiles = GameMemory.allocateTiles(tileCount);
-            for (int tileIndex = 0; tileIndex < tileCount; ++tileIndex) {
-                tiles.put(tileIndex, (byte)1);
-            }
-            tileChunk.setTiles(tiles);
-
-        }
         SetTileValue(tileChunk, ChunkPos.RelTileX, ChunkPos.RelTileY, TileValue);
     }
 
-    public void SetTileValue(TileChunk tileChunk, int TestTileX, int TestTileY, byte TileValue)
+    public void SetTileValue(TileChunk tileChunk, long TestTileX, long TestTileY, byte TileValue)
     {
         if(tileChunk != null && tileChunk.getTiles() != null && tileChunk.getTiles().limit() > 0)
         {
@@ -283,15 +271,15 @@ public class TileMap {
         }
         public Vector2f Offset = new Vector2f(0.0f, 0.0f);
 
-        public int AbsTileX = 1;
-        public int AbsTileY = 3;
+        public long AbsTileX = 1;
+        public long AbsTileY = 3;
     }
 
     public static class TileChunkPosition {
-        public int TileChunkX;
-        public int TileChunkY;
-        public int RelTileX;
-        public int RelTileY;
+        public long TileChunkX;
+        public long TileChunkY;
+        public long RelTileX;
+        public long RelTileY;
     }
 
     public static class TileMapDifference {

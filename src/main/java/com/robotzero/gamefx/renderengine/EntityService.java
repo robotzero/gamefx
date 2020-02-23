@@ -17,8 +17,7 @@ public class EntityService {
         int EntityIndex = AddLowEntity(EntityType.HERO);
         Entity.LowEntity entity = GetLowEntity(EntityIndex);
 
-        entity.P.AbsTileX = 5;
-        entity.P.AbsTileY = 4;
+        entity.P = new TileMap.TileMapPosition(Camera.position);
         entity.P.Offset.x = 0;
         entity.P.Offset.y = 0;
         entity.Height = 0.5f; // 1.4f;

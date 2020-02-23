@@ -7,6 +7,8 @@ import org.lwjgl.system.Pointer;
 import org.lwjgl.system.StructBuffer;
 
 import java.nio.ByteBuffer;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class GameMemory {
     public static final int OBJECT_SHELL_SIZE   = 8;
@@ -28,21 +30,17 @@ public class GameMemory {
     private int TransientStorageSize = Gigabytes(1);
     private ByteBuffer mainStorage;
     private PointerBuffer b;
-    private static ByteBuffer tiles;
+    private static Map<Long, ByteBuffer> tiles = new LinkedHashMap<>();
     public Entity[] entities;
-    public Entity.EntityResidence[] EntityResidence = new Entity.EntityResidence[256];
     public Entity.HighEntity[] HighEntities = new Entity.HighEntity[256];
     public Entity.LowEntity[] LowEntities = new Entity.LowEntity[256];
     public int CameraFollowingEntityIndex = 0;
     public int LowEntityCount = 0;
     public int HighEntityCount = 0;
 
-    public int entityCount = 0;
-
     public GameMemory() {
         mainStorage = org.lwjgl.system.MemoryUtil.memAlloc(PermanentStorageSize + TransientStorageSize);
         entities = new Entity[256];
-        entityCount = 0;
     }
 
     public boolean isInitialized() {
@@ -75,13 +73,20 @@ public class GameMemory {
 
     public void free() {
         mainStorage.clear();
+        for (long i = 0; i < tiles.size(); i++) {
+            tiles.get(i).clear();
+            MemoryUtil.memFree(tiles.get(i));
+        }
         tiles.clear();
-        MemoryUtil.memFree(tiles);
         MemoryUtil.memFree(mainStorage);
     }
 
-    public static ByteBuffer allocateTiles(int size) {
-        tiles = MemoryUtil.memAlloc(size);
-        return tiles;
+    public static ByteBuffer allocateTiles(int size, long hash) {
+        final var localtiles = MemoryUtil.memAlloc(size);
+        for(int i = 0; i < size; i++) {
+            localtiles.put((byte)1);
+        }
+        tiles.put(hash, localtiles);
+        return localtiles;
     }
 }

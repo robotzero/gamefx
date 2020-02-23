@@ -3,9 +3,13 @@ package com.robotzero.gamefx.world;
 import com.robotzero.gamefx.renderengine.EntityService;
 import com.robotzero.gamefx.renderengine.utils.Random;
 
+import java.math.BigInteger;
+
 public class WorldGenerator {
-    private final int tilesPerWidth = 17;
-    private final int tilesPerHeight = 9;
+    public static final int tilesPerWidth = 17;
+    public static final int tilesPerHeight = 9;
+    public static final long screenBaseX = 0;
+    public static final long screenBaseY = 0;
     private final EntityService entityService;
 
     public WorldGenerator(EntityService entityService) {
@@ -13,11 +17,10 @@ public class WorldGenerator {
     }
 
     public void renderWorld(TileMap tileMap) {
+        // TODO(casey): Waiting for full sparseness
         int randomNumberIndex = 0;
-        int screenBaseX = 0;
-        int screenBaseY = 0;
-        int screenX = screenBaseX;
-        int screenY = screenBaseY;
+        long screenX = screenBaseX;
+        long screenY = screenBaseY;
         boolean doorLeft = false;
         boolean doorRight = false;
         boolean doorTop = false;
@@ -42,8 +45,8 @@ public class WorldGenerator {
                 for (int tileX = 0;
                      tileX < tilesPerWidth;
                      ++tileX) {
-                    int absTileX = screenX * tilesPerWidth + tileX;
-                    int absTileY = screenY * tilesPerHeight + tileY;
+                    long absTileX = screenX * tilesPerWidth + tileX;
+                    long absTileY = screenY * tilesPerHeight + tileY;
 
                     byte tileValue = 1;
                     if ((tileX == 0) && (!doorLeft || (tileY != (tilesPerHeight / 2)))) {
@@ -62,9 +65,9 @@ public class WorldGenerator {
                         tileValue = 2;
                     }
 
-                    tileMap.SetTileValue(absTileX, absTileY, tileValue);
+                    tileMap.SetTileValue(BigInteger.valueOf(absTileX).intValueExact(), BigInteger.valueOf(absTileY).intValueExact(), tileValue);
                     if (tileValue == 2) {
-                        entityService.AddWall(absTileX, absTileY);
+                        entityService.AddWall(BigInteger.valueOf(absTileX).intValueExact(), BigInteger.valueOf(absTileY).intValueExact());
                     }
                 }
             }

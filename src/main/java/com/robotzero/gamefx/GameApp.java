@@ -12,8 +12,11 @@ import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.TileMap;
+import com.robotzero.gamefx.world.WorldGenerator;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+
+import java.math.BigInteger;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
@@ -93,8 +96,8 @@ public class GameApp implements Runnable {
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
         TileMap.TileMapPosition NewCameraP = new TileMap.TileMapPosition();
-        NewCameraP.AbsTileX = 17 / 2;
-        NewCameraP.AbsTileY = 9 / 2;
+        NewCameraP.AbsTileX = BigInteger.valueOf(WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17 / 2).intValueExact();
+        NewCameraP.AbsTileY = BigInteger.valueOf(WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9 / 2).intValueExact();
         camera.SetCamera(NewCameraP);
         LowIndex = entityService.AddPlayer();
     }
