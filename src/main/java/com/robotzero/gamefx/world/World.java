@@ -93,7 +93,6 @@ public class World {
             t.setTiles(tiles);
             return t;
         });
-
         return tileChunk;
     }
 
@@ -113,34 +112,34 @@ public class World {
         return(TileChunkValue);
     }
 
-    public boolean IsTileValueEmpty(int TileValue)
-    {
-        boolean Empty;
+//    public boolean IsTileValueEmpty(int TileValue)
+//    {
+//        boolean Empty;
+//
+//        Empty = ((TileValue == 1) ||
+//                (TileValue == 3) ||
+//                (TileValue == 4));
+//
+//        return(Empty);
+//    }
 
-        Empty = ((TileValue == 1) ||
-                (TileValue == 3) ||
-                (TileValue == 4));
-
-        return(Empty);
-    }
-
-    public boolean IsTileMapPointEmpty(WorldPosition CanPos)
-    {
-        boolean Empty;
-
-        int TileChunkValue = GetTileValue(CanPos.AbsTileX, CanPos.AbsTileY);
-        return IsTileValueEmpty(TileChunkValue);
-    }
-
-    public WorldPosition CenteredTilePoint(int AbsTileX, int AbsTileY)
-    {
-        WorldPosition Result = new WorldPosition();
-
-        Result.AbsTileX = AbsTileX;
-        Result.AbsTileY = AbsTileY;
-
-        return(Result);
-    }
+//    public boolean IsTileMapPointEmpty(WorldPosition CanPos)
+//    {
+//        boolean Empty;
+//
+//        int TileChunkValue = GetTileValue(CanPos.AbsTileX, CanPos.AbsTileY);
+//        return IsTileValueEmpty(TileChunkValue);
+//    }
+//
+//    public WorldPosition CenteredTilePoint(int AbsTileX, int AbsTileY)
+//    {
+//        WorldPosition Result = new WorldPosition();
+//
+//        Result.AbsTileX = AbsTileX;
+//        Result.AbsTileY = AbsTileY;
+//
+//        return(Result);
+//    }
 
     WorldPosition RecanonicalizeCoord(WorldPosition Pos)
     {
@@ -154,10 +153,10 @@ public class World {
         return Pos;
     }
 
-    public WorldPosition RecanonicalizePosition(WorldPosition Pos)
-    {
-        return RecanonicalizeCoord(Pos);
-    }
+//    public WorldPosition RecanonicalizePosition(WorldPosition Pos)
+//    {
+//        return RecanonicalizeCoord(Pos);
+//    }
 
     TileChunkPosition GetChunkPositionFor(long AbsTileX, long AbsTileY)
     {
@@ -180,33 +179,33 @@ public class World {
         return(TileChunkValue);
     }
 
-    public int GetTileValue(WorldPosition Pos)
-    {
-        int TileChunkValue = GetTileValue(Pos.AbsTileX, Pos.AbsTileY);
+//    public int GetTileValue(WorldPosition Pos)
+//    {
+//        int TileChunkValue = GetTileValue(Pos.AbsTileX, Pos.AbsTileY);
+//
+//        return(TileChunkValue);
+//    }
+//
+//    public void SetTileValueUnchecked(TileChunk tileChunk, long TileX, long TileY, byte TileValue)
+//    {
+//        tileChunk.setTile((int) (TileY * ChunkDim + TileX), TileValue);
+//    }
 
-        return(TileChunkValue);
-    }
+//    public void SetTileValue(int AbsTileX, int AbsTileY, byte TileValue)
+//    {
+//        TileChunkPosition ChunkPos = GetChunkPositionFor(AbsTileX, AbsTileY);
+//        TileChunk tileChunk = GetTileChunk(ChunkPos.TileChunkX, ChunkPos.TileChunkY);
+//
+//        SetTileValue(tileChunk, ChunkPos.RelTileX, ChunkPos.RelTileY, TileValue);
+//    }
 
-    public void SetTileValueUnchecked(TileChunk tileChunk, long TileX, long TileY, byte TileValue)
-    {
-        tileChunk.setTile((int) (TileY * ChunkDim + TileX), TileValue);
-    }
-
-    public void SetTileValue(int AbsTileX, int AbsTileY, byte TileValue)
-    {
-        TileChunkPosition ChunkPos = GetChunkPositionFor(AbsTileX, AbsTileY);
-        TileChunk tileChunk = GetTileChunk(ChunkPos.TileChunkX, ChunkPos.TileChunkY);
-
-        SetTileValue(tileChunk, ChunkPos.RelTileX, ChunkPos.RelTileY, TileValue);
-    }
-
-    public void SetTileValue(TileChunk tileChunk, long TestTileX, long TestTileY, byte TileValue)
-    {
-        if(tileChunk != null && tileChunk.getTiles() != null && tileChunk.getTiles().limit() > 0)
-        {
-            SetTileValueUnchecked(tileChunk, TestTileX, TestTileY, TileValue);
-        }
-    }
+//    public void SetTileValue(TileChunk tileChunk, long TestTileX, long TestTileY, byte TileValue)
+//    {
+//        if(tileChunk != null && tileChunk.getTiles() != null && tileChunk.getTiles().limit() > 0)
+//        {
+//            SetTileValueUnchecked(tileChunk, TestTileX, TestTileY, TileValue);
+//        }
+//    }
 
     public static WorldDifference subtract(WorldPosition A, WorldPosition B)
     {
@@ -254,13 +253,13 @@ public class World {
         return(Result);
     }
 
-    public WorldPosition Offset(WorldPosition P, Vector2f Offset)
-    {
-        P.Offset = P.Offset.add(Offset);
-        P = RecanonicalizePosition(P);
-
-        return(P);
-    }
+//    public WorldPosition Offset(WorldPosition P, Vector2f Offset)
+//    {
+//        P.Offset = P.Offset.add(Offset);
+//        P = RecanonicalizePosition(P);
+//
+//        return(P);
+//    }
 
     public static class WorldPosition {
         public WorldPosition() {}

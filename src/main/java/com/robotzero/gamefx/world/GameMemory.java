@@ -72,13 +72,19 @@ public class GameMemory {
     }
 
     public void free() {
-        mainStorage.clear();
-        for (long i = 0; i < tiles.size(); i++) {
-            tiles.get(i).clear();
-            MemoryUtil.memFree(tiles.get(i));
+        try {
+            mainStorage.clear();
+            for (long i = 0; i < tiles.size(); i++) {
+                if (tiles.get(i) != null) {
+                    tiles.get(i).clear();
+                    MemoryUtil.memFree(tiles.get(i));
+                }
+            }
+            tiles.clear();
+            MemoryUtil.memFree(mainStorage);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
         }
-        tiles.clear();
-        MemoryUtil.memFree(mainStorage);
     }
 
     public static ByteBuffer allocateTiles(int size, long hash) {
