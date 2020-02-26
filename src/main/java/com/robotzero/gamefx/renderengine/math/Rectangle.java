@@ -49,4 +49,12 @@ public class Rectangle {
 
         return(Result);
     }
+
+    public Vector2f getMin() {
+        return this.Min;
+    }
+
+    public Vector2f getMax() {
+        return this.Max;
+    }
 }

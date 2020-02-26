@@ -28,7 +28,7 @@ public class Camera {
     }
 
     public void movePosition(Entity entity) {
-        World.WorldPosition NewCameraP = new World.WorldPosition(position);
+//        World.WorldPosition NewCameraP = new World.WorldPosition(position);
 
 //        if(entity.High.P.x()  > (9.0f * World.TileSideInMeters)) {
 //            NewCameraP.AbsTileX += 17;
@@ -42,14 +42,14 @@ public class Camera {
 //        if(entity.High.P.y() < -(5.0f * World.TileSideInMeters)) {
 //            NewCameraP.AbsTileY -= 9;
 //        }
-        NewCameraP = new World.WorldPosition(entity.Low.P);
+        World.WorldPosition NewCameraP = new World.WorldPosition(entity.Low.P);
 
         SetCamera(NewCameraP);
     }
 
     public void SetCamera(World.WorldPosition NewCameraP)
     {
-        World.WorldDifference dCameraP = World.subtract(NewCameraP, position);
+        World.WorldDifference dCameraP = World.subtract(new World.WorldPosition(NewCameraP), new World.WorldPosition(position));
         position = NewCameraP;
 
         int TileSpanX = 17 * 3;

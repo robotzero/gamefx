@@ -70,6 +70,7 @@ public class GameApp implements Runnable {
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
         entityService.AddLowEntity(EntityType.NULL);
+        gameMemory.HighEntityCount = 1;
         this.world.renderWorld();
     }
 
@@ -96,8 +97,8 @@ public class GameApp implements Runnable {
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
         World.WorldPosition NewCameraP = new World.WorldPosition();
-        NewCameraP.AbsTileX = BigInteger.valueOf(WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17 / 2).intValueExact();
-        NewCameraP.AbsTileY = BigInteger.valueOf(WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9 / 2).intValueExact();
+        NewCameraP.AbsTileX = WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17 / 2;
+        NewCameraP.AbsTileY = WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9 / 2;
         camera.SetCamera(NewCameraP);
         LowIndex = entityService.AddPlayer();
     }
@@ -199,6 +200,7 @@ public class GameApp implements Runnable {
 
     private void update(float interval) {
         playerService.movePlayer(ControllingEntity, ddPlayer, interval, playerSpeed);
+        Camera.EntityOffsetForFrame = new Vector2f(0.0f, 0.0f);
         Entity cameraFollowingEntity = entityService.GetHighEntity(gameMemory.CameraFollowingEntityIndex);
         if (cameraFollowingEntity.High != null) {
            camera.movePosition(cameraFollowingEntity);

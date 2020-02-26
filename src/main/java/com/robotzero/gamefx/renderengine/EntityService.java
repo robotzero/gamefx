@@ -20,7 +20,7 @@ public class EntityService {
         entity.P = new World.WorldPosition(Camera.position);
         entity.P.Offset.x = 0;
         entity.P.Offset.y = 0;
-        entity.Height = 0.5f; // 1.4f;
+        entity.Height = 1.4f;
         entity.Width = 1.0f;
         entity.Collides = true;
 
