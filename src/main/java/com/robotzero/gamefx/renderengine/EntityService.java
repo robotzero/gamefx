@@ -46,8 +46,7 @@ public class EntityService {
         int EntityIndex = AddLowEntity(EntityType.WALL);
         Entity.LowEntity entity = GetLowEntity(EntityIndex);
 
-        entity.P.ChunkX = ChunkX;
-        entity.P.ChunkY = ChunkY;
+        entity.P = ChunkPositionFromTilePosition(ChunkX, ChunkY);
         entity.Height = World.TileSideInMeters;
         entity.Width = entity.Height;
         entity.Collides = true;
@@ -158,5 +157,17 @@ public class EntityService {
                 MakeEntityLowFrequency(High.LowEntityIndex);
             }
         }
+    }
+
+    public World.WorldPosition ChunkPositionFromTilePosition(long AbsTileX, long AbsTileY)
+    {
+        World.WorldPosition Result = new World.WorldPosition();
+
+        Result.ChunkX = AbsTileX / World.TILES_PER_CHUNK;
+        Result.ChunkY = AbsTileY / World.TILES_PER_CHUNK;
+
+        Result.Offset = new Vector2f(AbsTileX - (Result.ChunkX * World.TILES_PER_CHUNK) * World.TileSideInMeters,
+                AbsTileY - (Result.ChunkY * World.TILES_PER_CHUNK) * World.TileSideInMeters);
+        return(Result);
     }
 }

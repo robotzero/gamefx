@@ -2,7 +2,6 @@ package com.robotzero.gamefx.world;
 
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import org.joml.Vector2f;
-import org.joml.Vector3f;
 
 import java.math.BigInteger;
 import java.util.LinkedHashMap;
@@ -11,7 +10,7 @@ import java.util.Map;
 public class World {
     public static final int TileChunkCountX = 128;
     public static final int TileChunkCountY = 128;
-    private static final int TILES_PER_CHUNK = 16;
+    public static final int TILES_PER_CHUNK = 16;
     public static final int ChunkShift = BigInteger.valueOf(4).intValueExact();
     public static final int ChunkMask = BigInteger.valueOf((1 << ChunkShift) - 1).intValueExact();
     public static final int ChunkDim = BigInteger.valueOf(1 << ChunkShift).intValueExact();
@@ -222,18 +221,6 @@ public class World {
         Result.Offset = new Vector2f(Result.Offset).add(Offset);
         RecanonicalizeCoord(Result);
 
-        return(Result);
-    }
-
-    public WorldPosition ChunkPositionFromTilePosition(int AbsTileX, int AbsTileY)
-    {
-        WorldPosition Result = new WorldPosition();
-
-        Result.ChunkX = AbsTileX / TILES_PER_CHUNK;
-        Result.ChunkY = AbsTileY / TILES_PER_CHUNK;
-
-        Result.Offset = new Vector2f(AbsTileX - (Result.ChunkX*TILES_PER_CHUNK) * TileSideInMeters,
-                AbsTileY - (Result.ChunkY*TILES_PER_CHUNK) * TileSideInMeters);
         return(Result);
     }
 
