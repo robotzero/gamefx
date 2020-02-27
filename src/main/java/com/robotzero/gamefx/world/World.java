@@ -5,13 +5,13 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.math.BigInteger;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class World {
     public static final int TileChunkCountX = 128;
     public static final int TileChunkCountY = 128;
+    private static final int TILES_PER_CHUNK = 16;
     public static final int ChunkShift = BigInteger.valueOf(4).intValueExact();
     public static final int ChunkMask = BigInteger.valueOf((1 << ChunkShift) - 1).intValueExact();
     public static final int ChunkDim = BigInteger.valueOf(1 << ChunkShift).intValueExact();
@@ -19,14 +19,13 @@ public class World {
     public static final int LowerLeftX = - (TileSideInPixels / 2);
     public static final int LowerLeftY = DisplayManager.HEIGHT;
     public static final float TileSideInMeters = 1.4f;
+    private static final float ChunkSideInMeters = TILES_PER_CHUNK * TileSideInMeters;
     public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
     public static float ScreenCenterX = 0.5f * DisplayManager.WIDTH;
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
     private final WorldGenerator worldGenerator;
 
     private Map<Long, TileChunk> tileChunkHash = new LinkedHashMap<>(4096);
-
-    private Map<Vector3f, Float> tilePositions = new HashMap<>();
 
     public World(WorldGenerator worldGenerator) {
         this.worldGenerator = worldGenerator;
@@ -35,50 +34,6 @@ public class World {
     public void renderWorld() {
         this.worldGenerator.renderWorld(this);
     }
-
-//    private void generateTilePositions() {
-//        for(int RelRow = -10;
-//            RelRow < 10;
-//            ++RelRow)
-//        {
-//            for(int RelColumn = -20;
-//                RelColumn < 20;
-//                ++RelColumn) {
-//                long Column = Camera.position.AbsTileX + RelColumn;
-//                long Row = Camera.position.AbsTileY + RelRow;
-//                int tileID = GetTileValue(Column, Row);
-//
-//                float color = 0.5f;
-//                if(tileID == 2) {
-//                    color = 1.0f;
-//                }
-//
-//                if(tileID > 2) {
-//                    color = 0.25f;
-//                }
-//
-//                if((Column == Camera.position.AbsTileX) &&
-//                        (Row == Camera.position.AbsTileY))
-//                {
-//                    color = 0.0f;
-//                }
-//
-//                Vector2f TileSide = new Vector2f(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
-//                Vector2f Cen =  new Vector2f(ScreenCenterX - MetersToPixels * Camera.position.Offset.x() + (RelColumn * TileSideInPixels),
-//                    ScreenCenterY + MetersToPixels * Camera.position.Offset.y() - (RelRow * TileSideInPixels));
-//                Vector2f Min = Cen.sub(TileSide.mul(0.9f));
-//                Vector2f Max = Cen.add(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
-//
-//                tilePositions.put(new Vector3f(Min.x, Min.y, 0), color);
-//            }
-//        }
-//    }
-
-//    public Map<Vector3f, Float> getTilePositions() {
-//        this.tilePositions.clear();
-//        this.generateTilePositions();
-//        return this.tilePositions;
-//    }
 
     private TileChunk GetTileChunk(long TileChunkX, long TileChunkY) {
         long HashValue = 19*TileChunkX + 7*TileChunkY;
@@ -111,6 +66,30 @@ public class World {
         return(TileChunkValue);
     }
 
+    public boolean IsCanonical(float TileRel)
+    {
+        // TODO(casey): Fix floating point math so this can be exact?
+        boolean Result = ((TileRel >= -0.5f * ChunkSideInMeters) &&
+                (TileRel <= 0.5f * ChunkSideInMeters));
+
+        return(Result);
+    }
+
+    public boolean IsCanonical(Vector2f Offset)
+    {
+        boolean Result = (IsCanonical(Offset.x()) && IsCanonical(Offset.y()));
+
+        return(Result);
+    }
+
+    public boolean AreInSameChunk(WorldPosition A, WorldPosition B)
+    {
+        boolean Result = ((A.ChunkX == B.ChunkX) &&
+                (A.ChunkY == B.ChunkY));
+
+        return(Result);
+    }
+
 //    public boolean IsTileValueEmpty(int TileValue)
 //    {
 //        boolean Empty;
@@ -130,24 +109,24 @@ public class World {
 //        return IsTileValueEmpty(TileChunkValue);
 //    }
 //
-//    public WorldPosition CenteredTilePoint(int AbsTileX, int AbsTileY)
-//    {
-//        WorldPosition Result = new WorldPosition();
-//
-//        Result.AbsTileX = AbsTileX;
-//        Result.AbsTileY = AbsTileY;
-//
-//        return(Result);
-//    }
+    public WorldPosition CenteredChunkPoint(int ChunkX, int ChunkY)
+    {
+        WorldPosition Result = new WorldPosition();
+
+        Result.ChunkX = ChunkX;
+        Result.ChunkY = ChunkY;
+
+        return(Result);
+    }
 
     WorldPosition RecanonicalizeCoord(WorldPosition Pos)
     {
-        int OffsetX = (int) Math.floor(Pos.Offset.x() / TileSideInMeters);
-        int OffsetY = (int) Math.floor(Pos.Offset.y() / TileSideInMeters);
-        Pos.AbsTileX = Pos.AbsTileX + OffsetX;
-        Pos.AbsTileY = Pos.AbsTileY + OffsetY;
-        Pos.Offset.x = Pos.Offset.x() -  OffsetX * TileSideInMeters;
-        Pos.Offset.y = Pos.Offset.y() -  OffsetY * TileSideInMeters;
+        int OffsetX = (int) Math.floor(Pos.Offset.x() / ChunkSideInMeters);
+        int OffsetY = (int) Math.floor(Pos.Offset.y() / ChunkSideInMeters);
+        Pos.ChunkX = Pos.ChunkX + OffsetX;
+        Pos.ChunkX = Pos.ChunkY + OffsetY;
+        Pos.Offset.x = Pos.Offset.x() -  OffsetX * ChunkSideInMeters;
+        Pos.Offset.y = Pos.Offset.y() -  OffsetY * ChunkSideInMeters;
 
         return Pos;
     }
@@ -209,8 +188,8 @@ public class World {
     public static WorldDifference subtract(WorldPosition A, WorldPosition B)
     {
         WorldDifference Result = new WorldDifference();
-        Vector2f dTileXY = new Vector2f((float) A.AbsTileX - (float) B.AbsTileX, (float) A.AbsTileY - (float) B.AbsTileY);
-        Result.dXY = dTileXY.mul(World.TileSideInMeters).add(new Vector2f(A.Offset).sub(B.Offset));
+        Vector2f dTileXY = new Vector2f((float) A.ChunkX - (float) B.ChunkX, (float) A.ChunkY - (float) B.ChunkY);
+        Result.dXY = dTileXY.mul(World.ChunkSideInMeters).add(new Vector2f(A.Offset).sub(B.Offset));
 
         return(Result);
     }
@@ -246,6 +225,18 @@ public class World {
         return(Result);
     }
 
+    public WorldPosition ChunkPositionFromTilePosition(int AbsTileX, int AbsTileY)
+    {
+        WorldPosition Result = new WorldPosition();
+
+        Result.ChunkX = AbsTileX / TILES_PER_CHUNK;
+        Result.ChunkY = AbsTileY / TILES_PER_CHUNK;
+
+        Result.Offset = new Vector2f(AbsTileX - (Result.ChunkX*TILES_PER_CHUNK) * TileSideInMeters,
+                AbsTileY - (Result.ChunkY*TILES_PER_CHUNK) * TileSideInMeters);
+        return(Result);
+    }
+
     public int SignOf(int Value)
     {
         int Result = (Value >= 0) ? 1 : -1;
@@ -264,13 +255,13 @@ public class World {
         public WorldPosition() {}
         public WorldPosition(WorldPosition worldPosition) {
             this.Offset = worldPosition.Offset;
-            this.AbsTileX = worldPosition.AbsTileX;
-            this.AbsTileY = worldPosition.AbsTileY;
+            this.ChunkX = worldPosition.ChunkX;
+            this.ChunkY = worldPosition.ChunkY;
         }
         public Vector2f Offset = new Vector2f(0.0f, 0.0f);
 
-        public long AbsTileX = 1;
-        public long AbsTileY = 3;
+        public long ChunkX = 1;
+        public long ChunkY = 3;
     }
 
     public static class TileChunkPosition {

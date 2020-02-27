@@ -97,8 +97,8 @@ public class GameApp implements Runnable {
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
         World.WorldPosition NewCameraP = new World.WorldPosition();
-        NewCameraP.AbsTileX = WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17 / 2;
-        NewCameraP.AbsTileY = WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9 / 2;
+        NewCameraP.ChunkX = WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17 / 2;
+        NewCameraP.ChunkY = WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9 / 2;
         camera.SetCamera(NewCameraP);
         LowIndex = entityService.AddPlayer();
     }

@@ -41,13 +41,13 @@ public class EntityService {
         return(EntityIndex);
     }
 
-    public int AddWall(int AbsTileX, int AbsTileY)
+    public int AddWall(int ChunkX, int ChunkY)
     {
         int EntityIndex = AddLowEntity(EntityType.WALL);
         Entity.LowEntity entity = GetLowEntity(EntityIndex);
 
-        entity.P.AbsTileX = AbsTileX;
-        entity.P.AbsTileY = AbsTileY;
+        entity.P.ChunkX = ChunkX;
+        entity.P.ChunkY = ChunkY;
         entity.Height = World.TileSideInMeters;
         entity.Width = entity.Height;
         entity.Collides = true;

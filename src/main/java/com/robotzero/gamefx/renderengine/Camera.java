@@ -61,18 +61,18 @@ public class Camera {
 
         entityService.OffsetAndCheckFrequencyByArea(EntityOffsetForFrame, CameraBounds);
 
-        long MinTileX = NewCameraP.AbsTileX - Long.divideUnsigned(TileSpanX, 2);
-        long MaxTileX = NewCameraP.AbsTileX + Long.divideUnsigned(TileSpanX, 2);
-        long MinTileY = NewCameraP.AbsTileY - Long.divideUnsigned(TileSpanY, 2);
-        long MaxTileY = NewCameraP.AbsTileY + Long.divideUnsigned(TileSpanY, 2);
+        long MinTileX = NewCameraP.ChunkX - Long.divideUnsigned(TileSpanX, 2);
+        long MaxTileX = NewCameraP.ChunkX + Long.divideUnsigned(TileSpanX, 2);
+        long MinTileY = NewCameraP.ChunkY - Long.divideUnsigned(TileSpanY, 2);
+        long MaxTileY = NewCameraP.ChunkY + Long.divideUnsigned(TileSpanY, 2);
         for(int EntityIndex = 1; EntityIndex < gameMemory.LowEntityCount; ++EntityIndex)
         {
             Entity.LowEntity Low = gameMemory.LowEntities[EntityIndex];
             if (Low.HighEntityIndex == 0) {
-                if((Low.P.AbsTileX >= MinTileX) &&
-                        (Low.P.AbsTileX <= MaxTileX) &&
-                        (Low.P.AbsTileY >= MinTileY) &&
-                        (Low.P.AbsTileY <= MaxTileY))
+                if((Low.P.ChunkX >= MinTileX) &&
+                        (Low.P.ChunkX <= MaxTileX) &&
+                        (Low.P.ChunkY >= MinTileY) &&
+                        (Low.P.ChunkY <= MaxTileY))
 
                 {
                     entityService.MakeEntityHighFrequency(EntityIndex);
