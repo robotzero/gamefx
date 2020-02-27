@@ -1,6 +1,5 @@
 package com.robotzero.gamefx.world;
 
-import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -37,49 +36,49 @@ public class World {
         this.worldGenerator.renderWorld(this);
     }
 
-    private void generateTilePositions() {
-        for(int RelRow = -10;
-            RelRow < 10;
-            ++RelRow)
-        {
-            for(int RelColumn = -20;
-                RelColumn < 20;
-                ++RelColumn) {
-                long Column = Camera.position.AbsTileX + RelColumn;
-                long Row = Camera.position.AbsTileY + RelRow;
-                int tileID = GetTileValue(Column, Row);
+//    private void generateTilePositions() {
+//        for(int RelRow = -10;
+//            RelRow < 10;
+//            ++RelRow)
+//        {
+//            for(int RelColumn = -20;
+//                RelColumn < 20;
+//                ++RelColumn) {
+//                long Column = Camera.position.AbsTileX + RelColumn;
+//                long Row = Camera.position.AbsTileY + RelRow;
+//                int tileID = GetTileValue(Column, Row);
+//
+//                float color = 0.5f;
+//                if(tileID == 2) {
+//                    color = 1.0f;
+//                }
+//
+//                if(tileID > 2) {
+//                    color = 0.25f;
+//                }
+//
+//                if((Column == Camera.position.AbsTileX) &&
+//                        (Row == Camera.position.AbsTileY))
+//                {
+//                    color = 0.0f;
+//                }
+//
+//                Vector2f TileSide = new Vector2f(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
+//                Vector2f Cen =  new Vector2f(ScreenCenterX - MetersToPixels * Camera.position.Offset.x() + (RelColumn * TileSideInPixels),
+//                    ScreenCenterY + MetersToPixels * Camera.position.Offset.y() - (RelRow * TileSideInPixels));
+//                Vector2f Min = Cen.sub(TileSide.mul(0.9f));
+//                Vector2f Max = Cen.add(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
+//
+//                tilePositions.put(new Vector3f(Min.x, Min.y, 0), color);
+//            }
+//        }
+//    }
 
-                float color = 0.5f;
-                if(tileID == 2) {
-                    color = 1.0f;
-                }
-
-                if(tileID > 2) {
-                    color = 0.25f;
-                }
-
-                if((Column == Camera.position.AbsTileX) &&
-                        (Row == Camera.position.AbsTileY))
-                {
-                    color = 0.0f;
-                }
-
-                Vector2f TileSide = new Vector2f(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
-                Vector2f Cen =  new Vector2f(ScreenCenterX - MetersToPixels * Camera.position.Offset.x() + (RelColumn * TileSideInPixels),
-                    ScreenCenterY + MetersToPixels * Camera.position.Offset.y() - (RelRow * TileSideInPixels));
-                Vector2f Min = Cen.sub(TileSide.mul(0.9f));
-                Vector2f Max = Cen.add(0.5f * TileSideInPixels, 0.5f * TileSideInPixels);
-
-                tilePositions.put(new Vector3f(Min.x, Min.y, 0), color);
-            }
-        }
-    }
-
-    public Map<Vector3f, Float> getTilePositions() {
-        this.tilePositions.clear();
-        this.generateTilePositions();
-        return this.tilePositions;
-    }
+//    public Map<Vector3f, Float> getTilePositions() {
+//        this.tilePositions.clear();
+//        this.generateTilePositions();
+//        return this.tilePositions;
+//    }
 
     private TileChunk GetTileChunk(long TileChunkX, long TileChunkY) {
         long HashValue = 19*TileChunkX + 7*TileChunkY;

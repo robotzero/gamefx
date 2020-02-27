@@ -6,6 +6,11 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 public class PlayerService {
     private final World world;
     private final EntityService entityService;
@@ -19,9 +24,8 @@ public class PlayerService {
         this.gameMemory = gameMemory;
     }
 
-    public Matrix4f getModelMatrix() {
-        for (int HighEntityIndex = 1; HighEntityIndex < gameMemory.HighEntityCount; ++HighEntityIndex) {
-//            if (gameMemory.EntityResidence[EntityIndex] == Entity.EntityResidence.High) {
+    public Map<EntityType, List<Map.Entry<EntityType, Matrix4f>>> getModelMatrix() {
+        return IntStream.range(1, gameMemory.HighEntityCount).mapToObj(HighEntityIndex -> {
             Entity.HighEntity highEntity = gameMemory.HighEntities[HighEntityIndex];
             Entity.LowEntity lowEntity = gameMemory.LowEntities[highEntity.LowEntityIndex];
             //@@TODO
@@ -33,11 +37,27 @@ public class PlayerService {
             float PlayerLeft = PlayerGroundPointX - 0.5f * World.MetersToPixels * lowEntity.Width;
             float PlayerTop = PlayerGroundPointY - 0.5f * World.MetersToPixels * lowEntity.Height;
 
-            if (lowEntity.Type == EntityType.HERO) {
-                return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
-            }
-        }
-        return new Matrix4f().identity();
+            return Map.of(lowEntity.Type, v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f)));
+        }).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
+            return a.getKey();
+        }));
+//        for (int HighEntityIndex = 1; HighEntityIndex < gameMemory.HighEntityCount; ++HighEntityIndex) {
+//            Entity.HighEntity highEntity = gameMemory.HighEntities[HighEntityIndex];
+//            Entity.LowEntity lowEntity = gameMemory.LowEntities[highEntity.LowEntityIndex];
+//            //@@TODO
+////            highEntity.P = new Vector2f(highEntity.P).add(Camera.EntityOffsetForFrame);
+//            highEntity.P = new Vector2f(highEntity.P);
+//            final Matrix4f v = new Matrix4f();
+//            float PlayerGroundPointX = World.ScreenCenterX + World.MetersToPixels * highEntity.P.x();
+//            float PlayerGroundPointY = World.ScreenCenterY - World.MetersToPixels * highEntity.P.y();
+//            float PlayerLeft = PlayerGroundPointX - 0.5f * World.MetersToPixels * lowEntity.Width;
+//            float PlayerTop = PlayerGroundPointY - 0.5f * World.MetersToPixels * lowEntity.Height;
+//
+//            if (lowEntity.Type == EntityType.HERO) {
+//                return v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f));
+//            }
+//        }
+//        return new Matrix4f().identity();
     }
 
     public void movePlayer(Entity entity, Vector2f ddP, float interval, int playerSpeed) {

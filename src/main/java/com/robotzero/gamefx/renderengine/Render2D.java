@@ -54,7 +54,8 @@ public class Render2D implements Render {
     private void renderScene(Mesh background, Mesh bird, Mesh quad) {
         Matrix4f viewMatrix = camera.updateViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
-        Matrix4f playerModelMatrix = player.getModelMatrix();
+        //@@TODO one player so far so we just get it.
+        Matrix4f playerModelMatrix = player.getModelMatrix().get(EntityType.HERO).get(0).getValue();
         Matrix4f quadViewMatrix = new Matrix4f().identity();
 //        sceneShaderProgram.bind();
 //        sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
@@ -78,9 +79,9 @@ public class Render2D implements Render {
         quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
         quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
         quadShaderProgram.setUniform("vw_matrix", viewMatrix);
-        world.getTilePositions().forEach((key, value) -> {
-            quadShaderProgram.setUniform("ml_matrix", new Matrix4f().identity().translate(key));
-            quadShaderProgram.setUniform("t_color", new Vector4f(value, value, value, 1.0f));
+        player.getModelMatrix().get(EntityType.WALL).forEach((key) -> {
+            quadShaderProgram.setUniform("ml_matrix", key.getValue());
+            quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
             quad.render();
             quad.endRender();
         });
