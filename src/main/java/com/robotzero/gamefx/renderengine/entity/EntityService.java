@@ -20,6 +20,10 @@ import java.util.stream.IntStream;
 public class EntityService {
     private final GameMemory gameMemory;
     private final World world;
+    public static final float PlayerHeight = 1.4f;
+    public static final float PlayerWidth = 1.0f;
+    public static final float FamiliarHeight = 0.5f;
+    public static final float FamiliarWidth = 1.0f;
 
     public EntityService(GameMemory gameMemory, World world) {
         this.gameMemory = gameMemory;
@@ -192,8 +196,8 @@ public class EntityService {
             Result.ChunkY = Result.ChunkY - 1;
         }
 
-        Result.Offset = new Vector2f((AbsTileX - (World.TILES_PER_CHUNK / 2f) - (Result.ChunkX * World.TILES_PER_CHUNK)) * World.TileSideInMeters,
-                (AbsTileY - (World.TILES_PER_CHUNK / 2f) - (Result.ChunkY * World.TILES_PER_CHUNK)) * World.TileSideInMeters);
+        Result.Offset = new Vector2f((AbsTileX - World.TILES_PER_CHUNK / 2f - (Result.ChunkX * World.TILES_PER_CHUNK)) * World.TileSideInMeters,
+                (AbsTileY - World.TILES_PER_CHUNK / 2f - (Result.ChunkY * World.TILES_PER_CHUNK)) * World.TileSideInMeters);
 
         assert (world.IsCanonical(Result.Offset));
         return (Result);
@@ -229,8 +233,19 @@ public class EntityService {
                                 Block.LowEntityIndex[Index] = First.LowEntityIndex[First.EntityCount];
                                 if (First.EntityCount == 0) {
                                     if (First.next != null) {
+                                        Integer nextN = First.next;
+                                        WorldEntityBlock nextBlock = FirstBlock.get(nextN);
+                                        WorldEntityBlock firstBlock = new WorldEntityBlock();
+                                        int[] tmp = new int[16];
+                                        System.arraycopy(nextBlock.LowEntityIndex, 0, tmp, 0, nextBlock.LowEntityIndex.length);
+                                        firstBlock.LowEntityIndex = tmp;
+                                        firstBlock.next = nextBlock.next;
+                                        firstBlock.EntityCount = nextBlock.EntityCount;
+                                        nextBlock.next = World.firstFree;
+                                        FirstBlock.set(0, firstBlock);
+                                        FirstBlock.addLast(nextBlock);
+                                        World.firstFree = FirstBlock.indexOf(nextBlock);
                                     }
-                                    //@TODO potentially remove
                                     NotFound = false;
                                 }
                             }
@@ -317,12 +332,11 @@ public class EntityService {
     }
 
     public void UpdateFamiliar(Entity Entity, float dt) {
-        Entity ClosestHero = new Entity();
-        float ClosestHeroDSq = (float) Math.pow(10.0f, 10.0f);
-        for (int HighEntityIndex = 1; HighEntityIndex < gameMemory.HighEntities.length; ++HighEntityIndex) {
+        Entity ClosestHero = null;
+        float ClosestHeroDSq = (float) Math.pow(10.0f, 2);
+        for (int HighEntityIndex = 1; HighEntityIndex < gameMemory.HighEntityCount; ++HighEntityIndex) {
             Entity TestEntity = EntityFromHighIndex(HighEntityIndex);
-
-            if (TestEntity != null) {
+            assert (TestEntity != null);
                 if (TestEntity.Low.Type == EntityType.HERO) {
                     float TestDSq = new Vector2f(TestEntity.High.P).sub(new Vector2f(Entity.High.P)).lengthSquared();
                     if (TestEntity.Low.Type == EntityType.HERO) {
@@ -334,17 +348,16 @@ public class EntityService {
                         ClosestHeroDSq = TestDSq;
                     }
                 }
-            }
         }
 
         Vector2f ddP = new Vector2f();
-        if (ClosestHero.High != null && (ClosestHeroDSq > 0.01f)) {
+        if (ClosestHero != null && ClosestHero.High != null && ClosestHeroDSq > Math.pow(3.0f, 2.0f)) {
             float Acceleration = 0.5f;
             float OneOverLength = (float) (Acceleration / Math.sqrt(ClosestHeroDSq));
             ddP = new Vector2f(ClosestHero.High.P).sub(new Vector2f(Entity.High.P)).mul(OneOverLength);
         }
 
-        moveEntity(Entity, ddP, dt, 10);
+        moveEntity(Entity, ddP, dt, GameApp.playerSpeed);
     }
 
     public void UpdateMonstar(Entity entity, float dt) {
@@ -421,25 +434,57 @@ public class EntityService {
             }
         }
 
-        World.WorldPosition NewP = world.MapIntoChunkSpace(Camera.position, entity.High.P);
+        World.WorldPosition NewP = world.MapIntoChunkSpace(entity.Low.Type == EntityType.FAMILIAR ? Camera.oldPosition : Camera.position, entity.High.P);
         ChangeEntityLocation(entity.LowIndex, entity.Low.P, NewP);
         entity.Low.P = NewP;
     }
 
+    void pushPiece(EntityVisiblePieceGroup group, Vector2f offset, Vector2f align, float alpha) {
+        assert(group.PieceCount < group.Pieces.length);
+
+        EntityVisiblePiece piece = group.Pieces[group.PieceCount];
+        if (piece == null) {
+            piece = new EntityVisiblePiece();
+        }
+        piece.Offset = offset.sub(align);
+        piece.Alpha = alpha;
+        group.Pieces[group.PieceCount] = piece;
+        group.PieceCount = group.PieceCount + 1;
+    }
+
     public Map<EntityType, List<Map.Entry<EntityType, Matrix4f>>> getModelMatrix() {
+        EntityVisiblePieceGroup pieceGroup = new EntityVisiblePieceGroup();
+
         return IntStream.range(1, gameMemory.HighEntityCount).mapToObj(HighEntityIndex -> {
+            pieceGroup.PieceCount = 0;
             Entity.HighEntity highEntity = gameMemory.HighEntities[HighEntityIndex];
             Entity.LowEntity lowEntity = gameMemory.LowEntities[highEntity.LowEntityIndex];
 
-            //@TODO
-            Entity Entity = new Entity();
-            Entity.LowIndex = highEntity.LowEntityIndex;
-            Entity.Low = lowEntity;
-            Entity.High = highEntity;
+            Entity entity = new Entity();
+            entity.LowIndex = highEntity.LowEntityIndex;
+            entity.Low = lowEntity;
+            entity.High = highEntity;
             switch (lowEntity.Type.name().toLowerCase()) {
-                case ("familiar"): {
-//                    UpdateFamiliar(Entity, GameApp.globalinterval);
+                case ("wall") : {
+                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(40f, 80f), 0.0f);
                 } break;
+                case ("hero") : {
+                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), 0.0f);
+                } break;
+                case ("familiar"): {
+                    UpdateFamiliar(entity, GameApp.globalinterval);
+                    entity.High.tbob = entity.High.tbob + GameApp.globalinterval;
+                    if (entity.High.tbob > 2.0f * Math.PI) {
+                        entity.High.tbob = (float) (entity.High.tbob - (2.0f * Math.PI));
+                    }
+                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), 0.0f);
+                } break;
+                case ("monstar"): {
+
+                } break;
+                default: {
+                    throw new RuntimeException("INVALID PATH");
+                }
             }
 
             highEntity.P = new Vector2f(highEntity.P);

@@ -6,7 +6,6 @@ import com.robotzero.gamefx.renderengine.entity.AddLowEntityResult;
 import com.robotzero.gamefx.renderengine.entity.Entity;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
-import com.robotzero.gamefx.renderengine.PlayerService;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
@@ -46,25 +45,23 @@ public class GameApp implements Runnable {
     private Mesh background;
     private Mesh bird;
     private Mesh quad;
-    private final PlayerService playerService;
+    private Mesh familiarA;
     private final EntityService entityService;
     private Vector2f ddPlayer;
     private final GameMemory gameMemory;
     private final World world;
-    private int playerSpeed;
+    public static int playerSpeed;
     private int LowIndex;
     private Entity ControllingEntity;
-    private Entity familiar;
     private Entity monstar;
     public static float globalinterval;
 
-    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, PlayerService playerService, EntityService entityService, GameMemory g, World world) {
+    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
         this.displayManager = displayManager;
         this.render2D = render2D;
         this.camera = camera;
         this.timer = timer;
         this.assetFactory = assetFactory;
-        this.playerService = playerService;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         this.ddPlayer = new Vector2f(0.0f, 0.0f);
         this.gameMemory = g;
@@ -99,6 +96,7 @@ public class GameApp implements Runnable {
         background = assetFactory.getBackgroundMesh();
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
+        familiarA = assetFactory.getFamiliarMesh();
 
         World.WorldPosition NewCameraP = entityService.ChunkPositionFromTilePosition(
                 WorldGenerator.CameraTileX,
@@ -147,7 +145,7 @@ public class GameApp implements Runnable {
             fps = 0;
         }
         fps++;
-        render2D.render(displayManager.getWindow(), background, bird, quad);
+        render2D.render(displayManager.getWindow(), background, bird, quad, familiarA);
         displayManager.updateDisplay();
     }
 

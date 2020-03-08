@@ -12,6 +12,7 @@ import org.joml.Vector2f;
 
 public class Camera {
     public static World.WorldPosition position = new World.WorldPosition();
+    public static World.WorldPosition oldPosition = new World.WorldPosition();
     public static Vector2f EntityOffsetForFrame = new Vector2f(0.0f, 0.0f);
     private final GameMemory gameMemory;
     private final EntityService entityService;
@@ -39,6 +40,7 @@ public class Camera {
 
     public void SetCamera(World.WorldPosition NewCameraP) {
         World.WorldDifference dCameraP = World.subtract(new World.WorldPosition(NewCameraP), new World.WorldPosition(position));
+        oldPosition = new World.WorldPosition(position);
         position = NewCameraP;
         assert(entityService.ValidateEntityPairs());
         int TileSpanX = 17 * 3;

@@ -22,6 +22,7 @@ public class Render2D implements Render {
     private World world;
     private ShaderProgram birdShaderProgram;
     private ShaderProgram quadShaderProgram;
+    private ShaderProgram familiarShaderProgram;
     private final Camera camera;
     private final EntityService entityService;
 
@@ -35,6 +36,7 @@ public class Render2D implements Render {
 //        setupSceneShader();
         setupBirdShader();
         setUpQuadShader();
+        setUpFamiliarShader();
     }
 
     public void clear() {
@@ -42,10 +44,10 @@ public class Render2D implements Render {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void render(final long window, Mesh background2, Mesh bird, Mesh quad) {
+    public void render(final long window, Mesh background2, Mesh bird, Mesh quad, Mesh familiar) {
         clear();
         glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
-        renderScene(background2, bird, quad);
+        renderScene(background2, bird, quad, familiar);
 
         int error = glGetError();
         if (error != GL_NO_ERROR) {
@@ -53,7 +55,7 @@ public class Render2D implements Render {
         }
     }
 
-    private void renderScene(Mesh background, Mesh bird, Mesh quad) {
+    private void renderScene(Mesh background, Mesh bird, Mesh quad, Mesh familiar) {
         Matrix4f viewMatrix = camera.updateViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
         //@@TODO one player so far so we just get it.
@@ -62,7 +64,7 @@ public class Render2D implements Render {
 //        sceneShaderProgram.bind();
 //        sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
 //        sceneShaderProgram.setUniform("pr_matrix", projectionMatrix);
-//        sceneShaderProgram.setUniform("tex", 1);
+//        sceneShaderProgram.setUniform("tex", 1);sssssssssssss
 //
 //        background.render();
 //        background.endRender();
@@ -88,6 +90,15 @@ public class Render2D implements Render {
             quad.endRender();
         });
         quadShaderProgram.unbind();
+
+        Matrix4f familiarMatrix = entityService.getModelMatrix().get(EntityType.FAMILIAR).get(0).getValue();
+        familiarShaderProgram.bind();
+        familiarShaderProgram.setUniform("pr_matrix", projectionMatrix);
+        familiarShaderProgram.setUniform("ml_matrix", familiarMatrix);
+        familiarShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
+        familiar.render();
+        familiar.endRender();
+        familiarShaderProgram.unbind();
     }
 
     private void setupSceneShader() throws Exception {
@@ -128,8 +139,22 @@ public class Render2D implements Render {
         quadShaderProgram.createUniform("ml_matrix");
     }
 
+    private void setUpFamiliarShader() throws Exception {
+        familiarShaderProgram = new ShaderProgram();
+        familiarShaderProgram.createVertexShader(FileUtils.loadAsString("shaders/familiar.vert"));
+        familiarShaderProgram.createFragmentShader(FileUtils.loadAsString("shaders/familiar.frag"));
+        familiarShaderProgram.link();
+
+        // Create uniforms for view and projection matrices
+        familiarShaderProgram.createUniform("vw_matrix");
+        familiarShaderProgram.createUniform("pr_matrix");
+        familiarShaderProgram.createUniform("t_color");
+        familiarShaderProgram.createUniform("ml_matrix");
+    }
+
     public void cleanup() {
 //        sceneShaderProgram.cleanup();
+        familiarShaderProgram.cleanup();
         birdShaderProgram.cleanup();
         quadShaderProgram.cleanup();
     }

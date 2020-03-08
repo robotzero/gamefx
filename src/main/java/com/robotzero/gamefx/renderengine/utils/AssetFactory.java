@@ -1,6 +1,6 @@
 package com.robotzero.gamefx.renderengine.utils;
 
-import com.robotzero.gamefx.renderengine.PlayerService;
+import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.model.Material;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.model.Texture;
@@ -21,9 +21,9 @@ public class AssetFactory {
 
     private final float[] vertices2 = new float[] {
             0.0f, 0.0f, 0.0f,
-            0.0f, World.MetersToPixels * PlayerService.PlayerHeight, 0.0f,
-            World.MetersToPixels * PlayerService.PlayerWidth, World.MetersToPixels * PlayerService.PlayerHeight, 0.0f,
-            World.MetersToPixels * PlayerService.PlayerWidth, 0.0f, 0.0f
+            0.0f, World.MetersToPixels * EntityService.PlayerHeight, 0.0f,
+            World.MetersToPixels * EntityService.PlayerWidth, World.MetersToPixels * EntityService.PlayerHeight, 0.0f,
+            World.MetersToPixels * EntityService.PlayerWidth, 0.0f, 0.0f
     };
 
     private final float[] vertices3 = new float[] {
@@ -31,6 +31,13 @@ public class AssetFactory {
             0.0f, World.TileSideInPixels, 0.0f,
             World.TileSideInPixels, World.TileSideInPixels, 0.0f,
             World.TileSideInPixels, 0.0f, 0.0f
+    };
+
+    private final float[] vertices4 = new float[] {
+            0.0f, 0.0f, 0.0f,
+            0.0f, World.MetersToPixels * EntityService.FamiliarHeight, 0.0f,
+            World.MetersToPixels * EntityService.FamiliarWidth, World.MetersToPixels * EntityService.FamiliarHeight, 0.0f,
+            World.MetersToPixels * EntityService.FamiliarWidth, 0.0f, 0.0f
     };
 
     private final float[] tcs1 = new float[] {
@@ -62,6 +69,7 @@ public class AssetFactory {
     private Texture birdTexture;
     private Mesh bird;
     private Mesh quad2D;
+    private Mesh familiar;
 
     public void init() {
         bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
@@ -69,6 +77,7 @@ public class AssetFactory {
         birdTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bird.png")).orElseThrow().getPath());
         bird = new Mesh(vertices2, tcs2, indices2, birdTexture, null);
         quad2D = new Mesh(vertices3, tcs1, indices, null, new Material());
+        familiar = new Mesh(vertices4, tcs1, indices, null, new Material());
     }
 
     public Mesh getBirdMesh() {
@@ -81,5 +90,9 @@ public class AssetFactory {
 
     public Mesh getQuadMesh() {
         return quad2D;
+    }
+
+    public Mesh getFamiliarMesh() {
+        return familiar;
     }
 }

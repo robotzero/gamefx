@@ -12,6 +12,7 @@ public class Entity {
         public Vector2f P;
         public Vector2f dP;
         public int LowEntityIndex = 0;
+        public float tbob = 0;
     }
 
     public static class LowEntity {

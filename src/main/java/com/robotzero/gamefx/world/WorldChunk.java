@@ -6,7 +6,7 @@ import java.util.Objects;
 public class WorldChunk {
     private int ChunkX = 0;
     private int ChunkY = 0;
-    private LinkedList<WorldEntityBlock> FirstBlock = new LinkedList<>();
+    private final LinkedList<WorldEntityBlock> FirstBlock = new LinkedList<>();
 
     public void setTileChunkX(int tileChunkX) {
         ChunkX = tileChunkX;
