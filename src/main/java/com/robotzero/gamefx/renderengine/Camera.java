@@ -3,8 +3,12 @@ package com.robotzero.gamefx.renderengine;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
+import com.robotzero.gamefx.world.WorldChunk;
+import com.robotzero.gamefx.world.WorldEntityBlock;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+
+import java.util.Iterator;
 
 public class Camera {
     public static World.WorldPosition position = new World.WorldPosition();
@@ -47,11 +51,10 @@ public class Camera {
         SetCamera(NewCameraP);
     }
 
-    public void SetCamera(World.WorldPosition NewCameraP)
-    {
+    public void SetCamera(World.WorldPosition NewCameraP) {
         World.WorldDifference dCameraP = World.subtract(new World.WorldPosition(NewCameraP), new World.WorldPosition(position));
         position = NewCameraP;
-
+        assert(entityService.ValidateEntityPairs());
         int TileSpanX = 17 * 3;
         int TileSpanY = 9 * 3;
         Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector2f(0.0f, 0.0f),
@@ -60,22 +63,27 @@ public class Camera {
         EntityOffsetForFrame = new Vector2f(-dCameraP.dXY.x(), -dCameraP.dXY.y());
 
         entityService.OffsetAndCheckFrequencyByArea(EntityOffsetForFrame, CameraBounds);
+        assert(entityService.ValidateEntityPairs());
 
-        long MinTileX = NewCameraP.ChunkX - Long.divideUnsigned(TileSpanX, 2);
-        long MaxTileX = NewCameraP.ChunkX + Long.divideUnsigned(TileSpanX, 2);
-        long MinTileY = NewCameraP.ChunkY - Long.divideUnsigned(TileSpanY, 2);
-        long MaxTileY = NewCameraP.ChunkY + Long.divideUnsigned(TileSpanY, 2);
-        for(int EntityIndex = 1; EntityIndex < gameMemory.LowEntityCount; ++EntityIndex)
-        {
-            Entity.LowEntity Low = gameMemory.LowEntities[EntityIndex];
-            if (Low.HighEntityIndex == 0) {
-                if((Low.P.ChunkX >= MinTileX) &&
-                        (Low.P.ChunkX <= MaxTileX) &&
-                        (Low.P.ChunkY >= MinTileY) &&
-                        (Low.P.ChunkY <= MaxTileY))
-
-                {
-                    entityService.MakeEntityHighFrequency(EntityIndex);
+        // TODO(casey): Do this in terms of tile chunks!
+        World.WorldPosition MinChunkP = entityService.getWorld().MapIntoChunkSpace(NewCameraP, Rectangle.GetMinCorner(CameraBounds));
+        World.WorldPosition MaxChunkP = entityService.getWorld().MapIntoChunkSpace(NewCameraP, Rectangle.GetMaxCorner(CameraBounds));
+        for (int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
+            for (int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
+                WorldChunk Chunk = entityService.getWorld().GetWorldChunk(ChunkX, ChunkY, false);
+                if (Chunk != null) {
+                    for (WorldEntityBlock Block = Chunk.getFirstBlock().get(0); Block != null; Block = Block.next == null ? null : Chunk.getFirstBlock().get(Block.next)) {
+                        for (int EntityIndexIndex = 0; EntityIndexIndex < Block.EntityCount; ++EntityIndexIndex) {
+                            int LowEntityIndex = Block.LowEntityIndex[EntityIndexIndex];
+                            Entity.LowEntity Low = gameMemory.LowEntities[LowEntityIndex];
+                            if (Low.HighEntityIndex == 0) {
+                                Vector2f CameraSpaceP = entityService.GetCameraSpaceP(Low);
+                                if (Rectangle.IsInRectangle(CameraBounds, CameraSpaceP)) {
+                                    entityService.MakeEntityHighFrequency(Low, LowEntityIndex, CameraSpaceP);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

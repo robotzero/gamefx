@@ -8,26 +8,21 @@ import java.math.BigInteger;
 public class WorldGenerator {
     public static final int tilesPerWidth = 17;
     public static final int tilesPerHeight = 9;
-    public static final long screenBaseX = 0;
-    public static final long screenBaseY = 0;
-    private final EntityService entityService;
+    public static final int screenBaseX = 0;
+    public static final int screenBaseY = 0;
 
-    public WorldGenerator(EntityService entityService) {
-        this.entityService = entityService;
-    }
-
-    public void renderWorld(World world) {
+    public static void renderWorld(EntityService entityService) {
         // TODO(casey): Waiting for full sparseness
         int randomNumberIndex = 0;
-        long screenX = screenBaseX;
-        long screenY = screenBaseY;
+        int screenX = screenBaseX;
+        int screenY = screenBaseY;
         boolean doorLeft = false;
         boolean doorRight = false;
         boolean doorTop = false;
         boolean doorBottom = false;
 
         for (int screenIndex = 0;
-             screenIndex < 2;
+             screenIndex < 2000;
              ++screenIndex) {
 
             int randomChoice;
@@ -45,8 +40,8 @@ public class WorldGenerator {
                 for (int tileX = 0;
                      tileX < tilesPerWidth;
                      ++tileX) {
-                    long absTileX = screenX * tilesPerWidth + tileX;
-                    long absTileY = screenY * tilesPerHeight + tileY;
+                    int absTileX = screenX * tilesPerWidth + tileX;
+                    int absTileY = screenY * tilesPerHeight + tileY;
 
                     byte tileValue = 1;
                     if ((tileX == 0) && (!doorLeft || (tileY != (tilesPerHeight / 2)))) {
@@ -67,7 +62,7 @@ public class WorldGenerator {
 
                     //world.SetTileValue(BigInteger.valueOf(absTileX).intValueExact(), BigInteger.valueOf(absTileY).intValueExact(), tileValue);
                     if (tileValue == 2) {
-                        entityService.AddWall(BigInteger.valueOf(absTileX).intValueExact(), BigInteger.valueOf(absTileY).intValueExact());
+                        entityService.AddWall(absTileX, absTileY);
                     }
                 }
             }

@@ -10,7 +10,6 @@ import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
-import com.robotzero.gamefx.world.WorldGenerator;
 
 import java.util.Optional;
 
@@ -25,9 +24,8 @@ public class Robot {
             Timer timer = new Timer();
             DisplayManager displayManager = new DisplayManager();
             AssetFactory assetFactory = new AssetFactory();
-            EntityService entityService = new EntityService(gameMemory);
-            WorldGenerator worldGenerator = new WorldGenerator(entityService);
-            World world = new World(worldGenerator);
+            World world = new World();
+            EntityService entityService = new EntityService(gameMemory, world);
             Camera camera = new Camera(gameMemory, entityService);
             PlayerService playerService = new PlayerService(world, entityService, gameMemory);
             Render render = new Render2D(camera, playerService, world);

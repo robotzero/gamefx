@@ -16,8 +16,6 @@ import com.robotzero.gamefx.world.WorldGenerator;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import java.math.BigInteger;
-
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
@@ -69,9 +67,9 @@ public class GameApp implements Runnable {
         this.world = world;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
-        entityService.AddLowEntity(EntityType.NULL);
+        entityService.AddLowEntity(EntityType.NULL, null);
         gameMemory.HighEntityCount = 1;
-        this.world.renderWorld();
+        World.renderWorld(entityService);
     }
 
     public void run() {

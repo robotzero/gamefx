@@ -131,6 +131,9 @@ public class PlayerService {
             }
         }
 
-        entity.Low.P = world.MapIntoTileSpace(Camera.position, entity.High.P);
+        World.WorldPosition NewP = world.MapIntoChunkSpace(Camera.position, entity.High.P);
+        //@TODO
+        entityService.ChangeEntityLocation(entity.LowIndex, entity.Low.P, NewP);
+        entity.Low.P = NewP;
     }
 }

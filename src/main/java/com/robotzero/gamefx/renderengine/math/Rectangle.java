@@ -57,4 +57,21 @@ public class Rectangle {
     public Vector2f getMax() {
         return this.Max;
     }
+
+    public static Vector2f GetMinCorner(Rectangle Rect) {
+        Vector2f Result = Rect.Min;
+        return(Result);
+    }
+
+    public static Vector2f GetMaxCorner(Rectangle Rect)
+    {
+        Vector2f Result = Rect.Max;
+        return(Result);
+    }
+
+    public Vector2f GetCenter(Rectangle Rect)
+    {
+        Vector2f Result = Rect.Min.add(Rect.Max).mul(0.5f);
+        return(Result);
+    }
 }
