@@ -2,9 +2,10 @@ package com.robotzero.gamefx;
 
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
-import com.robotzero.gamefx.renderengine.Entity;
-import com.robotzero.gamefx.renderengine.EntityService;
-import com.robotzero.gamefx.renderengine.EntityType;
+import com.robotzero.gamefx.renderengine.entity.AddLowEntityResult;
+import com.robotzero.gamefx.renderengine.entity.Entity;
+import com.robotzero.gamefx.renderengine.entity.EntityService;
+import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.PlayerService;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.model.Mesh;
@@ -13,6 +14,7 @@ import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
+import com.robotzero.gamefx.renderengine.utils.Random;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
@@ -52,6 +54,9 @@ public class GameApp implements Runnable {
     private int playerSpeed;
     private int LowIndex;
     private Entity ControllingEntity;
+    private Entity familiar;
+    private Entity monstar;
+    public static float globalinterval;
 
     public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, PlayerService playerService, EntityService entityService, GameMemory g, World world) {
         this.displayManager = displayManager;
@@ -94,12 +99,22 @@ public class GameApp implements Runnable {
         background = assetFactory.getBackgroundMesh();
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
+
         World.WorldPosition NewCameraP = entityService.ChunkPositionFromTilePosition(
-                WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17 / 2,
-                WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9 / 2
+                WorldGenerator.CameraTileX,
+                WorldGenerator.CameraTileY
         );
+        entityService.AddMonstar(WorldGenerator.CameraTileX + 2, WorldGenerator.CameraTileY + 2);
+        for (int FamiliarIndex = 0; FamiliarIndex < 1; ++FamiliarIndex) {
+            int FamiliarOffsetX = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 7;
+            int FamiliarOffsetY = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 3;
+            if ((FamiliarOffsetX != 0) || (FamiliarOffsetY != 0)) {
+                AddLowEntityResult result = entityService.AddFamiliar(WorldGenerator.CameraTileX + FamiliarOffsetX, WorldGenerator.CameraTileY + FamiliarOffsetY);
+            }
+        }
         camera.SetCamera(NewCameraP);
-        LowIndex = entityService.AddPlayer();
+        LowIndex =  entityService.AddPlayer().LowIndex;
+
     }
 
     public void gameLoop() {
@@ -137,7 +152,7 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
-        ControllingEntity = entityService.GetHighEntity(LowIndex);
+        ControllingEntity = entityService.ForceEntityIntoHigh(LowIndex);
         playerSpeed = 10;
         cameraInc.set(0f, 0f, 0f);
         ddPlayer.set(0f, 0f);
@@ -198,9 +213,9 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        playerService.movePlayer(ControllingEntity, ddPlayer, interval, playerSpeed);
-        Camera.EntityOffsetForFrame = new Vector2f(0.0f, 0.0f);
-        Entity cameraFollowingEntity = entityService.GetHighEntity(gameMemory.CameraFollowingEntityIndex);
+        globalinterval = interval;
+        entityService.moveEntity(ControllingEntity, ddPlayer, interval, playerSpeed);
+        Entity cameraFollowingEntity = entityService.ForceEntityIntoHigh(gameMemory.CameraFollowingEntityIndex);
         if (cameraFollowingEntity.High != null) {
            camera.movePosition(cameraFollowingEntity);
         }

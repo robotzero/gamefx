@@ -1,10 +1,9 @@
-package com.robotzero.gamefx.renderengine;
+package com.robotzero.gamefx.renderengine.entity;
 
 import com.robotzero.gamefx.world.World;
 import org.joml.Vector2f;
 
 public class Entity {
-    public EntityResidence Residence = EntityResidence.Nonexistent;
     public int LowIndex = 0;
     public LowEntity Low;
     public HighEntity High;
@@ -18,14 +17,10 @@ public class Entity {
     public static class LowEntity {
         public World.WorldPosition P = new World.WorldPosition();
         public float Width, Height;
-        boolean Collides;
+        public boolean Collides;
         public EntityType Type;
         public int HighEntityIndex;
     }
-
-    public enum EntityResidence {
-        Nonexistent, Low, High
-    };
 }
 
 

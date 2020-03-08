@@ -1,19 +1,18 @@
 package com.robotzero.gamefx.world;
 
-import com.robotzero.gamefx.renderengine.EntityService;
+import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.utils.Random;
-
-import java.math.BigInteger;
 
 public class WorldGenerator {
     public static final int tilesPerWidth = 17;
     public static final int tilesPerHeight = 9;
     public static final int screenBaseX = 0;
     public static final int screenBaseY = 0;
+    public static int CameraTileX = WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17/2;
+    public static int CameraTileY = WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9/2;
+    public static int randomNumberIndex = 0;
 
     public static void renderWorld(EntityService entityService) {
-        // TODO(casey): Waiting for full sparseness
-        int randomNumberIndex = 0;
         int screenX = screenBaseX;
         int screenY = screenBaseY;
         boolean doorLeft = false;

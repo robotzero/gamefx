@@ -1,6 +1,6 @@
 package com.robotzero.gamefx.world;
 
-import com.robotzero.gamefx.renderengine.Entity;
+import com.robotzero.gamefx.renderengine.entity.Entity;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;

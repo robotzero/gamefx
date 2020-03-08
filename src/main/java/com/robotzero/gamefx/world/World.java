@@ -1,7 +1,7 @@
 package com.robotzero.gamefx.world;
 
 import com.robotzero.gamefx.renderengine.DisplayManager;
-import com.robotzero.gamefx.renderengine.EntityService;
+import com.robotzero.gamefx.renderengine.entity.EntityService;
 import org.joml.Vector2f;
 
 import java.util.LinkedHashMap;
@@ -77,8 +77,8 @@ public class World {
 
     WorldPosition RecanonicalizeCoord(WorldPosition Pos)
     {
-        int OffsetX = Math.round(Pos.Offset.x() / ChunkSideInMeters);
-        int OffsetY = Math.round(Pos.Offset.y() / ChunkSideInMeters);
+        int OffsetX = (int) Math.floor(Pos.Offset.x() / ChunkSideInMeters);
+        int OffsetY = (int) Math.floor(Pos.Offset.y() / ChunkSideInMeters);
         Pos.ChunkX = Pos.ChunkX + OffsetX;
         Pos.ChunkY = Pos.ChunkY + OffsetY;
         Pos.Offset.x = Pos.Offset.x() -  OffsetX * ChunkSideInMeters;

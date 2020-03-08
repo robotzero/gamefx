@@ -2,7 +2,7 @@ package com.robotzero.gamefx;
 
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
-import com.robotzero.gamefx.renderengine.EntityService;
+import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.PlayerService;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.Render2D;
@@ -27,8 +27,8 @@ public class Robot {
             World world = new World();
             EntityService entityService = new EntityService(gameMemory, world);
             Camera camera = new Camera(gameMemory, entityService);
-            PlayerService playerService = new PlayerService(world, entityService, gameMemory);
-            Render render = new Render2D(camera, playerService, world);
+            PlayerService playerService = new PlayerService(world, gameMemory);
+            Render render = new Render2D(camera, entityService, world);
             GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, playerService, entityService, gameMemory, world);
             gameApp.run();
         } catch (Throwable t) {

@@ -1,5 +1,7 @@
 package com.robotzero.gamefx.renderengine;
 
+import com.robotzero.gamefx.renderengine.entity.Entity;
+import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
@@ -7,8 +9,6 @@ import com.robotzero.gamefx.world.WorldChunk;
 import com.robotzero.gamefx.world.WorldEntityBlock;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
-
-import java.util.Iterator;
 
 public class Camera {
     public static World.WorldPosition position = new World.WorldPosition();
@@ -32,20 +32,6 @@ public class Camera {
     }
 
     public void movePosition(Entity entity) {
-//        World.WorldPosition NewCameraP = new World.WorldPosition(position);
-
-//        if(entity.High.P.x()  > (9.0f * World.TileSideInMeters)) {
-//            NewCameraP.AbsTileX += 17;
-//        }
-//        if(entity.High.P.x() < -(9.0f * World.TileSideInMeters)) {
-//            NewCameraP.AbsTileX -= 17;
-//        }
-//        if(entity.High.P.y() > (5.0f * World.TileSideInMeters)) {
-//            NewCameraP.AbsTileY += 9;
-//        }
-//        if(entity.High.P.y() < -(5.0f * World.TileSideInMeters)) {
-//            NewCameraP.AbsTileY -= 9;
-//        }
         World.WorldPosition NewCameraP = new World.WorldPosition(entity.Low.P);
 
         SetCamera(NewCameraP);

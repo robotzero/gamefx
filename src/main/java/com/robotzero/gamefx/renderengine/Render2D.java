@@ -1,5 +1,7 @@
 package com.robotzero.gamefx.renderengine;
 
+import com.robotzero.gamefx.renderengine.entity.EntityService;
+import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.FileUtils;
 import com.robotzero.gamefx.renderengine.utils.ShaderProgram;
@@ -21,11 +23,11 @@ public class Render2D implements Render {
     private ShaderProgram birdShaderProgram;
     private ShaderProgram quadShaderProgram;
     private final Camera camera;
-    private final PlayerService player;
+    private final EntityService entityService;
 
-    public Render2D(Camera camera, PlayerService player, World world) {
+    public Render2D(Camera camera, EntityService entityService, World world) {
         this.camera = camera;
-        this.player = player;
+        this.entityService = entityService;
         this.world = world;
     }
 
@@ -55,7 +57,7 @@ public class Render2D implements Render {
         Matrix4f viewMatrix = camera.updateViewMatrix();
         Matrix4f projectionMatrix = camera.getProjectionMatrix();
         //@@TODO one player so far so we just get it.
-        Matrix4f playerModelMatrix = player.getModelMatrix().get(EntityType.HERO).get(0).getValue();
+        Matrix4f playerModelMatrix = entityService.getModelMatrix().get(EntityType.HERO).get(0).getValue();
         Matrix4f quadViewMatrix = new Matrix4f().identity();
 //        sceneShaderProgram.bind();
 //        sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
@@ -79,7 +81,7 @@ public class Render2D implements Render {
         quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
         quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
         quadShaderProgram.setUniform("vw_matrix", viewMatrix);
-        player.getModelMatrix().get(EntityType.WALL).forEach((key) -> {
+        entityService.getModelMatrix().get(EntityType.WALL).forEach((key) -> {
             quadShaderProgram.setUniform("ml_matrix", key.getValue());
             quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
             quad.render();
