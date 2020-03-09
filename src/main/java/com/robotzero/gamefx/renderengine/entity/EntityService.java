@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.renderengine.entity;
 
+import com.badlogic.gdx.math.Vector2;
 import com.robotzero.gamefx.GameApp;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
@@ -7,9 +8,11 @@ import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldChunk;
 import com.robotzero.gamefx.world.WorldEntityBlock;
+import imgui.Col;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -439,15 +442,17 @@ public class EntityService {
         entity.Low.P = NewP;
     }
 
-    void pushPiece(EntityVisiblePieceGroup group, Vector2f offset, Vector2f align, float alpha) {
+    void pushPiece(EntityVisiblePieceGroup group, Vector2f offset, Vector2f align, Vector2f Dim, Vector4f Color, float EntityZC) {
         assert(group.PieceCount < group.Pieces.length);
 
         EntityVisiblePiece piece = group.Pieces[group.PieceCount];
         if (piece == null) {
             piece = new EntityVisiblePiece();
         }
-        piece.Offset = offset.sub(align);
-        piece.Alpha = alpha;
+        piece.Offset = new Vector2f(offset.x(), -offset.y()).mul(World.MetersToPixels).sub(align);
+        piece.EntityZC = EntityZC;
+        piece.Color = Color;
+        piece.Dim = Dim;
         group.Pieces[group.PieceCount] = piece;
         group.PieceCount = group.PieceCount + 1;
     }
@@ -466,10 +471,10 @@ public class EntityService {
             entity.High = highEntity;
             switch (lowEntity.Type.name().toLowerCase()) {
                 case ("wall") : {
-                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(40f, 80f), 0.0f);
+                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(40f, 80f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
                 } break;
                 case ("hero") : {
-                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), 0.0f);
+                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
                 } break;
                 case ("familiar"): {
                     UpdateFamiliar(entity, GameApp.globalinterval);
@@ -477,7 +482,7 @@ public class EntityService {
                     if (entity.High.tbob > 2.0f * Math.PI) {
                         entity.High.tbob = (float) (entity.High.tbob - (2.0f * Math.PI));
                     }
-                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), 0.0f);
+                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
                 } break;
                 case ("monstar"): {
 
@@ -491,10 +496,16 @@ public class EntityService {
             final Matrix4f v = new Matrix4f();
             float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * highEntity.P.x();
             float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * highEntity.P.y();
-            float PlayerLeft = EntityGroundPointX - 0.5f * World.MetersToPixels * lowEntity.Width;
-            float PlayerTop = EntityGroundPointY - 0.5f * World.MetersToPixels * lowEntity.Height;
+//            float PlayerLeft = EntityGroundPointX - 0.5f * World.MetersToPixels * lowEntity.Width;
+//            float PlayerTop = EntityGroundPointY - 0.5f * World.MetersToPixels * lowEntity.Height;
 
-            return Map.of(lowEntity.Type, v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f)));
+            EntityVisiblePiece Piece = pieceGroup.Pieces[0];
+            Vector2f Center = new Vector2f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y());
+            Vector2f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector2f(0, 0f));
+
+            return Map.of(lowEntity.Type, v.identity().translate(new Vector3f(Center.sub(HalfDim).x(), Center.add(HalfDim).y(), 0f)));
+
+//            return Map.of(lowEntity.Type, v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f)));
         }).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
             return a.getKey();
         }));
