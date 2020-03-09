@@ -16,7 +16,7 @@ public class World {
     public static float ScreenCenterX = 0.5f * DisplayManager.WIDTH;
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
     public static Integer firstFree = null;
-    private static int tileChunkHashSize = 4096;
+    private static final int tileChunkHashSize = 4096;
 
     private Map<Long, WorldChunk> tileChunkHash = new LinkedHashMap<>(tileChunkHashSize);
 

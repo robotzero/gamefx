@@ -59,11 +59,7 @@ public class EntityService {
         gameMemory.LowEntities[EntityIndex] = new Entity.LowEntity();
         gameMemory.LowEntities[EntityIndex].Type = Type;
 
-        //@TODO
-        if (P != null) {
-            gameMemory.LowEntities[EntityIndex].P = new World.WorldPosition(P);
-            ChangeEntityLocation(EntityIndex, null, P);
-        }
+        ChangeEntityLocation(EntityIndex, gameMemory.LowEntities[EntityIndex], null, P);
 
         AddLowEntityResult addLowEntityResult = new AddLowEntityResult();
         addLowEntityResult.Low = gameMemory.LowEntities[EntityIndex];
@@ -217,7 +213,18 @@ public class EntityService {
         return (Valid);
     }
 
-    public void ChangeEntityLocation(int LowEntityIndex, World.WorldPosition OldP, World.WorldPosition NewP) {
+    public void ChangeEntityLocation(int LowEntityIndex, Entity.LowEntity LowEntity, World.WorldPosition OldP, World.WorldPosition NewP) {
+        ChangeEntityLocationRaw(LowEntityIndex, OldP, NewP);
+
+        if (NewP != null) {
+            LowEntity.P = NewP;
+        } else {
+            LowEntity.P = null;
+        }
+    }
+
+    public void ChangeEntityLocationRaw(int LowEntityIndex, World.WorldPosition OldP, World.WorldPosition NewP) {
+
         if (OldP != null && world.AreInSameChunk(OldP, NewP)) {
             // NOTE(casey): Leave entity where it is
         } else {
@@ -257,41 +264,43 @@ public class EntityService {
                 }
             }
 
-            // NOTE(casey): Insert the entity into its new entity block
-            WorldChunk Chunk = world.GetWorldChunk(NewP.ChunkX, NewP.ChunkY, true);
-            WorldEntityBlock Block = Chunk.getFirstBlock().get(0);
-            LinkedList<WorldEntityBlock> blah = Chunk.getFirstBlock();
-            if (Block.EntityCount == Block.LowEntityIndex.length) {
-                //@TODO reuse stuff
-                WorldEntityBlock oldBlock;
-                if (World.firstFree != null) {
-                    oldBlock = blah.get(World.firstFree);
-                    World.firstFree = oldBlock.next;
-                } else {
-                    oldBlock = new WorldEntityBlock();
+            if (NewP != null) {
+                // NOTE(casey): Insert the entity into its new entity block
+                WorldChunk Chunk = world.GetWorldChunk(NewP.ChunkX, NewP.ChunkY, true);
+                WorldEntityBlock Block = Chunk.getFirstBlock().get(0);
+                LinkedList<WorldEntityBlock> blah = Chunk.getFirstBlock();
+                if (Block.EntityCount == Block.LowEntityIndex.length) {
+                    //@TODO reuse stuff
+                    WorldEntityBlock oldBlock;
+                    if (World.firstFree != null) {
+                        oldBlock = blah.get(World.firstFree);
+                        World.firstFree = oldBlock.next;
+                    } else {
+                        oldBlock = new WorldEntityBlock();
+                    }
+                    oldBlock.EntityCount = Block.EntityCount;
+                    int[] tmp = new int[16];
+                    System.arraycopy(Block.LowEntityIndex, 0, tmp, 0, Block.LowEntityIndex.length);
+                    oldBlock.LowEntityIndex = tmp;
+                    WorldEntityBlock next = new WorldEntityBlock();
+                    WorldEntityBlock bn = Block.next != null ? blah.get(Block.next) : null;
+                    next.EntityCount = bn != null ? bn.EntityCount : 0;
+                    next.next = bn != null ? bn.next : null;
+                    tmp = new int[16];
+                    System.arraycopy(bn != null ? bn.LowEntityIndex : new int[16], 0, tmp, 0, bn != null ? bn.LowEntityIndex.length : 16);
+                    next.LowEntityIndex = tmp;
+                    Block.EntityCount = 0;
+                    Block.LowEntityIndex = new int[16];
+                    blah.addLast(oldBlock);
+                    blah.addLast(next);
+                    int oldIndex = blah.indexOf(oldBlock);
+                    int nIndex = blah.indexOf(next);
+                    oldBlock.next = nIndex;
+                    Block.next = oldIndex;
                 }
-                oldBlock.EntityCount = Block.EntityCount;
-                int[] tmp = new int[16];
-                System.arraycopy(Block.LowEntityIndex, 0, tmp, 0, Block.LowEntityIndex.length);
-                oldBlock.LowEntityIndex = tmp;
-                WorldEntityBlock next = new WorldEntityBlock();
-                WorldEntityBlock bn = Block.next != null ? blah.get(Block.next) : null;
-                next.EntityCount = bn != null ? bn.EntityCount : 0;
-                next.next = bn != null ? bn.next : null;
-                tmp = new int[16];
-                System.arraycopy(bn != null ? bn.LowEntityIndex : new int[16], 0, tmp, 0, bn != null ? bn.LowEntityIndex.length : 16);
-                next.LowEntityIndex = tmp;
-                Block.EntityCount = 0;
-                Block.LowEntityIndex = new int[16];
-                blah.addLast(oldBlock);
-                blah.addLast(next);
-                int oldIndex = blah.indexOf(oldBlock);
-                int nIndex = blah.indexOf(next);
-                oldBlock.next = nIndex;
-                Block.next = oldIndex;
+                Block.LowEntityIndex[Block.EntityCount] = LowEntityIndex;
+                Block.EntityCount = Block.EntityCount + 1;
             }
-            Block.LowEntityIndex[Block.EntityCount] = LowEntityIndex;
-            Block.EntityCount = Block.EntityCount + 1;
         }
     }
 
@@ -438,8 +447,7 @@ public class EntityService {
         }
 
         World.WorldPosition NewP = world.MapIntoChunkSpace(entity.Low.Type == EntityType.FAMILIAR ? Camera.oldPosition : Camera.position, entity.High.P);
-        ChangeEntityLocation(entity.LowIndex, entity.Low.P, NewP);
-        entity.Low.P = NewP;
+        ChangeEntityLocation(entity.LowIndex, entity.Low, entity.Low.P, NewP);
     }
 
     void pushPiece(EntityVisiblePieceGroup group, Vector2f offset, Vector2f align, Vector2f Dim, Vector4f Color, float EntityZC) {
