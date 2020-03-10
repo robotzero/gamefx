@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.robotzero.gamefx.GameApp;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
+import com.robotzero.gamefx.renderengine.translations.MoveSpec;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldChunk;
@@ -172,9 +173,10 @@ public class EntityService {
     public void OffsetAndCheckFrequencyByArea(Vector2f Offset, Rectangle HighFrequencyBounds) {
         for (int HighEntityIndex = 1; HighEntityIndex < gameMemory.HighEntityCount; ) {
             Entity.HighEntity High = gameMemory.HighEntities[HighEntityIndex];
+            Entity.LowEntity Low = gameMemory.LowEntities[High.LowEntityIndex];
 
             High.P = new Vector2f(High.P).add(Offset);
-            if (Rectangle.IsInRectangle(HighFrequencyBounds, High.P)) {
+            if (Low.P != null && Rectangle.IsInRectangle(HighFrequencyBounds, High.P)) {
                 ++HighEntityIndex;
             } else {
                 MakeEntityLowFrequency(High.LowEntityIndex);
@@ -369,20 +371,36 @@ public class EntityService {
             ddP = new Vector2f(ClosestHero.High.P).sub(new Vector2f(Entity.High.P)).mul(OneOverLength);
         }
 
-        moveEntity(Entity, ddP, dt, GameApp.playerSpeed);
+        MoveSpec moveSpec = new MoveSpec();
+        moveSpec.UnitMaxAccelVector = true;
+        moveSpec.Speed = GameApp.playerSpeed;
+        moveSpec.Drag = 8.0f;
+
+        moveEntity(Entity, ddP, dt, moveSpec);
     }
 
     public void UpdateMonstar(Entity entity, float dt) {
     }
 
-    public void moveEntity(Entity entity, Vector2f ddP, float interval, int playerSpeed) {
-        float ddPLength = new Vector2f(ddP).lengthSquared();
-        if (ddPLength > 1.0f) {
-            ddP = new Vector2f(ddP.x(), ddP.y()).mul((float) (1.0f / Math.sqrt(ddPLength)));
+    public MoveSpec DefaultMoveSpec() {
+        MoveSpec moveSpec = new MoveSpec();
+        moveSpec.UnitMaxAccelVector = false;
+        moveSpec.Speed = 1.0f;
+        moveSpec.Drag = 0.0f;
+
+        return moveSpec;
+    }
+
+    public void moveEntity(Entity entity, Vector2f ddP, float interval, MoveSpec moveSpec) {
+        if (moveSpec.UnitMaxAccelVector) {
+            float ddPLength = new Vector2f(ddP).lengthSquared();
+            if (ddPLength > 1.0f) {
+                ddP = new Vector2f(ddP.x(), ddP.y()).mul((float) (1.0f / Math.sqrt(ddPLength)));
+            }
         }
 
-        ddP = ddP.mul(playerSpeed);
-        ddP = ddP.add(new Vector2f(entity.High.dP.x(), entity.High.dP.y()).mul(-8.0f));
+        ddP = ddP.mul(moveSpec.Speed);
+        ddP = ddP.add(new Vector2f(entity.High.dP.x(), entity.High.dP.y()).mul(-moveSpec.Drag));
 
 
         Vector2f OldPlayerP = new Vector2f(entity.High.P);
@@ -395,40 +413,43 @@ public class EntityService {
             Vector2f WallNormal = new Vector2f(0.0f, 0.0f);
             int HitHighEntityIndex = 0;
             Vector2f DesiredPosition = new Vector2f(entity.High.P).add(playerDelta);
-            for (int TestHighEntityIndex = 1; TestHighEntityIndex < gameMemory.HighEntityCount; ++TestHighEntityIndex) {
-                if (TestHighEntityIndex != entity.Low.HighEntityIndex) {
-                    Entity TestEntity = new Entity();
-                    TestEntity.High = gameMemory.HighEntities[TestHighEntityIndex];
-                    TestEntity.LowIndex = TestEntity.High.LowEntityIndex;
-                    TestEntity.Low = gameMemory.LowEntities[TestEntity.LowIndex];
-                    if (TestEntity.Low.Collides) {
-                        float DiameterW = TestEntity.Low.Width + entity.Low.Width;
-                        float DiameterH = TestEntity.Low.Height + entity.Low.Height;
-                        Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
-                        Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
-                        Vector2f Rel = new Vector2f(entity.High.P).sub(new Vector2f(TestEntity.High.P));
-                        if (world.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
-                                tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
-                            WallNormal = new Vector2f(-1, 0);
-                            HitHighEntityIndex = TestHighEntityIndex;
-                        }
 
-                        if (world.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
-                                tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
-                            WallNormal = new Vector2f(1, 0);
-                            HitHighEntityIndex = TestHighEntityIndex;
-                        }
+            if (entity.Low.Collides) {
+                for (int TestHighEntityIndex = 1; TestHighEntityIndex < gameMemory.HighEntityCount; ++TestHighEntityIndex) {
+                    if (TestHighEntityIndex != entity.Low.HighEntityIndex) {
+                        Entity TestEntity = new Entity();
+                        TestEntity.High = gameMemory.HighEntities[TestHighEntityIndex];
+                        TestEntity.LowIndex = TestEntity.High.LowEntityIndex;
+                        TestEntity.Low = gameMemory.LowEntities[TestEntity.LowIndex];
+                        if (TestEntity.Low.Collides) {
+                            float DiameterW = TestEntity.Low.Width + entity.Low.Width;
+                            float DiameterH = TestEntity.Low.Height + entity.Low.Height;
+                            Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
+                            Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
+                            Vector2f Rel = new Vector2f(entity.High.P).sub(new Vector2f(TestEntity.High.P));
+                            if (world.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                                    tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
+                                WallNormal = new Vector2f(-1, 0);
+                                HitHighEntityIndex = TestHighEntityIndex;
+                            }
 
-                        if (world.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
-                                tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
-                            WallNormal = new Vector2f(0, -1);
-                            HitHighEntityIndex = TestHighEntityIndex;
-                        }
+                            if (world.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                                    tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
+                                WallNormal = new Vector2f(1, 0);
+                                HitHighEntityIndex = TestHighEntityIndex;
+                            }
 
-                        if (world.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
-                                tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
-                            WallNormal = new Vector2f(0, 1);
-                            HitHighEntityIndex = TestHighEntityIndex;
+                            if (world.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                                    tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
+                                WallNormal = new Vector2f(0, -1);
+                                HitHighEntityIndex = TestHighEntityIndex;
+                            }
+
+                            if (world.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                                    tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
+                                WallNormal = new Vector2f(0, 1);
+                                HitHighEntityIndex = TestHighEntityIndex;
+                            }
                         }
                     }
                 }

@@ -8,6 +8,7 @@ import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.model.Mesh;
+import com.robotzero.gamefx.renderengine.translations.MoveSpec;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
@@ -54,6 +55,7 @@ public class GameApp implements Runnable {
     private int LowIndex;
     private Entity ControllingEntity;
     private Entity monstar;
+    private MoveSpec DefaultMoveSpec;
     public static float globalinterval;
 
     public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
@@ -72,6 +74,10 @@ public class GameApp implements Runnable {
         entityService.AddLowEntity(EntityType.NULL, null);
         gameMemory.HighEntityCount = 1;
         World.renderWorld(entityService);
+        DefaultMoveSpec = entityService.DefaultMoveSpec();
+        DefaultMoveSpec.UnitMaxAccelVector = true;
+        DefaultMoveSpec.Drag = 8.0f;
+        DefaultMoveSpec.Speed = 10f;
     }
 
     public void run() {
@@ -212,7 +218,8 @@ public class GameApp implements Runnable {
 
     private void update(float interval) {
         globalinterval = interval;
-        entityService.moveEntity(ControllingEntity, ddPlayer, interval, playerSpeed);
+        DefaultMoveSpec.Speed = playerSpeed;
+        entityService.moveEntity(ControllingEntity, ddPlayer, interval, DefaultMoveSpec);
         Entity cameraFollowingEntity = entityService.ForceEntityIntoHigh(gameMemory.CameraFollowingEntityIndex);
         if (cameraFollowingEntity.High != null) {
            camera.movePosition(cameraFollowingEntity);
