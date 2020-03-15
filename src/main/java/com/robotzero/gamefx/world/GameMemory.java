@@ -1,6 +1,9 @@
 package com.robotzero.gamefx.world;
 
-import com.robotzero.gamefx.renderengine.entity.Entity;
+import com.robotzero.gamefx.renderengine.entity.ControlledHero;
+import com.robotzero.gamefx.renderengine.entity.LowEntity;
+import com.robotzero.gamefx.renderengine.entity.SimEntity;
+import com.robotzero.gamefx.renderengine.entity.SimRegion;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
@@ -31,16 +34,18 @@ public class GameMemory {
     private ByteBuffer mainStorage;
     private PointerBuffer b;
     private static Map<Long, ByteBuffer> tiles = new LinkedHashMap<>();
-    public Entity[] entities;
-    public Entity.HighEntity[] HighEntities = new Entity.HighEntity[256];
-    public Entity.LowEntity[] LowEntities = new Entity.LowEntity[100000];
+    public SimEntity[] entities;
+    public LowEntity[] LowEntities = new LowEntity[100000];
     public int CameraFollowingEntityIndex = 0;
     public int LowEntityCount = 0;
     public int HighEntityCount = 0;
+    public SimRegion simRegion;
+    public ControlledHero ControlledHero;
 
     public GameMemory() {
         mainStorage = org.lwjgl.system.MemoryUtil.memAlloc(PermanentStorageSize + TransientStorageSize);
-        entities = new Entity[256];
+        entities = new SimEntity[256];
+        ControlledHero = new ControlledHero();
     }
 
     public boolean isInitialized() {

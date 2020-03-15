@@ -3,10 +3,12 @@ package com.robotzero.gamefx;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.entity.AddLowEntityResult;
-import com.robotzero.gamefx.renderengine.entity.Entity;
+import com.robotzero.gamefx.renderengine.entity.ControlledHero;
+import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.Render;
+import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.translations.MoveSpec;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
@@ -53,10 +55,12 @@ public class GameApp implements Runnable {
     private final World world;
     public static int playerSpeed;
     private int LowIndex;
-    private Entity ControllingEntity;
-    private Entity monstar;
+    private ControlledHero ControllingEntity;
+    private SimEntity monstar;
     private MoveSpec DefaultMoveSpec;
     public static float globalinterval;
+    int TileSpanX = 17 * 3;
+    int TileSpanY = 9 * 3;
 
     public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
         this.displayManager = displayManager;
@@ -116,7 +120,6 @@ public class GameApp implements Runnable {
                 AddLowEntityResult result = entityService.AddFamiliar(WorldGenerator.CameraTileX + FamiliarOffsetX, WorldGenerator.CameraTileY + FamiliarOffsetY);
             }
         }
-        camera.SetCamera(NewCameraP);
         LowIndex =  entityService.AddPlayer().LowIndex;
 
     }
@@ -156,7 +159,7 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
-        ControllingEntity = entityService.ForceEntityIntoHigh(LowIndex);
+        ControllingEntity = gameMemory.ControlledHero;
         playerSpeed = 10;
         cameraInc.set(0f, 0f, 0f);
         ddPlayer.set(0f, 0f);
@@ -219,10 +222,12 @@ public class GameApp implements Runnable {
     private void update(float interval) {
         globalinterval = interval;
         DefaultMoveSpec.Speed = playerSpeed;
-        entityService.moveEntity(ControllingEntity, ddPlayer, interval, DefaultMoveSpec);
-        Entity cameraFollowingEntity = entityService.ForceEntityIntoHigh(gameMemory.CameraFollowingEntityIndex);
-        if (cameraFollowingEntity.High != null) {
-           camera.movePosition(cameraFollowingEntity);
-        }
+        Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector2f(0f, 0f), new Vector2f(TileSpanX, TileSpanY).mul(World.TileSideInMeters));
+        gameMemory.simRegion = entityService.BeginSim(Camera.position, CameraBounds);
+//        entityService.moveEntity(gameMemory.simRegion, ControllingEntity, ddPlayer, interval, DefaultMoveSpec);
+//        LowEntity cameraFollowingEntity = entityService.ForceEntityIntoHigh(gameMemory.CameraFollowingEntityIndex);
+//        if (cameraFollowingEntity.High != null) {
+//           camera.movePosition(cameraFollowingEntity);
+//        }
     }
 }
