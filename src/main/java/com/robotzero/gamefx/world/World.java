@@ -43,9 +43,9 @@ public class World {
 
     public boolean IsCanonical(float TileRel)
     {
-        // TODO(casey): Fix floating point math so this can be exact?
-        boolean Result = ((TileRel >= -0.5f * ChunkSideInMeters) &&
-                (TileRel <= 0.5f * ChunkSideInMeters));
+        float Epsilon = 0.0001f;
+        boolean Result = ((TileRel >= -0.5f * ChunkSideInMeters + Epsilon) &&
+                (TileRel <= 0.5f * ChunkSideInMeters + Epsilon));
 
         return(Result);
     }

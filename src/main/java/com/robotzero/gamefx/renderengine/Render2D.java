@@ -56,11 +56,12 @@ public class Render2D implements Render {
     }
 
     private void renderScene(Mesh background, Mesh bird, Mesh quad, Mesh familiar) {
-        Matrix4f viewMatrix = camera.updateViewMatrix();
-        Matrix4f projectionMatrix = camera.getProjectionMatrix();
-        //@@TODO one player so far so we just get it.
-        Matrix4f playerModelMatrix = entityService.getModelMatrix().get(EntityType.HERO).get(0).getValue();
-        Matrix4f quadViewMatrix = new Matrix4f().identity();
+        if (!entityService.getModelMatrix().isEmpty()) {
+            Matrix4f viewMatrix = camera.updateViewMatrix();
+            Matrix4f projectionMatrix = camera.getProjectionMatrix();
+            //@@TODO one player so far so we just get it.
+            Matrix4f playerModelMatrix = entityService.getModelMatrix().get(EntityType.HERO).get(0).getValue();
+            Matrix4f quadViewMatrix = new Matrix4f().identity();
 //        sceneShaderProgram.bind();
 //        sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
 //        sceneShaderProgram.setUniform("pr_matrix", projectionMatrix);
@@ -70,35 +71,36 @@ public class Render2D implements Render {
 //        background.endRender();
 //        sceneShaderProgram.unbind();
 //
-        birdShaderProgram.bind();
-        birdShaderProgram.setUniform("vw_matrix", viewMatrix);
-        birdShaderProgram.setUniform("pr_matrix", projectionMatrix);
-        birdShaderProgram.setUniform("ml_matrix", playerModelMatrix);
-        birdShaderProgram.setUniform("tex", 1);
-        bird.render();
-        bird.endRender();
-        birdShaderProgram.unbind();
+            birdShaderProgram.bind();
+            birdShaderProgram.setUniform("vw_matrix", viewMatrix);
+            birdShaderProgram.setUniform("pr_matrix", projectionMatrix);
+            birdShaderProgram.setUniform("ml_matrix", playerModelMatrix);
+            birdShaderProgram.setUniform("tex", 1);
+            bird.render();
+            bird.endRender();
+            birdShaderProgram.unbind();
 
-        quadShaderProgram.bind();
-        quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
-        quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
-        quadShaderProgram.setUniform("vw_matrix", viewMatrix);
-        entityService.getModelMatrix().get(EntityType.WALL).forEach((key) -> {
-            quadShaderProgram.setUniform("ml_matrix", key.getValue());
-            quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
-            quad.render();
-            quad.endRender();
-        });
-        quadShaderProgram.unbind();
+            quadShaderProgram.bind();
+            quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
+            quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
+            quadShaderProgram.setUniform("vw_matrix", viewMatrix);
+            entityService.getModelMatrix().get(EntityType.WALL).forEach((key) -> {
+                quadShaderProgram.setUniform("ml_matrix", key.getValue());
+                quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
+                quad.render();
+                quad.endRender();
+            });
+            quadShaderProgram.unbind();
 
-        Matrix4f familiarMatrix = entityService.getModelMatrix().get(EntityType.FAMILIAR).get(0).getValue();
-        familiarShaderProgram.bind();
-        familiarShaderProgram.setUniform("pr_matrix", projectionMatrix);
-        familiarShaderProgram.setUniform("ml_matrix", familiarMatrix);
-        familiarShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
-        familiar.render();
-        familiar.endRender();
-        familiarShaderProgram.unbind();
+            Matrix4f familiarMatrix = entityService.getModelMatrix().get(EntityType.FAMILIAR).get(0).getValue();
+            familiarShaderProgram.bind();
+            familiarShaderProgram.setUniform("pr_matrix", projectionMatrix);
+            familiarShaderProgram.setUniform("ml_matrix", familiarMatrix);
+            familiarShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
+            familiar.render();
+            familiar.endRender();
+            familiarShaderProgram.unbind();
+        }
     }
 
     private void setupSceneShader() throws Exception {

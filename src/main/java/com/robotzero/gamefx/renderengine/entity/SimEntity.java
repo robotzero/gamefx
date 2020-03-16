@@ -8,7 +8,7 @@ import java.util.Map;
 public class SimEntity {
     public Vector2f P = new Vector2f(0.0f, 0.0f);
     public float Width, Height;
-    public boolean Collides;
+    public boolean Collides = false;
     public EntityType Type;
     public float tBob;
     public Vector2f dP = new Vector2f(0.0f, 0.0f);

@@ -121,7 +121,8 @@ public class GameApp implements Runnable {
             }
         }
         LowIndex =  entityService.AddPlayer().LowIndex;
-
+        gameMemory.ControlledHero = new ControlledHero();
+        gameMemory.ControlledHero.EntityIndex = LowIndex;
     }
 
     public void gameLoop() {
@@ -141,6 +142,7 @@ public class GameApp implements Runnable {
                 accumulator -= interval;
             }
 
+            //@TODO sim might not have been updated due to update not run
             render();
 
             sync();

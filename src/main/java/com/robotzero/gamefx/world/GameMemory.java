@@ -34,7 +34,6 @@ public class GameMemory {
     private ByteBuffer mainStorage;
     private PointerBuffer b;
     private static Map<Long, ByteBuffer> tiles = new LinkedHashMap<>();
-    public SimEntity[] entities;
     public LowEntity[] LowEntities = new LowEntity[100000];
     public int CameraFollowingEntityIndex = 0;
     public int LowEntityCount = 0;
@@ -44,7 +43,6 @@ public class GameMemory {
 
     public GameMemory() {
         mainStorage = org.lwjgl.system.MemoryUtil.memAlloc(PermanentStorageSize + TransientStorageSize);
-        entities = new SimEntity[256];
         ControlledHero = new ControlledHero();
     }
 

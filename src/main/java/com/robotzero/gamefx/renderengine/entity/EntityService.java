@@ -13,10 +13,10 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -57,6 +57,7 @@ public class EntityService {
         gameMemory.LowEntityCount = EntityIndex + 1;
 
         gameMemory.LowEntities[EntityIndex] = new LowEntity();
+        gameMemory.LowEntities[EntityIndex].Sim = new SimEntity();
         gameMemory.LowEntities[EntityIndex].Sim.Type = Type;
 
         ChangeEntityLocation(EntityIndex, gameMemory.LowEntities[EntityIndex], null, P);
@@ -336,7 +337,7 @@ public class EntityService {
     public void UpdateFamiliar(SimRegion simRegion, SimEntity Entity, float dt) {
         SimEntity ClosestHero = null;
         float ClosestHeroDSq = (float) Math.pow(10.0f, 2);
-            SimEntity TestEntity = simRegion.simEntities.get(0);
+            SimEntity TestEntity = simRegion.simEntities[0];
             //@TODO huh, index is moved but not looping through all entities
             for (int testEntityIndex = 0; testEntityIndex < simRegion.EntityCount; ++testEntityIndex) {
                 assert (TestEntity != null);
@@ -405,7 +406,7 @@ public class EntityService {
 
             if (entity.Collides) {
                 for (int TestHighEntityIndex = 1; TestHighEntityIndex < simRegion.EntityCount; ++TestHighEntityIndex) {
-                    SimEntity TestEntity = simRegion.simEntities.get(TestHighEntityIndex);
+                    SimEntity TestEntity = simRegion.simEntities[TestHighEntityIndex];
                     if (TestEntity != entity) {
                         if (TestEntity.Collides) {
                             float DiameterW = TestEntity.Width + entity.Width;
@@ -470,9 +471,12 @@ public class EntityService {
     public Map<EntityType, List<Map.Entry<EntityType, Matrix4f>>> getModelMatrix() {
         EntityVisiblePieceGroup pieceGroup = new EntityVisiblePieceGroup();
 
+        if (gameMemory.simRegion == null) {
+            return Map.of();
+        }
         return IntStream.range(1, gameMemory.simRegion.EntityCount).mapToObj(HighEntityIndex -> {
             pieceGroup.PieceCount = 0;
-            SimEntity entity = gameMemory.simRegion.simEntities.get(HighEntityIndex);
+            SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
 
             switch (entity.Type.name().toLowerCase()) {
                 case ("wall") : {
@@ -515,11 +519,29 @@ public class EntityService {
         }));
     }
 
+    public Vector2f GetSimSpaceP(SimRegion simRegion, LowEntity stored) {
+        World.WorldDifference Diff = World.subtract(stored.P, simRegion.Origin);
+        return Diff.dXY;
+    }
+
+    public SimEntity AddEntity(SimRegion simRegion, int StorageIndex, LowEntity Source, Vector2f SimP) {
+        SimEntity Dest = AddEntity(simRegion, StorageIndex, Source);
+        if (Dest != null) {
+            if (SimP != null) {
+                Dest.P = SimP;
+            } else {
+                Dest.P = GetSimSpaceP(simRegion, Source);
+            }
+        }
+
+        return null;
+    }
+
     public SimEntity AddEntity(SimRegion simRegion) {
         SimEntity Entity = null;
 
-        if(simRegion.EntityCount < simRegion.MaxEntityCount) {
-            Entity = simRegion.simEntities.get(simRegion.EntityCount);
+        if (simRegion.EntityCount < simRegion.MaxEntityCount) {
+            Entity = simRegion.simEntities[simRegion.EntityCount];
             simRegion.EntityCount = simRegion.EntityCount + 1;
 
             // TODO(casey): See what we want to do about clearing policy when
@@ -533,22 +555,30 @@ public class EntityService {
         return(Entity);
     }
 
-    public Vector2f GetSimSpaceP(SimRegion simRegion, LowEntity stored) {
-        World.WorldDifference Diff = World.subtract(stored.P, simRegion.Origin);
-        return Diff.dXY;
-    }
+    SimEntity AddEntity(SimRegion simRegion, int StorageIndex, LowEntity Source) {
+        SimEntity Entity = null;
 
-    public SimEntity AddEntity(SimRegion simRegion, LowEntity Source, Vector2f SimP) {
-        SimEntity Dest = AddEntity(simRegion);
-        if (Dest != null) {
-            if (SimP != null) {
-                Dest.P = SimP;
-            } else {
-                Dest.P = GetSimSpaceP(simRegion, Source);
+        if (simRegion.EntityCount < simRegion.MaxEntityCount) {
+            int EntityCount = simRegion.EntityCount;
+            Entity = simRegion.simEntities[EntityCount];
+            simRegion.EntityCount = simRegion.EntityCount + 1;
+
+            MapStorageIndexToEntity(simRegion, StorageIndex, Entity);
+
+            if (Source != null) {
+                // TODO(casey): This should really be a decompression step, not
+                // a copy!
+                Entity = new SimEntity(Source.Sim);
+                simRegion.simEntities[EntityCount] = Entity;
+//                LoadEntityReference(simRegion, Entity.Sword);
             }
+
+            Entity.StorageIndex = StorageIndex;
+        } else {
+            throw new RuntimeException("Invalid code path");
         }
 
-        return null;
+        return(Entity);
     }
 
     public void MapStorageIndexToEntity(SimRegion simRegion, int StorageIndex, SimEntity Entity) {
@@ -571,7 +601,9 @@ public class EntityService {
 
         int HashValue = StorageIndex;
         for (int Offset = 0; Offset < simRegion.Hash.length; ++Offset) {
-            SimEntityHash Entry = simRegion.Hash[((HashValue + Offset) & (simRegion.Hash.length) - 1)];
+            int HashMask = simRegion.Hash.length - 1;
+            int HashIndex = ((HashValue + Offset) & HashMask);
+            SimEntityHash Entry = simRegion.Hash[HashIndex];
             if ((Entry.Index == 0) || (Entry.Index == StorageIndex)) {
                 Result = Entry;
                 break;
@@ -580,33 +612,6 @@ public class EntityService {
 
         return(Result);
     }
-
-
-    SimEntity AddEntity(SimRegion simRegion, int StorageIndex, LowEntity Source)
-    {
-        SimEntity Entity = null;
-
-        if (simRegion.EntityCount < simRegion.MaxEntityCount) {
-            Entity = simRegion.simEntities.get(simRegion.EntityCount);
-            simRegion.EntityCount = simRegion.EntityCount + 1;
-
-            MapStorageIndexToEntity(simRegion, StorageIndex, Entity);
-
-            if (Source != null) {
-                // TODO(casey): This should really be a decompression step, not
-                // a copy!
-                Entity = new SimEntity(Source.Sim);
-//                LoadEntityReference(simRegion, Entity.Sword);
-            }
-
-            Entity.StorageIndex = StorageIndex;
-        } else {
-            throw new RuntimeException("Invalid code path");
-        }
-
-        return(Entity);
-    }
-
 
     public void LoadEntityReference(SimRegion simRegion, EntityReference Ref) {
         if (Ref.Index != 0) {
@@ -633,7 +638,7 @@ public class EntityService {
 
         simRegion.MaxEntityCount = 4096;
         simRegion.EntityCount = 0;
-        simRegion.simEntities = new ArrayList<>(simRegion.MaxEntityCount);
+        simRegion.simEntities = new SimEntity[simRegion.MaxEntityCount];
 
         World.WorldPosition MinChunkP = world.MapIntoChunkSpace(simRegion.Origin, Rectangle.GetMinCorner(simRegion.Bounds));
         World.WorldPosition MaxChunkP = world.MapIntoChunkSpace(simRegion.Origin, Rectangle.GetMaxCorner(simRegion.Bounds));
@@ -651,7 +656,7 @@ public class EntityService {
                             Vector2f SimSpaceP = GetSimSpaceP(simRegion, Low);
                             if (Rectangle.IsInRectangle(simRegion.Bounds, SimSpaceP))
                             {
-                                AddEntity(simRegion, Low, SimSpaceP);
+                                AddEntity(simRegion, LowEntityIndex, Low, SimSpaceP);
                             }
                         }
                     }
@@ -663,9 +668,9 @@ public class EntityService {
 
     public void EndSim(SimRegion Region)
     {
-        SimEntity Entity = Region.simEntities.get(0);
+        SimEntity Entity = Region.simEntities[0];
 
-        for(int EntityIndex = 0; EntityIndex < Region.EntityCount; ++EntityIndex, Entity = Region.simEntities.get(EntityIndex)) {
+        for(int EntityIndex = 0; EntityIndex < Region.EntityCount; ++EntityIndex, Entity = Region.simEntities[EntityIndex]) {
             LowEntity Stored = gameMemory.LowEntities[Entity.StorageIndex];
             Stored.Sim = Entity;
 //            StoreEntityReference(Stored.sim.sword);

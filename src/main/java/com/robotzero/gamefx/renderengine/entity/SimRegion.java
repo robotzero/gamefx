@@ -3,13 +3,11 @@ package com.robotzero.gamefx.renderengine.entity;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.world.World;
 
-import java.util.List;
-
 public class SimRegion {
     public World.WorldPosition Origin;
     public Rectangle Bounds;
-    public int MaxEntityCount;
-    public int EntityCount;
-    public List<SimEntity> simEntities;
-    public SimEntityHash[] Hash;
+    public int MaxEntityCount = 4096;
+    public int EntityCount = 0;
+    public SimEntity[] simEntities;
+    public SimEntityHash[] Hash = new SimEntityHash[4096];
 }
