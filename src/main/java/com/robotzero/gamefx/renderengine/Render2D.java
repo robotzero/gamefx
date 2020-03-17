@@ -92,14 +92,14 @@ public class Render2D implements Render {
             });
             quadShaderProgram.unbind();
 
-            Matrix4f familiarMatrix = entityService.getModelMatrix().get(EntityType.FAMILIAR).get(0).getValue();
-            familiarShaderProgram.bind();
-            familiarShaderProgram.setUniform("pr_matrix", projectionMatrix);
-            familiarShaderProgram.setUniform("ml_matrix", familiarMatrix);
-            familiarShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
-            familiar.render();
-            familiar.endRender();
-            familiarShaderProgram.unbind();
+//            Matrix4f familiarMatrix = entityService.getModelMatrix().get(EntityType.FAMILIAR).get(0).getValue();
+//            familiarShaderProgram.bind();
+//            familiarShaderProgram.setUniform("pr_matrix", projectionMatrix);
+//            familiarShaderProgram.setUniform("ml_matrix", familiarMatrix);
+//            familiarShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
+//            familiar.render();
+//            familiar.endRender();
+//            familiarShaderProgram.unbind();
         }
     }
 

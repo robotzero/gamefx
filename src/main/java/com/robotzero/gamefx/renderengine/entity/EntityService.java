@@ -16,7 +16,6 @@ import org.joml.Vector4f;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -483,6 +482,11 @@ public class EntityService {
                     pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(40f, 80f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
                 } break;
                 case ("hero") : {
+                    MoveSpec MoveSpec = DefaultMoveSpec();
+                    MoveSpec.UnitMaxAccelVector = true;
+                    MoveSpec.Speed = 50.0f;
+                    MoveSpec.Drag = 8.0f;
+                    moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP ,GameApp.globalinterval, MoveSpec);
                     pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
                 } break;
                 case ("familiar"): {
@@ -604,6 +608,10 @@ public class EntityService {
             int HashMask = simRegion.Hash.length - 1;
             int HashIndex = ((HashValue + Offset) & HashMask);
             SimEntityHash Entry = simRegion.Hash[HashIndex];
+            if (Entry == null) {
+                simRegion.Hash[HashIndex] = new SimEntityHash();
+                Entry = simRegion.Hash[HashIndex];
+            }
             if ((Entry.Index == 0) || (Entry.Index == StorageIndex)) {
                 Result = Entry;
                 break;
@@ -672,8 +680,8 @@ public class EntityService {
 
         for(int EntityIndex = 0; EntityIndex < Region.EntityCount; ++EntityIndex, Entity = Region.simEntities[EntityIndex]) {
             LowEntity Stored = gameMemory.LowEntities[Entity.StorageIndex];
-            Stored.Sim = Entity;
-//            StoreEntityReference(Stored.sim.sword);
+            Stored.Sim = new SimEntity(Entity);
+            //StoreEntityReference(Stored.sim.sword);
 
             World.WorldPosition NewP = world.MapIntoChunkSpace(Region.Origin, Entity.P);
             ChangeEntityLocation(Entity.StorageIndex, Stored, Stored.P, NewP);

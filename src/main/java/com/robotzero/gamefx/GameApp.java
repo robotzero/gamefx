@@ -2,7 +2,6 @@ package com.robotzero.gamefx;
 
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
-import com.robotzero.gamefx.renderengine.entity.AddLowEntityResult;
 import com.robotzero.gamefx.renderengine.entity.ControlledHero;
 import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
@@ -78,10 +77,10 @@ public class GameApp implements Runnable {
         entityService.AddLowEntity(EntityType.NULL, null);
         gameMemory.HighEntityCount = 1;
         World.renderWorld(entityService);
-        DefaultMoveSpec = entityService.DefaultMoveSpec();
-        DefaultMoveSpec.UnitMaxAccelVector = true;
-        DefaultMoveSpec.Drag = 8.0f;
-        DefaultMoveSpec.Speed = 10f;
+//        DefaultMoveSpec = entityService.DefaultMoveSpec();
+//        DefaultMoveSpec.UnitMaxAccelVector = true;
+//        DefaultMoveSpec.Drag = 8.0f;
+//        DefaultMoveSpec.Speed = 10f;
     }
 
     public void run() {
@@ -117,7 +116,7 @@ public class GameApp implements Runnable {
             int FamiliarOffsetX = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 7;
             int FamiliarOffsetY = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 3;
             if ((FamiliarOffsetX != 0) || (FamiliarOffsetY != 0)) {
-                AddLowEntityResult result = entityService.AddFamiliar(WorldGenerator.CameraTileX + FamiliarOffsetX, WorldGenerator.CameraTileY + FamiliarOffsetY);
+                entityService.AddFamiliar(WorldGenerator.CameraTileX + FamiliarOffsetX, WorldGenerator.CameraTileY + FamiliarOffsetY);
             }
         }
         LowIndex =  entityService.AddPlayer().LowIndex;
@@ -158,6 +157,7 @@ public class GameApp implements Runnable {
         fps++;
         render2D.render(displayManager.getWindow(), background, bird, quad, familiarA);
         displayManager.updateDisplay();
+        entityService.EndSim(gameMemory.simRegion);
     }
 
     protected void input() {
@@ -199,6 +199,7 @@ public class GameApp implements Runnable {
         if (displayManager.isKeyPressed(GLFW_KEY_SPACE)) {
             playerSpeed = 50;
         }
+        gameMemory.ControlledHero.ddP = ddPlayer;
     }
 
     private void sync() {
@@ -223,7 +224,6 @@ public class GameApp implements Runnable {
 
     private void update(float interval) {
         globalinterval = interval;
-        DefaultMoveSpec.Speed = playerSpeed;
         Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector2f(0f, 0f), new Vector2f(TileSpanX, TileSpanY).mul(World.TileSideInMeters));
         gameMemory.simRegion = entityService.BeginSim(Camera.position, CameraBounds);
 //        entityService.moveEntity(gameMemory.simRegion, ControllingEntity, ddPlayer, interval, DefaultMoveSpec);

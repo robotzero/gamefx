@@ -21,8 +21,14 @@ public class SimEntity {
         Height = sim.Height;
         Type = sim.Type;
         dP = sim.dP;
+        Collides = sim.Collides;
+        tBob = sim.tBob;
         StorageIndex = sim.StorageIndex;
-        Hash = new HashMap<>(sim.Hash);
+        if(sim.Hash == null) {
+            Hash = new HashMap<>();
+        } else {
+            Hash = new HashMap<>(sim.Hash);
+        }
     }
 
     public SimEntity() {
