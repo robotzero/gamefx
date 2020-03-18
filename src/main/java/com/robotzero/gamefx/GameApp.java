@@ -112,6 +112,7 @@ public class GameApp implements Runnable {
                 WorldGenerator.CameraTileY
         );
         entityService.AddMonstar(WorldGenerator.CameraTileX + 2, WorldGenerator.CameraTileY + 2);
+        Camera.position = NewCameraP;
         for (int FamiliarIndex = 0; FamiliarIndex < 1; ++FamiliarIndex) {
             int FamiliarOffsetX = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 7;
             int FamiliarOffsetY = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 3;

@@ -2,8 +2,8 @@ package com.robotzero.gamefx.world;
 
 import com.robotzero.gamefx.renderengine.entity.ControlledHero;
 import com.robotzero.gamefx.renderengine.entity.LowEntity;
-import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.entity.SimRegion;
+import org.joml.Vector2f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.system.Pointer;
@@ -24,6 +24,7 @@ public class GameMemory {
     public static final int BOOLEAN_FIELD_SIZE  = 1;
     public static final int DOUBLE_FIELD_SIZE   = 8;
     public static final int FLOAT_FIELD_SIZE    = 4;
+    public static final Vector2f InvalidP = new Vector2f(100000.0f, 100000.0f);
 
     private boolean isInitialized;
     private PointerBuffer PermanentStorage;
