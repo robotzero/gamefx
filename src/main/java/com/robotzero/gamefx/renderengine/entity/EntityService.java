@@ -664,14 +664,14 @@ public class EntityService {
         World.WorldPosition MinChunkP = world.MapIntoChunkSpace(simRegion.Origin, Rectangle.GetMinCorner(simRegion.Bounds));
         World.WorldPosition MaxChunkP = world.MapIntoChunkSpace(simRegion.Origin, Rectangle.GetMaxCorner(simRegion.Bounds));
 
-        for(int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
-            for(int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
+        for (int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
+            for (int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
                 WorldChunk Chunk = world.GetWorldChunk(ChunkX, ChunkY, false);
                 if (Chunk != null) {
                     LinkedList<WorldEntityBlock> FirstBlock = Chunk.getFirstBlock();
                     WorldEntityBlock First = Chunk.getFirstBlock().get(0);
                     for (WorldEntityBlock Block = First; Block != null; Block = Block.next == null ? null : Chunk.getFirstBlock().get(Block.next)) {
-                        for(int EntityIndexIndex = 0; EntityIndexIndex < Block.EntityCount; ++EntityIndexIndex) {
+                        for (int EntityIndexIndex = 0; EntityIndexIndex < Block.EntityCount; ++EntityIndexIndex) {
                             int LowEntityIndex = Block.LowEntityIndex[EntityIndexIndex];
                             LowEntity Low = gameMemory.LowEntities[LowEntityIndex];
                             if (!IsSet(Low.Sim, SimEntityFlag.NONSPATIAL)) {

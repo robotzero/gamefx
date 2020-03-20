@@ -4,12 +4,10 @@ import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
 
 public class Camera {
     public static World.WorldPosition position = new World.WorldPosition();
     public static World.WorldPosition oldPosition = new World.WorldPosition();
-    public static Vector2f EntityOffsetForFrame = new Vector2f(0.0f, 0.0f);
     private final GameMemory gameMemory;
     private final EntityService entityService;
 
