@@ -79,111 +79,6 @@ public class EntityService {
         return entity;
     }
 
-    public LowEntity GetLowEntity(int Index) {
-        LowEntity Result = null;
-
-        if ((Index > 0) && (Index < gameMemory.LowEntityCount)) {
-            Result = gameMemory.LowEntities[Index];
-        }
-
-        return (Result);
-    }
-
-//    public LowEntity.HighEntity MakeEntityHighFrequency(int LowIndex) {
-//        LowEntity.HighEntity EntityHigh = null;
-//
-//        LowEntity.LowEntity EntityLow = gameMemory.LowEntities[LowIndex];
-//
-//        if (EntityLow.HighEntityIndex > 0) {
-//            EntityHigh = gameMemory.HighEntities[EntityLow.HighEntityIndex];
-//        } else {
-//            Vector2f CameraSpaceP = GetCameraSpaceP(EntityLow);
-//            EntityHigh = MakeEntityHighFrequency(EntityLow, LowIndex, CameraSpaceP);
-//        }
-//
-//        return (EntityHigh);
-//    }
-
-    public Vector2f GetCameraSpaceP(LowEntity EntityLow) {
-        // NOTE(casey): Map the entity into camera space
-        World.WorldDifference Diff = World.subtract(EntityLow.P, Camera.position);
-        Vector2f Result = Diff.dXY;
-
-        return (Result);
-    }
-
-//    public LowEntity.HighEntity MakeEntityHighFrequency(LowEntity.LowEntity EntityLow, int LowIndex, Vector2f CameraSpaceP) {
-//        LowEntity.HighEntity EntityHigh = null;
-//
-//        if (EntityLow.HighEntityIndex == 0) {
-//            if (gameMemory.HighEntityCount < gameMemory.HighEntities.length) {
-//                int HighIndex = gameMemory.HighEntityCount;
-//                gameMemory.HighEntityCount = HighIndex + 1;
-//                EntityHigh = gameMemory.HighEntities[HighIndex];
-//                if (EntityHigh == null) {
-//                    EntityHigh = new LowEntity.HighEntity();
-//                }
-//                EntityHigh.P = CameraSpaceP;
-//                EntityHigh.dP = new Vector2f(0.0f, 0.0f);
-//                EntityHigh.LowEntityIndex = LowIndex;
-//                gameMemory.HighEntities[HighIndex] = EntityHigh;
-//
-//                EntityLow.HighEntityIndex = HighIndex;
-//            } else {
-//                throw new RuntimeException("Invalid code path");
-//            }
-//        }
-//
-//        return (EntityHigh);
-//    }
-
-//    public LowEntity ForceEntityIntoHigh(int LowIndex) {
-//        LowEntity Result = new LowEntity();
-//
-//        if ((LowIndex > 0) && (LowIndex < gameMemory.LowEntityCount)) {
-//            Result.LowIndex = LowIndex;
-//            Result.Low = gameMemory.LowEntities[LowIndex];
-//            Result.High = MakeEntityHighFrequency(LowIndex);
-//        }
-//
-//        return (Result);
-//    }
-//
-//    public void MakeEntityLowFrequency(int LowIndex) {
-//        LowEntity.LowEntity EntityLow = gameMemory.LowEntities[LowIndex];
-//        int HighIndex = EntityLow.HighEntityIndex;
-//        if (HighIndex > 0) {
-//            int LastHighIndex = gameMemory.HighEntityCount - 1;
-//            if (HighIndex != LastHighIndex) {
-//                LowEntity.HighEntity LastEntity = gameMemory.HighEntities[LastHighIndex];
-//                LowEntity.HighEntity DelEntity = gameMemory.HighEntities[HighIndex];
-//
-//                DelEntity.dP = LastEntity.dP;
-//                DelEntity.P = LastEntity.P;
-//                DelEntity.LowEntityIndex = LastEntity.LowEntityIndex;
-//                gameMemory.LowEntities[LastEntity.LowEntityIndex].HighEntityIndex = HighIndex;
-//                gameMemory.HighEntities[HighIndex] = DelEntity;
-//            }
-//
-//            gameMemory.HighEntityCount = gameMemory.HighEntityCount - 1;
-//            EntityLow.HighEntityIndex = 0;
-//        }
-//    }
-//
-//    public void OffsetAndCheckFrequencyByArea(Vector2f Offset, Rectangle HighFrequencyBounds) {
-//        for (int HighEntityIndex = 1; HighEntityIndex < gameMemory.HighEntityCount; ) {
-//            LowEntity.HighEntity High = gameMemory.HighEntities[HighEntityIndex];
-//            LowEntity.LowEntity Low = gameMemory.LowEntities[High.LowEntityIndex];
-//
-//            High.P = new Vector2f(High.P).add(Offset);
-//            if (Low.P != null && Rectangle.IsInRectangle(HighFrequencyBounds, High.P)) {
-//                ++HighEntityIndex;
-//            } else {
-//                MakeEntityLowFrequency(High.LowEntityIndex);
-//            }
-//        }
-//    }
-
     public World.WorldPosition ChunkPositionFromTilePosition(int AbsTileX, int AbsTileY) {
         World.WorldPosition Result = new World.WorldPosition();
         Result.ChunkX = AbsTileX / World.TILES_PER_CHUNK;
@@ -260,8 +155,8 @@ public class EntityService {
                                         FirstBlock.addLast(nextBlock);
                                         World.firstFree = FirstBlock.indexOf(nextBlock);
                                     }
-                                    NotFound = false;
                                 }
+                                NotFound = false;
                             }
                         }
                     }
@@ -276,12 +171,12 @@ public class EntityService {
                 if (Block.EntityCount == Block.LowEntityIndex.length) {
                     //@TODO reuse stuff
                     WorldEntityBlock oldBlock;
-                    if (World.firstFree != null) {
-                        oldBlock = blah.get(World.firstFree);
-                        World.firstFree = oldBlock.next;
-                    } else {
+//                    if (World.firstFree != null) {
+//                        oldBlock = blah.get(World.firstFree);
+//                        World.firstFree = oldBlock.next;
+//                    } else {
                         oldBlock = new WorldEntityBlock();
-                    }
+//                    }
                     oldBlock.EntityCount = Block.EntityCount;
                     int[] tmp = new int[16];
                     System.arraycopy(Block.LowEntityIndex, 0, tmp, 0, Block.LowEntityIndex.length);
@@ -307,23 +202,6 @@ public class EntityService {
             }
         }
     }
-
-//    public SimEntity EntityFromHighIndex(int HighEntityIndex) {
-//        SimEntity Result = null;
-//
-//        if (HighEntityIndex > 0) {
-//            assert(HighEntityIndex < gameMemory.HighEntities.length);
-//            SimEntity.HighEntity High = gameMemory.HighEntities[HighEntityIndex];
-//            if (High != null) {
-//                Result = new SimEntity();
-//                Result.High = High;
-//                Result.LowIndex = Result.High.LowEntityIndex;
-//                Result.Low = gameMemory.LowEntities[Result.LowIndex];
-//            }
-//        }
-//
-//        return(Result);
-//    }
 
     public AddLowEntityResult AddMonstar(int AbsTileX, int AbsTileY) {
         World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY);
@@ -412,55 +290,70 @@ public class EntityService {
         entity.dP = new Vector2f(ddP).mul(interval).add(new Vector2f(entity.dP));
         Vector2f NewPlayerP = OldPlayerP.add(playerDelta);
 
+        float DistanceRemaining = entity.DistanceLimit;
+        if (DistanceRemaining == 0.0f) {
+            DistanceRemaining = 10000.0f;
+        }
+
         for (int Iteration = 0; (Iteration < 4); ++Iteration) {
             float[] tMin = {1.0f, 0.0f};
-            Vector2f WallNormal = new Vector2f(0.0f, 0.0f);
-            int HitHighEntityIndex = 0;
-            Vector2f DesiredPosition = new Vector2f(entity.P).add(playerDelta);
+            float PlayerDeltaLength = playerDelta.length();
+            if (PlayerDeltaLength > 0.0f) {
+                if (PlayerDeltaLength > DistanceRemaining) {
+                    tMin[0] = DistanceRemaining / PlayerDeltaLength;
+                }
+                Vector2f WallNormal = new Vector2f(0.0f, 0.0f);
+                SimEntity HitEntity = null;
+                Vector2f DesiredPosition = new Vector2f(entity.P).add(playerDelta);
+                boolean StopOnCollision = IsSet(entity, SimEntityFlag.COLLIDES);
+                if (!IsSet(entity, SimEntityFlag.NONSPATIAL)) {
+                    for (int TestHighEntityIndex = 1; TestHighEntityIndex < simRegion.EntityCount; ++TestHighEntityIndex) {
+                        SimEntity TestEntity = simRegion.simEntities[TestHighEntityIndex];
+                        if (TestEntity != entity) {
+                            if (TestEntity.flags.contains(SimEntityFlag.COLLIDES) && !entity.flags.contains(SimEntityFlag.NONSPATIAL)) {
+                                float DiameterW = TestEntity.Width + entity.Width;
+                                float DiameterH = TestEntity.Height + entity.Height;
+                                Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
+                                Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
+                                Vector2f Rel = new Vector2f(entity.P).sub(new Vector2f(TestEntity.P));
+                                if (world.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                                        tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
+                                    WallNormal = new Vector2f(-1, 0);
+                                    HitEntity = TestEntity;
+                                }
 
-            if (entity.flags.contains(SimEntityFlag.COLLIDES) && !entity.flags.contains(SimEntityFlag.NONSPATIAL)) {
-                for (int TestHighEntityIndex = 1; TestHighEntityIndex < simRegion.EntityCount; ++TestHighEntityIndex) {
-                    SimEntity TestEntity = simRegion.simEntities[TestHighEntityIndex];
-                    if (TestEntity != entity) {
-                        if (TestEntity.flags.contains(SimEntityFlag.COLLIDES) && !entity.flags.contains(SimEntityFlag.NONSPATIAL)) {
-                            float DiameterW = TestEntity.Width + entity.Width;
-                            float DiameterH = TestEntity.Height + entity.Height;
-                            Vector2f MinCorner = new Vector2f(DiameterW, DiameterH).mul(-0.5f);
-                            Vector2f MaxCorner = new Vector2f(DiameterW, DiameterH).mul(0.5f);
-                            Vector2f Rel = new Vector2f(entity.P).sub(new Vector2f(TestEntity.P));
-                            if (world.TestWall(MinCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
-                                    tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
-                                WallNormal = new Vector2f(-1, 0);
-                                HitHighEntityIndex = TestHighEntityIndex;
-                            }
+                                if (world.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
+                                        tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
+                                    WallNormal = new Vector2f(1, 0);
+                                    HitEntity = TestEntity;
+                                }
 
-                            if (world.TestWall(MaxCorner.x(), Rel.x(), Rel.y(), playerDelta.x(), playerDelta.y(),
-                                    tMin, MinCorner.y(), MaxCorner.y())[1] == 1) {
-                                WallNormal = new Vector2f(1, 0);
-                                HitHighEntityIndex = TestHighEntityIndex;
-                            }
+                                if (world.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                                        tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
+                                    WallNormal = new Vector2f(0, -1);
+                                    HitEntity = TestEntity;
+                                }
 
-                            if (world.TestWall(MinCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
-                                    tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
-                                WallNormal = new Vector2f(0, -1);
-                                HitHighEntityIndex = TestHighEntityIndex;
-                            }
-
-                            if (world.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
-                                    tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
-                                WallNormal = new Vector2f(0, 1);
-                                HitHighEntityIndex = TestHighEntityIndex;
+                                if (world.TestWall(MaxCorner.y(), Rel.y(), Rel.x(), playerDelta.y(), playerDelta.x(),
+                                        tMin, MinCorner.x(), MaxCorner.x())[1] == 1) {
+                                    WallNormal = new Vector2f(0, 1);
+                                    HitEntity = TestEntity;
+                                }
                             }
                         }
                     }
                 }
-            }
-            entity.P = new Vector2f(entity.P).add(new Vector2f(playerDelta).mul(tMin[0]));
-            if (HitHighEntityIndex > 0) {
-                entity.dP = new Vector2f(entity.dP).sub(new Vector2f(WallNormal).mul(new Vector2f(entity.dP).dot(WallNormal)));
-                playerDelta = new Vector2f(DesiredPosition).sub(new Vector2f(entity.P));
-                playerDelta = new Vector2f(playerDelta).sub(new Vector2f(WallNormal).mul(new Vector2f(playerDelta).dot(new Vector2f(WallNormal))));
-
+                entity.P = new Vector2f(entity.P).add(new Vector2f(playerDelta).mul(tMin[0]));
+                DistanceRemaining = DistanceRemaining - tMin[0] * PlayerDeltaLength;
+                if (HitEntity != null) {
+                    playerDelta = new Vector2f(DesiredPosition).sub(new Vector2f(entity.P));
+                    if (StopOnCollision) {
+                        entity.dP = new Vector2f(entity.dP).sub(new Vector2f(WallNormal).mul(new Vector2f(entity.dP).dot(WallNormal)));
+                        playerDelta = new Vector2f(playerDelta).sub(new Vector2f(WallNormal).mul(new Vector2f(playerDelta).dot(new Vector2f(WallNormal))));
+                    }
+                } else {
+                    break;
+                }
             } else {
                 break;
             }
@@ -492,55 +385,65 @@ public class EntityService {
             pieceGroup.PieceCount = 0;
             SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
 
-            switch (entity.Type.name().toLowerCase()) {
-                case ("wall") : {
-                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(40f, 80f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
-                } break;
-                case ("hero") : {
-                    MoveSpec MoveSpec = DefaultMoveSpec();
-                    MoveSpec.UnitMaxAccelVector = true;
-                    MoveSpec.Speed = 50.0f;
-                    MoveSpec.Drag = 8.0f;
-                    moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP ,GameApp.globalinterval, MoveSpec);
-                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
-                } break;
-                case ("familiar"): {
-                    UpdateFamiliar(gameMemory.simRegion, entity, GameApp.globalinterval);
-                    entity.tBob = entity.tBob + GameApp.globalinterval;
-                    if (entity.tBob > 2.0f * Math.PI) {
-                        entity.tBob = (float) (entity.tBob - (2.0f * Math.PI));
+            if (entity.Updatable) {
+                MoveSpec MoveSpec = null;
+                switch (entity.Type.name().toLowerCase()) {
+                    case ("wall"): {
+                        pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(40f, 80f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
                     }
-                    pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
-                } break;
-                case ("monstar"): {
+                    break;
+                    case ("hero"): {
+                        MoveSpec = DefaultMoveSpec();
+                        MoveSpec.UnitMaxAccelVector = true;
+                        MoveSpec.Speed = 10.0f;
+                        MoveSpec.Drag = 8.0f;
+                        pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
+                    }
+                    break;
+                    case ("familiar"): {
+//                        UpdateFamiliar(gameMemory.simRegion, entity, GameApp.globalinterval);
+//                        entity.tBob = entity.tBob + GameApp.globalinterval;
+//                        if (entity.tBob > 2.0f * Math.PI) {
+//                            entity.tBob = (float) (entity.tBob - (2.0f * Math.PI));
+//                        }
+//                        pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
+                    }
+                    break;
+                    case ("monstar"): {
 
-                } break;
-                default: {
-                    throw new RuntimeException("INVALID PATH");
+                    }
+                    break;
+                    default: {
+                        throw new RuntimeException("INVALID PATH");
+                    }
                 }
-            }
 
-            final Matrix4f v = new Matrix4f();
-            float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * entity.P.x();
-            float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * entity.P.y();
+                if (!IsSet(entity, SimEntityFlag.NONSPATIAL) && MoveSpec != null) {
+                    moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
+                }
+
+                final Matrix4f v = new Matrix4f();
+                float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * entity.P.x();
+                float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * entity.P.y();
 //            float PlayerLeft = EntityGroundPointX - 0.5f * World.MetersToPixels * lowEntity.Width;
 //            float PlayerTop = EntityGroundPointY - 0.5f * World.MetersToPixels * lowEntity.Height;
 
-            EntityVisiblePiece Piece = pieceGroup.Pieces[0];
-            Vector2f Center = new Vector2f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y());
-            Vector2f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector2f(0, 0f));
+                EntityVisiblePiece Piece = pieceGroup.Pieces[0];
+                Vector2f Center = new Vector2f(EntityGroundPointX, EntityGroundPointY);
+                Vector2f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector2f(0, 0f));
 
-            return Map.of(entity.Type, v.identity().translate(new Vector3f(Center.sub(HalfDim).x(), Center.add(HalfDim).y(), 0f)));
-
+                return Map.of(entity.Type, v.identity().translate(new Vector3f(Center.x(), Center.y(), 0f)));
+            }
+            return null;
 //            return Map.of(lowEntity.Type, v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f)));
-        }).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
+        }).filter(map -> map != null).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
             return a.getKey();
         }));
     }
 
     public Vector2f GetSimSpaceP(SimRegion simRegion, LowEntity stored) {
         Vector2f Result = GameMemory.InvalidP;
-        if (IsSet(stored.Sim, SimEntityFlag.NONSPATIAL)) {
+        if (!IsSet(stored.Sim, SimEntityFlag.NONSPATIAL)) {
             World.WorldDifference Diff = World.subtract(stored.P, simRegion.Origin);
             return Diff.dXY;
         }
@@ -553,6 +456,7 @@ public class EntityService {
         if (Dest != null) {
             if (SimP != null) {
                 Dest.P = new Vector2f(SimP);
+                Dest.Updatable = Rectangle.IsInRectangle(simRegion.UpdatableBounds, Dest.P);
             } else {
                 Dest.P = GetSimSpaceP(simRegion, Source);
             }
@@ -590,6 +494,7 @@ public class EntityService {
                 }
 
                 Entity.StorageIndex = StorageIndex;
+                Entity.Updatable = false;
             } else {
                 throw new RuntimeException("Invalid code path");
             }
@@ -653,9 +558,12 @@ public class EntityService {
     }
 
     public SimRegion BeginSim(World.WorldPosition Origin, Rectangle Bounds) {
+        float UpdateSafetyMargin = 1.0f;
         SimRegion simRegion = new SimRegion();
         simRegion.Origin = Origin;
-        simRegion.Bounds = Bounds;
+        simRegion.UpdatableBounds = Bounds;
+        simRegion.Bounds = AddRadiusTo(simRegion.UpdatableBounds, UpdateSafetyMargin, UpdateSafetyMargin);
+
 
         simRegion.MaxEntityCount = 4096;
         simRegion.EntityCount = 0;
@@ -733,5 +641,12 @@ public class EntityService {
         ClearFlag(Entity, SimEntityFlag.NONSPATIAL);
         Entity.P = P;
         Entity.dP = dP;
+    }
+
+    public Rectangle AddRadiusTo(Rectangle A, float RadiusW, float RadiusH) {
+        return new Rectangle(
+                A.getMin().sub(new Vector2f(RadiusW, RadiusW)),
+                A.getMax().add(new Vector2f(RadiusH, RadiusH))
+        );
     }
 }

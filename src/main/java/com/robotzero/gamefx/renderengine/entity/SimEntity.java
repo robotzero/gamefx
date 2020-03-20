@@ -16,6 +16,8 @@ public class SimEntity {
     public int StorageIndex;
     public Map<Integer, SimEntity> Hash;
     public List<SimEntityFlag> flags = new ArrayList<>();
+    public boolean Updatable = false;
+    public float DistanceLimit = 0.0f;
 
     public SimEntity(SimEntity sim) {
         P = sim.P;
@@ -26,6 +28,7 @@ public class SimEntity {
         flags = sim.flags;
         tBob = sim.tBob;
         StorageIndex = sim.StorageIndex;
+        Updatable = sim.Updatable;
         if(sim.Hash == null) {
             Hash = new HashMap<>();
         } else {
