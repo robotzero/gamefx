@@ -2,7 +2,7 @@ package com.robotzero.gamefx.world;
 
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
-import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -11,7 +11,10 @@ public class World {
     public static final int TILES_PER_CHUNK = 16;
     public static final int TileSideInPixels = 60;
     public static final float TileSideInMeters = 1.4f;
-    private static final float ChunkSideInMeters = TILES_PER_CHUNK * TileSideInMeters;
+    public static final Vector3f ChunkDimInMeters = new Vector3f(TILES_PER_CHUNK*TileSideInMeters,
+            TILES_PER_CHUNK * TileSideInMeters,
+            TileSideInMeters);
+    public static final float TileDepthInMeters = TileSideInMeters;
     public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
     public static float ScreenCenterX = 0.5f * DisplayManager.WIDTH;
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
@@ -41,18 +44,18 @@ public class World {
         return tileChunkHash.get(HashSlot);
     }
 
-    public boolean IsCanonical(float TileRel)
+    public boolean IsCanonical(float ChunkDim, float TileRel)
     {
         float Epsilon = 0.0001f;
-        boolean Result = ((TileRel >= -0.5f * ChunkSideInMeters + Epsilon) &&
-                (TileRel <= 0.5f * ChunkSideInMeters + Epsilon));
+        boolean Result = ((TileRel >= -0.5f * ChunkDim + Epsilon) &&
+                (TileRel <= 0.5f * ChunkDim + Epsilon));
 
         return(Result);
     }
 
-    public boolean IsCanonical(Vector2f Offset)
+    public boolean IsCanonical(Vector3f Offset)
     {
-        boolean Result = (IsCanonical(Offset.x()) && IsCanonical(Offset.y()));
+        boolean Result = (IsCanonical(ChunkDimInMeters.x(), Offset.x()) && IsCanonical(ChunkDimInMeters.y(), Offset.y()));
 
         return(Result);
     }
@@ -75,25 +78,22 @@ public class World {
         return(Result);
     }
 
-    WorldPosition RecanonicalizeCoord(WorldPosition Pos)
+    WorldPosition RecanonicalizeCoord(Vector3f ChunkDim, WorldPosition Pos)
     {
-        int OffsetX = (int) Math.floor(Pos.Offset.x() / ChunkSideInMeters);
-        int OffsetY = (int) Math.floor(Pos.Offset.y() / ChunkSideInMeters);
+        int OffsetX = (int) Math.floor(Pos.Offset.x() / ChunkDim.x());
+        int OffsetY = (int) Math.floor(Pos.Offset.y() / ChunkDim.y());
         Pos.ChunkX = Pos.ChunkX + OffsetX;
         Pos.ChunkY = Pos.ChunkY + OffsetY;
-        Pos.Offset.x = Pos.Offset.x() -  OffsetX * ChunkSideInMeters;
-        Pos.Offset.y = Pos.Offset.y() -  OffsetY * ChunkSideInMeters;
+        Pos.Offset.x = Pos.Offset.x() -  OffsetX * ChunkDim.x();
+        Pos.Offset.y = Pos.Offset.y() -  OffsetY * ChunkDim.y();
 
         return Pos;
     }
 
-    public static WorldDifference subtract(WorldPosition A, WorldPosition B)
+    public static Vector3f subtract(WorldPosition A, WorldPosition B)
     {
-        WorldDifference Result = new WorldDifference();
-        Vector2f dTileXY = new Vector2f((float) A.ChunkX - (float) B.ChunkX, (float) A.ChunkY - (float) B.ChunkY);
-        Result.dXY = dTileXY.mul(World.ChunkSideInMeters).add(new Vector2f(A.Offset).sub(B.Offset));
-
-        return(Result);
+        Vector3f dTile = new Vector3f((float) A.ChunkX - (float) B.ChunkX, (float) A.ChunkY - (float) B.ChunkY, 0.0f);
+        return EntityService.Hadamard(ChunkDimInMeters, dTile).add(A.Offset.sub(B.Offset));
     }
 
     public float[] TestWall(float WallX, float RelX, float RelY, float PlayerDeltaX, float PlayerDeltaY,
@@ -117,12 +117,12 @@ public class World {
         return new float[]{tMinTemp, Hit};
     }
 
-    public WorldPosition MapIntoChunkSpace(WorldPosition BasePos, Vector2f Offset)
+    public WorldPosition MapIntoChunkSpace(WorldPosition BasePos, Vector3f Offset)
     {
         WorldPosition Result = new WorldPosition(BasePos);
 
-        Result.Offset = new Vector2f(Result.Offset).add(Offset);
-        RecanonicalizeCoord(Result);
+        Result.Offset = new Vector3f(Result.Offset).add(Offset);
+        RecanonicalizeCoord(ChunkDimInMeters, Result);
 
         return(Result);
     }
@@ -140,14 +140,10 @@ public class World {
             this.ChunkX = worldPosition.ChunkX;
             this.ChunkY = worldPosition.ChunkY;
         }
-        public Vector2f Offset = new Vector2f(0.0f, 0.0f);
+        public Vector3f Offset = new Vector3f(0.0f, 0.0f, 0.0f);
 
         public int ChunkX = 1;
         public int ChunkY = 3;
-    }
-
-    public static class WorldDifference {
-        public Vector2f dXY;
     }
 }
 

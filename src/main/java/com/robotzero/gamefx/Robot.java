@@ -25,7 +25,7 @@ public class Robot {
             AssetFactory assetFactory = new AssetFactory();
             World world = new World();
             EntityService entityService = new EntityService(gameMemory, world);
-            Camera camera = new Camera(gameMemory, entityService);
+            Camera camera = new Camera();
             Render render = new Render2D(camera, entityService, world);
             GameApp gameApp = new GameApp(displayManager, render, camera, timer, assetFactory, entityService, gameMemory, world);
             gameApp.run();

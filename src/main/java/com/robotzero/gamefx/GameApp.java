@@ -16,7 +16,6 @@ import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
 import com.robotzero.gamefx.renderengine.utils.Random;
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
@@ -49,7 +48,7 @@ public class GameApp implements Runnable {
     private Mesh quad;
     private Mesh familiarA;
     private final EntityService entityService;
-    private Vector2f ddPlayer;
+    private Vector3f ddPlayer;
     private final GameMemory gameMemory;
     private final World world;
     public static int playerSpeed;
@@ -68,7 +67,7 @@ public class GameApp implements Runnable {
         this.timer = timer;
         this.assetFactory = assetFactory;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
-        this.ddPlayer = new Vector2f(0.0f, 0.0f);
+        this.ddPlayer = new Vector3f(0.0f, 0.0f, 0.0f);
         this.gameMemory = g;
         this.entityService = entityService;
         this.world = world;
@@ -165,7 +164,7 @@ public class GameApp implements Runnable {
         ControllingEntity = gameMemory.ControlledHero;
         playerSpeed = 10;
         cameraInc.set(0f, 0f, 0f);
-        ddPlayer.set(0f, 0f);
+        ddPlayer.set(0f, 0f, 0f);
         int heroFacingDirection = 0;
         if (displayManager.isKeyPressed(GLFW_KEY_W)) {
             sceneChanged = true;
@@ -225,7 +224,7 @@ public class GameApp implements Runnable {
 
     private void update(float interval) {
         globalinterval = interval;
-        Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector2f(0f, 0f), new Vector2f(TileSpanX, TileSpanY).mul(World.TileSideInMeters));
+        Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector3f(0f, 0f, 0f), new Vector3f(TileSpanX, TileSpanY, 0f).mul(World.TileSideInMeters));
         gameMemory.simRegion = entityService.BeginSim(Camera.position, CameraBounds);
 //        entityService.moveEntity(gameMemory.simRegion, ControllingEntity, ddPlayer, interval, DefaultMoveSpec);
 //        LowEntity cameraFollowingEntity = entityService.ForceEntityIntoHigh(gameMemory.CameraFollowingEntityIndex);
