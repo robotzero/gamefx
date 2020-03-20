@@ -645,8 +645,8 @@ public class EntityService {
 
     public Rectangle AddRadiusTo(Rectangle A, float RadiusW, float RadiusH) {
         return new Rectangle(
-                A.getMin().sub(new Vector2f(RadiusW, RadiusW)),
-                A.getMax().add(new Vector2f(RadiusH, RadiusH))
+                A.getMin().sub(new Vector2f(RadiusW, RadiusH)),
+                A.getMax().add(new Vector2f(RadiusW, RadiusH))
         );
     }
 }
