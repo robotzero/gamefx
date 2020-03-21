@@ -11,4 +11,6 @@ public class SimRegion {
     public int EntityCount = 0;
     public SimEntity[] simEntities;
     public SimEntityHash[] Hash = new SimEntityHash[4096];
+    public float MaxEntityRadius;
+    public float MaxEntityVelocity;
 }

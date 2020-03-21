@@ -225,7 +225,7 @@ public class GameApp implements Runnable {
     private void update(float interval) {
         globalinterval = interval;
         Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector3f(0f, 0f, 0f), new Vector3f(TileSpanX, TileSpanY, 0f).mul(World.TileSideInMeters));
-        gameMemory.simRegion = entityService.BeginSim(Camera.position, CameraBounds);
+        gameMemory.simRegion = entityService.BeginSim(Camera.position, CameraBounds, interval);
 //        entityService.moveEntity(gameMemory.simRegion, ControllingEntity, ddPlayer, interval, DefaultMoveSpec);
 //        LowEntity cameraFollowingEntity = entityService.ForceEntityIntoHigh(gameMemory.CameraFollowingEntityIndex);
 //        if (cameraFollowingEntity.High != null) {

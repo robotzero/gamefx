@@ -46,7 +46,7 @@ public class World {
 
     public boolean IsCanonical(float ChunkDim, float TileRel)
     {
-        float Epsilon = 0.0001f;
+        float Epsilon = 0.01f;
         boolean Result = ((TileRel >= -0.5f * ChunkDim + Epsilon) &&
                 (TileRel <= 0.5f * ChunkDim + Epsilon));
 

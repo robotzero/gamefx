@@ -40,8 +40,7 @@ public class EntityService {
         World.WorldPosition P = Camera.position;
         AddLowEntityResult entity = AddLowEntity(EntityType.HERO, P);
 
-        entity.Low.Sim.Height = 1.4f;
-        entity.Low.Sim.Width = 1.0f;
+        entity.Low.Sim.Dim = new Vector3f(1.0f, 1.4f, 0.0f);
         AddFlag(entity.Low.Sim, SimEntityFlag.COLLIDES);
 
         if (gameMemory.CameraFollowingEntityIndex == 0) {
@@ -72,8 +71,7 @@ public class EntityService {
         World.WorldPosition P = ChunkPositionFromTilePosition(ChunkX, ChunkY);
         AddLowEntityResult entity = AddLowEntity(EntityType.WALL, P);
 
-        entity.Low.Sim.Height = World.TileSideInMeters;
-        entity.Low.Sim.Width = entity.Low.Sim.Height;
+        entity.Low.Sim.Dim = new Vector3f(World.TileSideInMeters, World.TileSideInMeters, 0.0f);
         AddFlag(entity.Low.Sim, SimEntityFlag.COLLIDES);
 
         return entity;
@@ -82,7 +80,7 @@ public class EntityService {
     public World.WorldPosition ChunkPositionFromTilePosition(int AbsTileX, int AbsTileY) {
         World.WorldPosition BasePos = new World.WorldPosition();
 
-        Vector3f Offset = Hadamard(World.ChunkDimInMeters, new Vector3f(AbsTileX, AbsTileY, 0f));
+        Vector3f Offset =  new Vector3f(AbsTileX, AbsTileY, 0.0f).mul(World.TileSideInMeters);
         World.WorldPosition Result = world.MapIntoChunkSpace(BasePos, Offset);
         assert (world.IsCanonical(Result.Offset));
         return (Result);
@@ -196,8 +194,7 @@ public class EntityService {
         World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY);
         AddLowEntityResult Entity = AddLowEntity(EntityType.MONSTAR, P);
 
-        Entity.Low.Sim.Height = 0.5f;
-        Entity.Low.Sim.Width = 1.0f;
+        Entity.Low.Sim.Dim = new Vector3f(1.0f, 0.5f, 0.0f);
         AddFlag(Entity.Low.Sim, SimEntityFlag.COLLIDES);
 
         return(Entity);
@@ -207,8 +204,7 @@ public class EntityService {
         World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY);
         AddLowEntityResult Entity = AddLowEntity(EntityType.FAMILIAR, P);
 
-        Entity.Low.Sim.Height = 0.5f;
-        Entity.Low.Sim.Width = 1.0f;
+        Entity.Low.Sim.Dim = new Vector3f(1.0f, 0.5f, 0.0f);
         AddFlag(Entity.Low.Sim, SimEntityFlag.COLLIDES);
 
         return(Entity);
@@ -277,6 +273,9 @@ public class EntityService {
         Vector3f OldPlayerP = new Vector3f(entity.P);
         Vector3f playerDelta = new Vector3f(ddP.x(), ddP.y(), ddP.z()).mul(0.5f).mul(interval * interval).add(new Vector3f(entity.dP.x(), entity.dP.y(), entity.dP.z()).mul(interval));
         entity.dP = new Vector3f(ddP).mul(interval).add(new Vector3f(entity.dP));
+
+        assert (entity.dP.lengthSquared() <= simRegion.MaxEntityVelocity);
+
         Vector3f NewPlayerP = OldPlayerP.add(playerDelta);
 
         float DistanceRemaining = entity.DistanceLimit;
@@ -300,7 +299,7 @@ public class EntityService {
                         SimEntity TestEntity = simRegion.simEntities[TestHighEntityIndex];
                         if (TestEntity != entity) {
                             if (TestEntity.flags.contains(SimEntityFlag.COLLIDES) && !entity.flags.contains(SimEntityFlag.NONSPATIAL)) {
-                                Vector3f MinkowskiDiameter = new Vector3f(TestEntity.Width + entity.Width, TestEntity.Height + entity.Height, 2.0f * World.TileDepthInMeters);
+                                Vector3f MinkowskiDiameter = new Vector3f(TestEntity.Dim.x() + entity.Dim.x(), TestEntity.Dim.y() + entity.Dim.y(), 2.0f * World.TileDepthInMeters);
                                 Vector3f MinCorner = MinkowskiDiameter.mul(-0.5f);
                                 Vector3f MaxCorner = MinkowskiDiameter.mul(0.5f);
                                 Vector3f Rel = new Vector3f(entity.P).sub(new Vector3f(TestEntity.P));
@@ -443,7 +442,7 @@ public class EntityService {
         if (Dest != null) {
             if (SimP != null) {
                 Dest.P = new Vector3f(SimP);
-                Dest.Updatable = Rectangle.IsInRectangle(simRegion.UpdatableBounds, Dest.P);
+                Dest.Updatable = EntityOverlapsRectangle(Dest.P, Dest.Dim, simRegion.UpdatableBounds);
             } else {
                 Dest.P = GetSimSpaceP(simRegion, Source);
             }
@@ -544,11 +543,20 @@ public class EntityService {
         }
     }
 
-    public SimRegion BeginSim(World.WorldPosition Origin, Rectangle Bounds) {
-        float UpdateSafetyMargin = 1.0f;
+
+    public boolean EntityOverlapsRectangle(Vector3f P, Vector3f Dim, Rectangle Rect) {
+        Rectangle Grown = AddRadiusTo(Rect, Dim.mul(0.5f));
+        boolean Result = Rectangle.IsInRectangle(Grown, P);
+        return(Result);
+    }
+
+    public SimRegion BeginSim(World.WorldPosition Origin, Rectangle Bounds, float interval) {
         SimRegion simRegion = new SimRegion();
+        simRegion.MaxEntityRadius = 5.0f;
+        simRegion.MaxEntityVelocity = 30.0f;
+        float UpdateSafetyMargin = simRegion.MaxEntityRadius + interval * simRegion.MaxEntityVelocity;
         simRegion.Origin = Origin;
-        simRegion.UpdatableBounds = Bounds;
+        simRegion.UpdatableBounds = AddRadiusTo(Bounds, new Vector3f(simRegion.MaxEntityRadius, simRegion.MaxEntityRadius, simRegion.MaxEntityRadius));
         simRegion.Bounds = AddRadiusTo(simRegion.UpdatableBounds, new Vector3f(UpdateSafetyMargin, UpdateSafetyMargin, 0.0f));
 
 
@@ -571,7 +579,7 @@ public class EntityService {
                             LowEntity Low = gameMemory.LowEntities[LowEntityIndex];
                             if (!IsSet(Low.Sim, SimEntityFlag.NONSPATIAL)) {
                                 Vector3f SimSpaceP = GetSimSpaceP(simRegion, Low);
-                                if (Rectangle.IsInRectangle(simRegion.Bounds, SimSpaceP))
+                                if (EntityOverlapsRectangle(SimSpaceP, Low.Sim.Dim, simRegion.Bounds))
                                 {
                                     AddEntity(simRegion, LowEntityIndex, Low, SimSpaceP);
                                 }
