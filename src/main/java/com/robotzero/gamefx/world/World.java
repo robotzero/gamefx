@@ -80,8 +80,8 @@ public class World {
 
     WorldPosition RecanonicalizeCoord(Vector3f ChunkDim, WorldPosition Pos)
     {
-        int OffsetX = (int) Math.floor(Pos.Offset.x() / ChunkDim.x());
-        int OffsetY = (int) Math.floor(Pos.Offset.y() / ChunkDim.y());
+        int OffsetX = Math.round(Pos.Offset.x() / ChunkDim.x());
+        int OffsetY = Math.round(Pos.Offset.y() / ChunkDim.y());
         Pos.ChunkX = Pos.ChunkX + OffsetX;
         Pos.ChunkY = Pos.ChunkY + OffsetY;
         Pos.Offset.x = Pos.Offset.x() -  OffsetX * ChunkDim.x();
@@ -142,8 +142,8 @@ public class World {
         }
         public Vector3f Offset = new Vector3f(0.0f, 0.0f, 0.0f);
 
-        public int ChunkX = 1;
-        public int ChunkY = 3;
+        public int ChunkX = 0;
+        public int ChunkY = 0;
     }
 }
 

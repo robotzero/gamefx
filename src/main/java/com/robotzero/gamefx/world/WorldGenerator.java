@@ -21,11 +21,11 @@ public class WorldGenerator {
         boolean doorBottom = false;
 
         for (int screenIndex = 0;
-             screenIndex < 2000;
+             screenIndex < 1;
              ++screenIndex) {
 
             int randomChoice;
-            randomChoice = Random.randomNumberTable[randomNumberIndex++] % 3;
+            randomChoice = Random.randomNumberTable[randomNumberIndex++] % 2;
 
             if (randomChoice == 1) {
                 doorRight = true;

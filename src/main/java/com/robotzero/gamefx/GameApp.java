@@ -76,10 +76,6 @@ public class GameApp implements Runnable {
         entityService.AddLowEntity(EntityType.NULL, null);
         gameMemory.HighEntityCount = 1;
         World.renderWorld(entityService);
-//        DefaultMoveSpec = entityService.DefaultMoveSpec();
-//        DefaultMoveSpec.UnitMaxAccelVector = true;
-//        DefaultMoveSpec.Drag = 8.0f;
-//        DefaultMoveSpec.Speed = 10f;
     }
 
     public void run() {
