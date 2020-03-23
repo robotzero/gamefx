@@ -596,7 +596,7 @@ public class EntityService {
                 assert (IsSet(Stored.Sim, SimEntityFlag.SIMMING));
                 Stored.Sim = new SimEntity(Entity);
                 assert (!IsSet(Stored.Sim, SimEntityFlag.SIMMING));
-                //StoreEntityReference(Stored.sim.sword);
+//                StoreEntityReference(Stored.Sim.Sword);
 
                 World.WorldPosition NewP = IsSet(Entity, SimEntityFlag.NONSPATIAL) ? null : world.MapIntoChunkSpace(Region.Origin, Entity.P);
                 ChangeEntityLocation(Entity.StorageIndex, Stored, NewP);
