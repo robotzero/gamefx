@@ -38,10 +38,7 @@ public class EntityService {
 
     public AddLowEntityResult AddPlayer() {
         World.WorldPosition P = Camera.position;
-        AddLowEntityResult entity = AddLowEntity(EntityType.HERO, P);
-
-        entity.Low.Sim.Dim = new Vector3f(1.0f, 1.4f, 0.0f);
-        AddFlag(entity.Low.Sim, SimEntityFlag.COLLIDES);
+        AddLowEntityResult entity = AddLowEntity(EntityType.HERO, P, new Vector3f(1.0f, 1.4f, 0.0f), SimEntityFlag.COLLIDES);
 
         if (gameMemory.CameraFollowingEntityIndex == 0) {
             gameMemory.CameraFollowingEntityIndex = entity.LowIndex;
@@ -50,29 +47,33 @@ public class EntityService {
         return entity;
     }
 
-    public AddLowEntityResult AddLowEntity(EntityType Type, World.WorldPosition P) {
+    public AddLowEntityResult AddLowEntity(EntityType Type, World.WorldPosition P, Vector3f Dim, SimEntityFlag flag) {
         int EntityIndex = gameMemory.LowEntityCount;
         gameMemory.LowEntityCount = EntityIndex + 1;
 
         gameMemory.LowEntities[EntityIndex] = new LowEntity();
         gameMemory.LowEntities[EntityIndex].Sim = new SimEntity();
         gameMemory.LowEntities[EntityIndex].Sim.Type = Type;
+        gameMemory.LowEntities[EntityIndex].Sim.Dim = Dim;
         gameMemory.LowEntities[EntityIndex].P = null;
+        if (flag != null) {
+            AddFlag(gameMemory.LowEntities[EntityIndex].Sim, flag);
+        }
 
         ChangeEntityLocation(EntityIndex, gameMemory.LowEntities[EntityIndex], P);
 
         AddLowEntityResult addLowEntityResult = new AddLowEntityResult();
         addLowEntityResult.Low = gameMemory.LowEntities[EntityIndex];
         addLowEntityResult.LowIndex = EntityIndex;
+        if (P != null) {
+            System.out.println("ChunkX= " + P.ChunkX + " ChunkY= " + P.ChunkY + " x= " + P.Offset.x + " y= " + P.Offset.y + " Index= " + EntityIndex);
+        }
         return addLowEntityResult;
     }
 
     public AddLowEntityResult AddWall(int ChunkX, int ChunkY) {
         World.WorldPosition P = ChunkPositionFromTilePosition(ChunkX, ChunkY);
-        AddLowEntityResult entity = AddLowEntity(EntityType.WALL, P);
-
-        entity.Low.Sim.Dim = new Vector3f(World.TileSideInMeters, World.TileSideInMeters, 0.0f);
-        AddFlag(entity.Low.Sim, SimEntityFlag.COLLIDES);
+        AddLowEntityResult entity = AddLowEntity(EntityType.WALL, P, new Vector3f(World.TileSideInMeters, World.TileSideInMeters, 0.0f), SimEntityFlag.COLLIDES);
 
         return entity;
     }
@@ -192,20 +193,14 @@ public class EntityService {
 
     public AddLowEntityResult AddMonstar(int AbsTileX, int AbsTileY) {
         World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY);
-        AddLowEntityResult Entity = AddLowEntity(EntityType.MONSTAR, P);
-
-        Entity.Low.Sim.Dim = new Vector3f(1.0f, 0.5f, 0.0f);
-        AddFlag(Entity.Low.Sim, SimEntityFlag.COLLIDES);
+        AddLowEntityResult Entity = AddLowEntity(EntityType.MONSTAR, P,  new Vector3f(1.0f, 0.5f, 0.0f), SimEntityFlag.COLLIDES);
 
         return(Entity);
     }
 
     public AddLowEntityResult AddFamiliar(int AbsTileX, int AbsTileY) {
         World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY);
-        AddLowEntityResult Entity = AddLowEntity(EntityType.FAMILIAR, P);
-
-        Entity.Low.Sim.Dim = new Vector3f(1.0f, 0.5f, 0.0f);
-        AddFlag(Entity.Low.Sim, SimEntityFlag.COLLIDES);
+        AddLowEntityResult Entity = AddLowEntity(EntityType.FAMILIAR, P, new Vector3f(1.0f, 0.5f, 0.0f), SimEntityFlag.COLLIDES);
 
         return(Entity);
     }
@@ -416,8 +411,8 @@ public class EntityService {
 //            float PlayerTop = EntityGroundPointY - 0.5f * World.MetersToPixels * lowEntity.Height;
 
                 EntityVisiblePiece Piece = pieceGroup.Pieces[0];
-                Vector3f Center = new Vector3f(EntityGroundPointX, EntityGroundPointY, 0);
-//                Vector3f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector3f(0, 0, 0));
+                Vector3f Center = new Vector3f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y(), 0);
+                Vector2f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector2f());
 
                 return Map.of(entity.Type, v.identity().translate(Center));
             }

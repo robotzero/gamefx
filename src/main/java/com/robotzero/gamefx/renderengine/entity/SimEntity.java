@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 public class SimEntity {
-    public Vector3f P = new Vector3f(0.0f, 0.0f, 0.0f);
+    public Vector3f P = null;
     public Vector3f Dim = new Vector3f(0.0f, 0.0f, 0.0f);
     public WorldChunk OldChunk;
     public EntityType Type;

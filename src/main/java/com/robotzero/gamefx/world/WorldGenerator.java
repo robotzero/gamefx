@@ -4,8 +4,8 @@ import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.utils.Random;
 
 public class WorldGenerator {
-    public static final int tilesPerWidth = 17;
-    public static final int tilesPerHeight = 9;
+    public static final int tilesPerWidth = 5;
+    public static final int tilesPerHeight = 3;
     public static final int screenBaseX = 0;
     public static final int screenBaseY = 0;
     public static int CameraTileX = WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17/2;
@@ -21,11 +21,11 @@ public class WorldGenerator {
         boolean doorBottom = false;
 
         for (int screenIndex = 0;
-             screenIndex < 2000;
+             screenIndex < 1;
              ++screenIndex) {
 
             int randomChoice;
-            randomChoice = Random.randomNumberTable[randomNumberIndex++] % 3;
+            randomChoice = Random.randomNumberTable[randomNumberIndex++] % 2;
 
             if (randomChoice == 1) {
                 doorRight = true;
@@ -42,7 +42,7 @@ public class WorldGenerator {
                     int absTileX = screenX * tilesPerWidth + tileX;
                     int absTileY = screenY * tilesPerHeight + tileY;
 
-                    byte tileValue = 1;
+                    int tileValue = 1;
                     if ((tileX == 0) && (!doorLeft || (tileY != (tilesPerHeight / 2)))) {
                         tileValue = 2;
                     }
@@ -71,7 +71,9 @@ public class WorldGenerator {
             doorRight = false;
             doorTop = false;
 
-            if (randomChoice == 1) {
+            if (randomChoice == 2) {
+
+            } else if (randomChoice == 1) {
                 screenX += 1;
             } else {
                 screenY += 1;

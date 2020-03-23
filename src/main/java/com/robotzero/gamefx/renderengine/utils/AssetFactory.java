@@ -72,9 +72,9 @@ public class AssetFactory {
     private Mesh familiar;
 
     public void init() {
-        bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
+        bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath().replaceFirst("/", ""));
         background = new Mesh(vertices1, tcs1, indices, bgTexture, null);
-        birdTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bird.png")).orElseThrow().getPath());
+        birdTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bird.png")).orElseThrow().getPath().replaceFirst("/", ""));
         bird = new Mesh(vertices2, tcs2, indices2, birdTexture, null);
         quad2D = new Mesh(vertices3, tcs1, indices, null, new Material());
         familiar = new Mesh(vertices4, tcs1, indices, null, new Material());

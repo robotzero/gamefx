@@ -73,7 +73,7 @@ public class GameApp implements Runnable {
         this.world = world;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
-        entityService.AddLowEntity(EntityType.NULL, null);
+        entityService.AddLowEntity(EntityType.NULL, null, null, null);
         gameMemory.HighEntityCount = 1;
         World.renderWorld(entityService);
 //        DefaultMoveSpec = entityService.DefaultMoveSpec();
@@ -110,18 +110,18 @@ public class GameApp implements Runnable {
                 WorldGenerator.CameraTileX,
                 WorldGenerator.CameraTileY
         );
-        entityService.AddMonstar(WorldGenerator.CameraTileX + 2, WorldGenerator.CameraTileY + 2);
+//        entityService.AddMonstar(WorldGenerator.CameraTileX + 2, WorldGenerator.CameraTileY + 2);
         Camera.position = NewCameraP;
         for (int FamiliarIndex = 0; FamiliarIndex < 1; ++FamiliarIndex) {
             int FamiliarOffsetX = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 7;
             int FamiliarOffsetY = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 3;
             if ((FamiliarOffsetX != 0) || (FamiliarOffsetY != 0)) {
-                entityService.AddFamiliar(WorldGenerator.CameraTileX + FamiliarOffsetX, WorldGenerator.CameraTileY + FamiliarOffsetY);
+//                entityService.AddFamiliar(WorldGenerator.CameraTileX + FamiliarOffsetX, WorldGenerator.CameraTileY + FamiliarOffsetY);
             }
         }
-        LowIndex =  entityService.AddPlayer().LowIndex;
-        gameMemory.ControlledHero = new ControlledHero();
-        gameMemory.ControlledHero.EntityIndex = LowIndex;
+//        LowIndex =  entityService.AddPlayer().LowIndex;
+//        gameMemory.ControlledHero = new ControlledHero();
+//        gameMemory.ControlledHero.EntityIndex = LowIndex;
     }
 
     public void gameLoop() {
@@ -139,11 +139,11 @@ public class GameApp implements Runnable {
             while (accumulator >= interval) {
                 update(interval);
                 accumulator -= interval;
+                entityService.EndSim(gameMemory.simRegion);
             }
 
             //@TODO sim might not have been updated due to update not run
             render();
-
             sync();
         }
     }
@@ -157,7 +157,6 @@ public class GameApp implements Runnable {
         fps++;
         render2D.render(displayManager.getWindow(), background, bird, quad, familiarA);
         displayManager.updateDisplay();
-        entityService.EndSim(gameMemory.simRegion);
     }
 
     protected void input() {
