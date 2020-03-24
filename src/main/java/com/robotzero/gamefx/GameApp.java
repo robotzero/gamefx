@@ -132,14 +132,14 @@ public class GameApp implements Runnable {
 
             input();
 
-            while (accumulator >= interval) {
+ //           while (accumulator >= interval) {
                 update(interval);
-                accumulator -= interval;
-                entityService.EndSim(gameMemory.simRegion);
-            }
+//                accumulator -= interval;
+//            }
 
             //@TODO sim might not have been updated due to update not run
             render();
+            entityService.EndSim(gameMemory.simRegion);
             sync();
         }
     }

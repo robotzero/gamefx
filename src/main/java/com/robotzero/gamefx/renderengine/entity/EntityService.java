@@ -468,9 +468,11 @@ public class EntityService {
                     // a copy!
                     Entity = new SimEntity(Source.Sim);
                     simRegion.simEntities[EntityCount] = Entity;
+                    Entry.Ptr = Entity;
 
                     assert (!IsSet(Source.Sim, SimEntityFlag.SIMMING));
                     AddFlag(Source.Sim, SimEntityFlag.SIMMING);
+                    simRegion.simEntities[EntityCount] = Entity;
 //                LoadEntityReference(simRegion, Entity.Sword);
                 }
 
@@ -500,8 +502,6 @@ public class EntityService {
     public SimEntityHash GetHashFromStorageIndex(SimRegion simRegion, int StorageIndex) {
         assert (StorageIndex != 0);
 
-        SimEntityHash Result = null;
-
         int HashValue = StorageIndex;
         for (int Offset = 0; Offset < simRegion.Hash.length; ++Offset) {
             int HashMask = simRegion.Hash.length - 1;
@@ -512,12 +512,11 @@ public class EntityService {
                 Entry = simRegion.Hash[HashIndex];
             }
             if ((Entry.Index == 0) || (Entry.Index == StorageIndex)) {
-                Result = Entry;
-                break;
+                return Entry;
             }
         }
 
-        return(Result);
+        return null;
     }
 
 //    public void LoadEntityReference(SimRegion simRegion, EntityReference Ref) {

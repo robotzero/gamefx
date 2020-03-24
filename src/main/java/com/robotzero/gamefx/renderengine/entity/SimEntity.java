@@ -26,7 +26,7 @@ public class SimEntity {
         Dim = sim.Dim;
         Type = sim.Type;
         dP = sim.dP;
-        flags = sim.flags;
+        flags = new ArrayList<>(sim.flags);
         tBob = sim.tBob;
         StorageIndex = sim.StorageIndex;
         Updatable = sim.Updatable;
