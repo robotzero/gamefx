@@ -22,7 +22,7 @@ import java.util.stream.IntStream;
 public class EntityService {
     private final GameMemory gameMemory;
     private final World world;
-    public static final float PlayerHeight = 1.4f;
+    public static final float PlayerHeight = 0.5f;
     public static final float PlayerWidth = 1.0f;
     public static final float FamiliarHeight = 0.5f;
     public static final float FamiliarWidth = 1.0f;
@@ -38,7 +38,7 @@ public class EntityService {
 
     public AddLowEntityResult AddPlayer() {
         World.WorldPosition P = Camera.position;
-        AddLowEntityResult entity = AddLowEntity(EntityType.HERO, P, new Vector3f(1.0f, 1.4f, 0.0f), SimEntityFlag.COLLIDES);
+        AddLowEntityResult entity = AddLowEntity(EntityType.HERO, P, new Vector3f(PlayerWidth, PlayerHeight, 0.0f), SimEntityFlag.COLLIDES);
 
         if (gameMemory.CameraFollowingEntityIndex == 0) {
             gameMemory.CameraFollowingEntityIndex = entity.LowIndex;
@@ -65,9 +65,6 @@ public class EntityService {
         AddLowEntityResult addLowEntityResult = new AddLowEntityResult();
         addLowEntityResult.Low = gameMemory.LowEntities[EntityIndex];
         addLowEntityResult.LowIndex = EntityIndex;
-        if (P != null) {
-            System.out.println("ChunkX= " + P.ChunkX + " ChunkY= " + P.ChunkY + " x= " + P.Offset.x + " y= " + P.Offset.y + " Index= " + EntityIndex);
-        }
         return addLowEntityResult;
     }
 
@@ -363,7 +360,7 @@ public class EntityService {
         if (gameMemory.simRegion == null) {
             return Map.of();
         }
-        return IntStream.range(1, gameMemory.simRegion.EntityCount).mapToObj(HighEntityIndex -> {
+        return IntStream.range(0, gameMemory.simRegion.EntityCount).mapToObj(HighEntityIndex -> {
             pieceGroup.PieceCount = 0;
             SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
 
@@ -411,7 +408,8 @@ public class EntityService {
 //            float PlayerTop = EntityGroundPointY - 0.5f * World.MetersToPixels * lowEntity.Height;
 
                 EntityVisiblePiece Piece = pieceGroup.Pieces[0];
-                Vector3f Center = new Vector3f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y(), 0);
+//                Vector3f Center = new Vector3f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y(), 0);
+                Vector3f Center = new Vector3f(EntityGroundPointX, EntityGroundPointY, 0);
                 Vector2f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector2f());
 
                 return Map.of(entity.Type, v.identity().translate(Center));
@@ -539,7 +537,7 @@ public class EntityService {
 
 
     public boolean EntityOverlapsRectangle(Vector3f P, Vector3f Dim, Rectangle Rect) {
-        Rectangle Grown = AddRadiusTo(Rect, Dim.mul(0.5f));
+        Rectangle Grown = AddRadiusTo(Rect, new Vector3f(Dim).mul(0.5f));
         boolean Result = Rectangle.IsInRectangle(Grown, P);
         return(Result);
     }

@@ -115,9 +115,9 @@ public class GameApp implements Runnable {
 //                entityService.AddFamiliar(WorldGenerator.CameraTileX + FamiliarOffsetX, WorldGenerator.CameraTileY + FamiliarOffsetY);
             }
         }
-//        LowIndex =  entityService.AddPlayer().LowIndex;
-//        gameMemory.ControlledHero = new ControlledHero();
-//        gameMemory.ControlledHero.EntityIndex = LowIndex;
+        LowIndex =  entityService.AddPlayer().LowIndex;
+        gameMemory.ControlledHero = new ControlledHero();
+        gameMemory.ControlledHero.EntityIndex = LowIndex;
     }
 
     public void gameLoop() {
@@ -132,14 +132,14 @@ public class GameApp implements Runnable {
 
             input();
 
- //           while (accumulator >= interval) {
+//            while (accumulator >= interval) {
                 update(interval);
-//                accumulator -= interval;
+                accumulator -= interval;
 //            }
 
-            //@TODO sim might not have been updated due to update not run
             render();
             entityService.EndSim(gameMemory.simRegion);
+            //@TODO sim might not have been updated due to update not run
             sync();
         }
     }

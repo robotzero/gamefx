@@ -79,11 +79,5 @@ public class WorldGenerator {
                 screenY += 1;
             }
         }
-
-//        while(gameMemory.LowEntityCount < (ArrayCount(GameState->LowEntities) - 16))
-//        {
-//            uint32 Coordinate = 1024 + GameState->LowEntityCount;
-//            AddWall(GameState, Coordinate, Coordinate, Coordinate);
-//        }
     }
 }

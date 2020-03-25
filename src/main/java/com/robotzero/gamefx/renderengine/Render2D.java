@@ -60,7 +60,7 @@ public class Render2D implements Render {
             Matrix4f viewMatrix = camera.updateViewMatrix();
             Matrix4f projectionMatrix = camera.getProjectionMatrix();
             //@@TODO one player so far so we just get it.
-//            Matrix4f playerModelMatrix = entityService.getModelMatrix().get(EntityType.HERO).get(0).getValue();
+            Matrix4f playerModelMatrix = entityService.getModelMatrix().get(EntityType.HERO).get(0).getValue();
             Matrix4f quadViewMatrix = new Matrix4f().identity();
 //        sceneShaderProgram.bind();
 //        sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
@@ -71,14 +71,14 @@ public class Render2D implements Render {
 //        background.endRender();
 //        sceneShaderProgram.unbind();
 //
-//            birdShaderProgram.bind();
-//            birdShaderProgram.setUniform("vw_matrix", viewMatrix);
-//            birdShaderProgram.setUniform("pr_matrix", projectionMatrix);
-//            birdShaderProgram.setUniform("ml_matrix", playerModelMatrix);
-//            birdShaderProgram.setUniform("tex", 1);
-//            bird.render();
-//            bird.endRender();
-//            birdShaderProgram.unbind();
+            birdShaderProgram.bind();
+            birdShaderProgram.setUniform("vw_matrix", viewMatrix);
+            birdShaderProgram.setUniform("pr_matrix", projectionMatrix);
+            birdShaderProgram.setUniform("ml_matrix", playerModelMatrix);
+            birdShaderProgram.setUniform("tex", 1);
+            bird.render();
+            bird.endRender();
+            birdShaderProgram.unbind();
 
             quadShaderProgram.bind();
             quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
