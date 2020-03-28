@@ -48,12 +48,10 @@ public class GameApp implements Runnable {
     private Mesh quad;
     private Mesh familiarA;
     private final EntityService entityService;
-    private Vector3f ddPlayer;
     private final GameMemory gameMemory;
     private final World world;
     public static int playerSpeed;
     private int LowIndex;
-    private ControlledHero ControllingEntity;
     private SimEntity monstar;
     private MoveSpec DefaultMoveSpec;
     public static float globalinterval;
@@ -67,7 +65,6 @@ public class GameApp implements Runnable {
         this.timer = timer;
         this.assetFactory = assetFactory;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
-        this.ddPlayer = new Vector3f(0.0f, 0.0f, 0.0f);
         this.gameMemory = g;
         this.entityService = entityService;
         this.world = world;
@@ -117,6 +114,7 @@ public class GameApp implements Runnable {
         }
         LowIndex =  entityService.AddPlayer().LowIndex;
         gameMemory.ControlledHero = new ControlledHero();
+        gameMemory.ControlledHero.ddP = new Vector3f(0.0f, 0.0f, 0.0f);
         gameMemory.ControlledHero.EntityIndex = LowIndex;
     }
 
@@ -156,31 +154,30 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
-        ControllingEntity = gameMemory.ControlledHero;
         playerSpeed = 10;
         cameraInc.set(0f, 0f, 0f);
-        ddPlayer.set(0f, 0f, 0f);
+        gameMemory.ControlledHero.ddP.set(0f, 0f, 0f);
         int heroFacingDirection = 0;
         if (displayManager.isKeyPressed(GLFW_KEY_W)) {
             sceneChanged = true;
             cameraInc.y = -1;
-            ddPlayer.y = 1;
+            gameMemory.ControlledHero.ddP.y = 1;
             heroFacingDirection = 1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_S)) {
             sceneChanged = true;
             cameraInc.y = 1;
-            ddPlayer.y = -1;
+            gameMemory.ControlledHero.ddP.y = -1;
             heroFacingDirection = 2;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_A)) {
             sceneChanged = true;
             cameraInc.x = -1;
-            ddPlayer.x = -1;
+            gameMemory.ControlledHero.ddP.x = -1;
             heroFacingDirection = 3;
         } else if (displayManager.isKeyPressed(GLFW_KEY_D)) {
             sceneChanged = true;
             cameraInc.x = 1;
-            ddPlayer.x = 1;
+            gameMemory.ControlledHero.ddP.x = 1;
             heroFacingDirection = 4;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_Z)) {
@@ -194,7 +191,6 @@ public class GameApp implements Runnable {
         if (displayManager.isKeyPressed(GLFW_KEY_SPACE)) {
             playerSpeed = 50;
         }
-        gameMemory.ControlledHero.ddP = ddPlayer;
     }
 
     private void sync() {

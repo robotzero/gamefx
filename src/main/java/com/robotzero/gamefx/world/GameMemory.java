@@ -45,6 +45,7 @@ public class GameMemory {
     public GameMemory() {
         mainStorage = org.lwjgl.system.MemoryUtil.memAlloc(PermanentStorageSize + TransientStorageSize);
         ControlledHero = new ControlledHero();
+        ControlledHero.ddP = new Vector3f(0.0f, 0.0f, 0.0f);
     }
 
     public boolean isInitialized() {

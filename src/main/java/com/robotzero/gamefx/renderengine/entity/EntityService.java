@@ -260,7 +260,7 @@ public class EntityService {
         }
 
         ddP = ddP.mul(moveSpec.Speed);
-        ddP = ddP.add(new Vector3f(entity.dP.x(), entity.dP.y(), entity.dP.z()).mul(-moveSpec.Drag));
+        ddP = ddP.add((new Vector3f(entity.dP.x(), entity.dP.y(), entity.dP.z()).mul(-moveSpec.Drag)));
 
         Vector3f OldPlayerP = new Vector3f(entity.P);
         Vector3f playerDelta = new Vector3f(ddP.x(), ddP.y(), ddP.z()).mul(0.5f).mul(interval * interval).add(new Vector3f(entity.dP.x(), entity.dP.y(), entity.dP.z()).mul(interval));
@@ -268,7 +268,7 @@ public class EntityService {
 
         assert (entity.dP.lengthSquared() <= simRegion.MaxEntityVelocity);
 
-        Vector3f NewPlayerP = OldPlayerP.add(playerDelta);
+        Vector3f NewPlayerP = new Vector3f(OldPlayerP).add(new Vector3f(playerDelta));
 
         float DistanceRemaining = entity.DistanceLimit;
         if (DistanceRemaining == 0.0f) {
