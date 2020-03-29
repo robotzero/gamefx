@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.renderengine;
 
+import com.robotzero.gamefx.world.GameMemory;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;
@@ -98,7 +99,7 @@ public class DisplayManager {
         glfwMakeContextCurrent(window);
 
         // Enable v-sync (1)
-        glfwSwapInterval(1);
+//        glfwSwapInterval(1);
 
         // Make the window visible
         glfwShowWindow(window);
@@ -118,7 +119,10 @@ public class DisplayManager {
         glClearColor(r, g, b, alpha);
     }
 
-    public boolean isKeyPressed(int keyCode) {
+    public boolean isKeyPressed(int keyCode, boolean initialized) {
+        if (keyCode == GLFW_KEY_D && initialized) {
+            return true;
+        }
         return glfwGetKey(window, keyCode) == GLFW_PRESS;
     }
 

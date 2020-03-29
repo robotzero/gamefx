@@ -22,7 +22,8 @@ public class SimEntity {
     public float DistanceLimit = 0.0f;
 
     public SimEntity(SimEntity sim) {
-        P = sim.P;
+//        P = sim.P;
+        P = new Vector3f(0.0f, 0.0f, 0.0f);
         Dim = sim.Dim;
         Type = sim.Type;
         dP = sim.dP;

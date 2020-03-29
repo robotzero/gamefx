@@ -32,6 +32,7 @@ public class Robot {
         } catch (Throwable t) {
             System.out.println(t.toString());
             System.out.println(t.getMessage());
+            t.printStackTrace();
             Optional.ofNullable(gameMemory).ifPresent(GameMemory::free);
             System.exit(1);
         }

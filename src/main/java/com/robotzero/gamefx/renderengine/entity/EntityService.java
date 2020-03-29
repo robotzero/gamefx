@@ -55,7 +55,8 @@ public class EntityService {
         gameMemory.LowEntities[EntityIndex].Sim = new SimEntity();
         gameMemory.LowEntities[EntityIndex].Sim.Type = Type;
         gameMemory.LowEntities[EntityIndex].Sim.Dim = Dim;
-        gameMemory.LowEntities[EntityIndex].P = null;
+        gameMemory.LowEntities[EntityIndex].Sim.P = new Vector3f();
+        gameMemory.LowEntities[EntityIndex].P = NullPosition();
         if (flag != null) {
             AddFlag(gameMemory.LowEntities[EntityIndex].Sim, flag);
         }
@@ -88,11 +89,11 @@ public class EntityService {
         World.WorldPosition OldP = null;
         World.WorldPosition NewP = null;
 
-        if (!IsSet(LowEntity.Sim, SimEntityFlag.NONSPATIAL) && LowEntity.P != null) {
+        if (!IsSet(LowEntity.Sim, SimEntityFlag.NONSPATIAL) && isValid(LowEntity.P)) {
             OldP = new World.WorldPosition(LowEntity.P);
         }
 
-        if (NewPInit != null) {
+        if (isValid(NewPInit)) {
             NewP = new World.WorldPosition(NewPInit);
         }
 
@@ -108,8 +109,10 @@ public class EntityService {
     }
 
     public void ChangeEntityLocationRaw(int LowEntityIndex, World.WorldPosition OldP, World.WorldPosition NewP) {
+        assert (OldP == null || isValid(OldP));
+        assert (NewP == null || isValid(NewP));
 
-        if (OldP != null && world.AreInSameChunk(OldP, NewP)) {
+        if (OldP != null && NewP != null && world.AreInSameChunk(OldP, NewP)) {
             // NOTE(casey): Leave entity where it is
         } else {
             if (OldP != null) {
@@ -136,8 +139,9 @@ public class EntityService {
                                         firstBlock.next = nextBlock.next;
                                         firstBlock.EntityCount = nextBlock.EntityCount;
                                         nextBlock.next = World.firstFree;
-                                        FirstBlock.set(0, firstBlock);
-                                        FirstBlock.addLast(nextBlock);
+//                                        FirstBlock.set(0, firstBlock);
+//                                        FirstBlock.addLast(nextBlock);
+                                        FirstBlock.set(0, nextBlock);
                                         World.firstFree = FirstBlock.indexOf(nextBlock);
                                     }
                                 }
@@ -266,7 +270,7 @@ public class EntityService {
         Vector3f playerDelta = new Vector3f(ddP.x(), ddP.y(), ddP.z()).mul(0.5f).mul(interval * interval).add(new Vector3f(entity.dP.x(), entity.dP.y(), entity.dP.z()).mul(interval));
         entity.dP = new Vector3f(ddP).mul(interval).add(new Vector3f(entity.dP));
 
-        assert (entity.dP.lengthSquared() <= simRegion.MaxEntityVelocity);
+        assert (new Vector3f(entity.dP).lengthSquared() <= simRegion.MaxEntityVelocity * simRegion.MaxEntityVelocity);
 
         Vector3f NewPlayerP = new Vector3f(OldPlayerP).add(new Vector3f(playerDelta));
 
@@ -274,8 +278,9 @@ public class EntityService {
         if (DistanceRemaining == 0.0f) {
             DistanceRemaining = 10000.0f;
         }
-
-        for (int Iteration = 0; (Iteration < 4); ++Iteration) {
+        int count = 0;
+        for (int Iteration = 0; Iteration < 4; ++Iteration) {
+            count = count + 1;
             float[] tMin = {1.0f, 0.0f};
             float PlayerDeltaLength = playerDelta.length();
             if (PlayerDeltaLength > 0.0f) {
@@ -284,7 +289,7 @@ public class EntityService {
                 }
                 Vector3f WallNormal = new Vector3f(0.0f, 0.0f, 0.0f);
                 SimEntity HitEntity = null;
-                Vector3f DesiredPosition = new Vector3f(entity.P).add(playerDelta);
+                Vector3f DesiredPosition = new Vector3f(entity.P).add(new Vector3f(playerDelta));
                 boolean StopOnCollision = IsSet(entity, SimEntityFlag.COLLIDES);
                 if (!IsSet(entity, SimEntityFlag.NONSPATIAL)) {
                     for (int TestHighEntityIndex = 1; TestHighEntityIndex < simRegion.EntityCount; ++TestHighEntityIndex) {
@@ -374,7 +379,8 @@ public class EntityService {
                     case ("hero"): {
                         MoveSpec = DefaultMoveSpec();
                         MoveSpec.UnitMaxAccelVector = true;
-                        MoveSpec.Speed = 10.0f;
+                        //MoveSpec.Speed = GameApp.playerSpeed == 1 ? 10.0f : GameApp.playerSpeed;
+                        MoveSpec.Speed = 50f;
                         MoveSpec.Drag = 8.0f;
                         pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
                     }
@@ -601,7 +607,7 @@ public class EntityService {
                 if (Entity.StorageIndex == gameMemory.CameraFollowingEntityIndex) {
                     World.WorldPosition NewCameraP = new World.WorldPosition(Camera.position);
                     NewCameraP = new World.WorldPosition(Stored.P);
-                    Camera.position = NewCameraP;
+                    Camera.position = Stored.P;
                 }
             }
         }
@@ -647,5 +653,16 @@ public class EntityService {
         Vector3f Result = new Vector3f(A.x() * B.x(), A.y() * B.y(), A.z() * B.z());
 
         return(Result);
+    }
+
+    public World.WorldPosition NullPosition() {
+        World.WorldPosition Result = new World.WorldPosition();
+        Result.ChunkX = Integer.MAX_VALUE;
+
+        return(Result);
+    }
+
+    private boolean isValid(World.WorldPosition P) {
+        return P != null && P.ChunkX != Integer.MAX_VALUE;
     }
 }

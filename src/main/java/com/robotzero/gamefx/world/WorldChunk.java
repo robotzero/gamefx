@@ -36,4 +36,12 @@ public class WorldChunk {
     public int hashCode() {
         return Objects.hash(ChunkX, ChunkY);
     }
+
+    public Integer getChunkX() {
+        return ChunkX;
+    }
+
+    public Integer getChunkY() {
+        return ChunkY;
+    }
 }

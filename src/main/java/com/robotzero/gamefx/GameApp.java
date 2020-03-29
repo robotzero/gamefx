@@ -29,7 +29,7 @@ import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 
 public class GameApp implements Runnable {
-    public static final int TARGET_FPS = 60;
+    public static final int TARGET_FPS = 30;
 //    public static final int TARGET_FPS = (int) DisplayManager.refreshRate;
     private boolean running = false;
     private final DisplayManager displayManager;
@@ -53,7 +53,6 @@ public class GameApp implements Runnable {
     public static int playerSpeed;
     private int LowIndex;
     private SimEntity monstar;
-    private MoveSpec DefaultMoveSpec;
     public static float globalinterval;
     int TileSpanX = 17 * 3;
     int TileSpanY = 9 * 3;
@@ -70,7 +69,7 @@ public class GameApp implements Runnable {
         this.world = world;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
-        entityService.AddLowEntity(EntityType.NULL, null, null, null);
+        entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null, null);
         gameMemory.HighEntityCount = 1;
         World.renderWorld(entityService);
     }
@@ -122,7 +121,11 @@ public class GameApp implements Runnable {
         float elapsedTime;
         float accumulator = 0f;
         float interval = 1f / TARGET_UPS;
-
+        double beforeTime, afterTime, timeDiff, sleepTime;
+        double overSleepTime = 0L;
+        int noDelays = 0;
+        long excess = 0L;
+        long period = 1000000000L / 30; //60 frames per second;
         boolean running = true;
         while (running && !displayManager.windowShouldClose()) {
             elapsedTime = timer.getElapsedTime();
@@ -131,10 +134,10 @@ public class GameApp implements Runnable {
             input();
 
 //            while (accumulator >= interval) {
-                update(interval);
-                accumulator -= interval;
+//                update(interval);
+//                accumulator -= interval;
 //            }
-
+            update(interval);
             render();
             entityService.EndSim(gameMemory.simRegion);
             //@TODO sim might not have been updated due to update not run
@@ -154,41 +157,41 @@ public class GameApp implements Runnable {
     }
 
     protected void input() {
-        playerSpeed = 10;
+        playerSpeed = 1;
         cameraInc.set(0f, 0f, 0f);
         gameMemory.ControlledHero.ddP.set(0f, 0f, 0f);
         int heroFacingDirection = 0;
-        if (displayManager.isKeyPressed(GLFW_KEY_W)) {
+        if (displayManager.isKeyPressed(GLFW_KEY_W, true)) {
             sceneChanged = true;
             cameraInc.y = -1;
             gameMemory.ControlledHero.ddP.y = 1;
             heroFacingDirection = 1;
-        } else if (displayManager.isKeyPressed(GLFW_KEY_S)) {
+        } else if (displayManager.isKeyPressed(GLFW_KEY_S, true)) {
             sceneChanged = true;
             cameraInc.y = 1;
             gameMemory.ControlledHero.ddP.y = -1;
             heroFacingDirection = 2;
         }
-        if (displayManager.isKeyPressed(GLFW_KEY_A)) {
+        if (displayManager.isKeyPressed(GLFW_KEY_A, true)) {
             sceneChanged = true;
             cameraInc.x = -1;
             gameMemory.ControlledHero.ddP.x = -1;
             heroFacingDirection = 3;
-        } else if (displayManager.isKeyPressed(GLFW_KEY_D)) {
+        } else if (displayManager.isKeyPressed(GLFW_KEY_D, gameMemory.simRegion != null)) {
             sceneChanged = true;
             cameraInc.x = 1;
             gameMemory.ControlledHero.ddP.x = 1;
             heroFacingDirection = 4;
         }
-        if (displayManager.isKeyPressed(GLFW_KEY_Z)) {
+        if (displayManager.isKeyPressed(GLFW_KEY_Z, true)) {
             sceneChanged = true;
             cameraInc.z = -1;
-        } else if (displayManager.isKeyPressed(GLFW_KEY_X)) {
+        } else if (displayManager.isKeyPressed(GLFW_KEY_X, true)) {
             sceneChanged = true;
             cameraInc.z = 1;
         }
 
-        if (displayManager.isKeyPressed(GLFW_KEY_SPACE)) {
+        if (displayManager.isKeyPressed(GLFW_KEY_SPACE, true)) {
             playerSpeed = 50;
         }
     }
@@ -217,10 +220,5 @@ public class GameApp implements Runnable {
         globalinterval = interval;
         Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector3f(0f, 0f, 0f), new Vector3f(TileSpanX, TileSpanY, 0f).mul(World.TileSideInMeters));
         gameMemory.simRegion = entityService.BeginSim(Camera.position, CameraBounds, interval);
-//        entityService.moveEntity(gameMemory.simRegion, ControllingEntity, ddPlayer, interval, DefaultMoveSpec);
-//        LowEntity cameraFollowingEntity = entityService.ForceEntityIntoHigh(gameMemory.CameraFollowingEntityIndex);
-//        if (cameraFollowingEntity.High != null) {
-//           camera.movePosition(cameraFollowingEntity);
-//        }
     }
 }

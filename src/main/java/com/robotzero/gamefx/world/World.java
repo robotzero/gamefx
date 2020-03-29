@@ -30,6 +30,7 @@ public class World {
     public WorldChunk GetWorldChunk(int TileChunkX, int TileChunkY, boolean initialize) {
         long HashValue = 19 * TileChunkX + 7 * TileChunkY;
         long HashSlot = HashValue & (tileChunkHashSize - 1);
+        assert (HashSlot < tileChunkHashSize);
 
         if (initialize) {
             WorldChunk worldChunk = tileChunkHash.computeIfAbsent(HashSlot, (v) -> {
@@ -93,7 +94,7 @@ public class World {
     public static Vector3f subtract(WorldPosition A, WorldPosition B)
     {
         Vector3f dTile = new Vector3f((float) A.ChunkX - (float) B.ChunkX, (float) A.ChunkY - (float) B.ChunkY, 0.0f);
-        return EntityService.Hadamard(ChunkDimInMeters, dTile).add(A.Offset.sub(B.Offset));
+        return EntityService.Hadamard(ChunkDimInMeters, dTile).add(new Vector3f(A.Offset).sub(new Vector3f(B.Offset)));
     }
 
     public float[] TestWall(float WallX, float RelX, float RelY, float PlayerDeltaX, float PlayerDeltaY,

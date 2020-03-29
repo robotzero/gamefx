@@ -56,11 +56,12 @@ public class Render2D implements Render {
     }
 
     private void renderScene(Mesh background, Mesh bird, Mesh quad, Mesh familiar) {
-        if (!entityService.getModelMatrix().isEmpty()) {
+        final var translations = entityService.getModelMatrix();
+        if (!translations.isEmpty()) {
             Matrix4f viewMatrix = camera.updateViewMatrix();
             Matrix4f projectionMatrix = camera.getProjectionMatrix();
             //@@TODO one player so far so we just get it.
-            Matrix4f playerModelMatrix = entityService.getModelMatrix().get(EntityType.HERO).get(0).getValue();
+            Matrix4f playerModelMatrix = translations.get(EntityType.HERO).get(0).getValue();
             Matrix4f quadViewMatrix = new Matrix4f().identity();
 //        sceneShaderProgram.bind();
 //        sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
@@ -84,7 +85,7 @@ public class Render2D implements Render {
             quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
             quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
             quadShaderProgram.setUniform("vw_matrix", viewMatrix);
-            entityService.getModelMatrix().get(EntityType.WALL).forEach((key) -> {
+            translations.get(EntityType.WALL).forEach((key) -> {
                 quadShaderProgram.setUniform("ml_matrix", key.getValue());
                 quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
                 quad.render();
