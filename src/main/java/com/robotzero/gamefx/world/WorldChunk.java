@@ -16,8 +16,8 @@ public class WorldChunk {
         ChunkY = tileChunkY;
     }
 
-    public LinkedList<WorldEntityBlock> getFirstBlock() {
-        if (FirstBlock.isEmpty()) {
+    public LinkedList<WorldEntityBlock> getFirstBlock(boolean initialize) {
+        if (FirstBlock.isEmpty() && initialize) {
             FirstBlock.add(new WorldEntityBlock());
         }
         return FirstBlock;
@@ -35,13 +35,5 @@ public class WorldChunk {
     @Override
     public int hashCode() {
         return Objects.hash(ChunkX, ChunkY);
-    }
-
-    public Integer getChunkX() {
-        return ChunkX;
-    }
-
-    public Integer getChunkY() {
-        return ChunkY;
     }
 }

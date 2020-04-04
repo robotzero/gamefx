@@ -13,6 +13,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -108,7 +109,8 @@ public class EntityService {
         }
     }
 
-    public void ChangeEntityLocationRaw(int LowEntityIndex, World.WorldPosition OldP, World.WorldPosition NewP) {
+    public void
+    ChangeEntityLocationRaw(int LowEntityIndex, World.WorldPosition OldP, World.WorldPosition NewP) {
         assert (OldP == null || isValid(OldP));
         assert (NewP == null || isValid(NewP));
 
@@ -121,28 +123,19 @@ public class EntityService {
 
                 if (Chunk != null) {
                     boolean NotFound = true;
-                    LinkedList<WorldEntityBlock> FirstBlock = Chunk.getFirstBlock();
-                    WorldEntityBlock First = Chunk.getFirstBlock().get(0);
-                    for (WorldEntityBlock Block = First; NotFound && Block != null; Block = Block.next == null ? null : Chunk.getFirstBlock().get(Block.next)) {
+                    LinkedList<WorldEntityBlock> FirstBlock = Chunk.getFirstBlock(false);
+                    WorldEntityBlock First = FirstBlock.getFirst();
+                    Iterator<WorldEntityBlock> iterator = FirstBlock.listIterator();
+                    while(iterator.hasNext() && NotFound) {
+                        WorldEntityBlock Block = iterator.next();
                         for (int Index = 0; Index < Block.EntityCount && NotFound; ++Index) {
                             if (Block.LowEntityIndex[Index] == LowEntityIndex) {
                                 First.EntityCount = First.EntityCount - 1;
                                 Block.LowEntityIndex[Index] = First.LowEntityIndex[First.EntityCount];
                                 if (First.EntityCount == 0) {
-                                    if (First.next != null) {
-                                        Integer nextN = First.next;
-                                        WorldEntityBlock nextBlock = FirstBlock.get(nextN);
-                                        WorldEntityBlock firstBlock = new WorldEntityBlock();
-                                        int[] tmp = new int[16];
-                                        System.arraycopy(nextBlock.LowEntityIndex, 0, tmp, 0, nextBlock.LowEntityIndex.length);
-                                        firstBlock.LowEntityIndex = tmp;
-                                        firstBlock.next = nextBlock.next;
-                                        firstBlock.EntityCount = nextBlock.EntityCount;
-                                        nextBlock.next = World.firstFree;
-//                                        FirstBlock.set(0, firstBlock);
-//                                        FirstBlock.addLast(nextBlock);
-                                        FirstBlock.set(0, nextBlock);
-                                        World.firstFree = FirstBlock.indexOf(nextBlock);
+                                    if (FirstBlock.listIterator(FirstBlock.indexOf(First)).hasNext()) {
+                                        WorldEntityBlock FirstFree = FirstBlock.remove(FirstBlock.indexOf(First));
+                                        World.firstFree = FirstFree;
                                     }
                                 }
                                 NotFound = false;
@@ -155,36 +148,28 @@ public class EntityService {
             if (NewP != null) {
                 // NOTE(casey): Insert the entity into its new entity block
                 WorldChunk Chunk = world.GetWorldChunk(NewP.ChunkX, NewP.ChunkY, true);
-                WorldEntityBlock Block = Chunk.getFirstBlock().get(0);
-                LinkedList<WorldEntityBlock> blah = Chunk.getFirstBlock();
+                WorldEntityBlock Block = Chunk.getFirstBlock(true).getFirst();
+                LinkedList<WorldEntityBlock> blah = Chunk.getFirstBlock(false);
                 if (Block.EntityCount == Block.LowEntityIndex.length) {
                     //@TODO reuse stuff
                     WorldEntityBlock oldBlock;
-//                    if (World.firstFree != null) {
-//                        oldBlock = blah.get(World.firstFree);
-//                        World.firstFree = oldBlock.next;
-//                    } else {
+                    if (World.firstFree != null) {
+                        oldBlock = World.firstFree;
+                        World.firstFree = null;
+                    } else {
                         oldBlock = new WorldEntityBlock();
-//                    }
+                    }
                     oldBlock.EntityCount = Block.EntityCount;
                     int[] tmp = new int[16];
                     System.arraycopy(Block.LowEntityIndex, 0, tmp, 0, Block.LowEntityIndex.length);
                     oldBlock.LowEntityIndex = tmp;
-                    WorldEntityBlock next = new WorldEntityBlock();
                     WorldEntityBlock bn = Block.next != null ? blah.get(Block.next) : null;
-                    next.EntityCount = bn != null ? bn.EntityCount : 0;
-                    next.next = bn != null ? bn.next : null;
                     tmp = new int[16];
                     System.arraycopy(bn != null ? bn.LowEntityIndex : new int[16], 0, tmp, 0, bn != null ? bn.LowEntityIndex.length : 16);
-                    next.LowEntityIndex = tmp;
                     Block.EntityCount = 0;
                     Block.LowEntityIndex = new int[16];
+                    oldBlock.next = Block.next;
                     blah.addLast(oldBlock);
-                    blah.addLast(next);
-                    int oldIndex = blah.indexOf(oldBlock);
-                    int nIndex = blah.indexOf(next);
-                    oldBlock.next = nIndex;
-                    Block.next = oldIndex;
                 }
                 Block.LowEntityIndex[Block.EntityCount] = LowEntityIndex;
                 Block.EntityCount = Block.EntityCount + 1;
@@ -569,9 +554,10 @@ public class EntityService {
             for (int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
                 WorldChunk Chunk = world.GetWorldChunk(ChunkX, ChunkY, false);
                 if (Chunk != null) {
-                    LinkedList<WorldEntityBlock> FirstBlock = Chunk.getFirstBlock();
-                    WorldEntityBlock First = Chunk.getFirstBlock().get(0);
-                    for (WorldEntityBlock Block = First; Block != null; Block = Block.next == null ? null : Chunk.getFirstBlock().get(Block.next)) {
+                    List<WorldEntityBlock> First = Chunk.getFirstBlock(false);
+                    Iterator<WorldEntityBlock> iterator = First.listIterator();
+                    while(iterator.hasNext()) {
+                        WorldEntityBlock Block = iterator.next();
                         for (int EntityIndexIndex = 0; EntityIndexIndex < Block.EntityCount; ++EntityIndexIndex) {
                             int LowEntityIndex = Block.LowEntityIndex[EntityIndexIndex];
                             LowEntity Low = gameMemory.LowEntities[LowEntityIndex];

@@ -140,7 +140,6 @@ public class GameApp implements Runnable {
             update(interval);
             render();
             entityService.EndSim(gameMemory.simRegion);
-            //@TODO sim might not have been updated due to update not run
             sync();
         }
     }

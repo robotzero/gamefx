@@ -120,9 +120,9 @@ public class DisplayManager {
     }
 
     public boolean isKeyPressed(int keyCode, boolean initialized) {
-        if (keyCode == GLFW_KEY_D && initialized) {
-            return true;
-        }
+//        if (keyCode == GLFW_KEY_D && initialized) {
+//            return true;
+//        }
         return glfwGetKey(window, keyCode) == GLFW_PRESS;
     }
 
