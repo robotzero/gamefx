@@ -100,7 +100,8 @@ public class GameApp implements Runnable {
 
         World.WorldPosition NewCameraP = entityService.ChunkPositionFromTilePosition(
                 WorldGenerator.CameraTileX,
-                WorldGenerator.CameraTileY
+                WorldGenerator.CameraTileY,
+                new Vector3f(0.0f, 0.0f, 0.5f * World.TileDepthInMeters)
         );
 //        entityService.AddMonstar(WorldGenerator.CameraTileX + 2, WorldGenerator.CameraTileY + 2);
         Camera.position = NewCameraP;

@@ -74,4 +74,10 @@ public class Rectangle {
         Vector3f Result = Rect.Min.add(Rect.Max).mul(0.5f);
         return(Result);
     }
+
+    public Rectangle ToRectangleXY(Rectangle A) {
+        Rectangle Result = new Rectangle(new Vector3f(A.Min.x, A.Min.y, 0), new Vector3f(A.Max.x, A.Max.y, 0));
+
+        return(Result);
+    }
 }

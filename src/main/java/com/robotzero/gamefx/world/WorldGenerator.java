@@ -21,7 +21,7 @@ public class WorldGenerator {
         boolean doorBottom = false;
 
         for (int screenIndex = 0;
-             screenIndex < 200;
+             screenIndex < 2000;
              ++screenIndex) {
 
             int randomChoice;
@@ -42,25 +42,25 @@ public class WorldGenerator {
                     int absTileX = screenX * tilesPerWidth + tileX;
                     int absTileY = screenY * tilesPerHeight + tileY;
 
-                    int tileValue = 1;
+                    boolean shouldBeDoor = false;
                     if ((tileX == 0) && (!doorLeft || (tileY != (tilesPerHeight / 2)))) {
-                        tileValue = 2;
+                        shouldBeDoor = true;
                     }
 
                     if ((tileX == (tilesPerWidth - 1)) && (!doorRight || (tileY != (tilesPerHeight / 2)))) {
-                        tileValue = 2;
+                        shouldBeDoor = true;
                     }
 
                     if ((tileY == 0) && (!doorBottom || (tileX != (tilesPerWidth / 2)))) {
-                        tileValue = 2;
+                        shouldBeDoor = true;
                     }
 
                     if ((tileY == (tilesPerHeight - 1)) && (!doorTop || (tileX != (tilesPerWidth / 2)))) {
-                        tileValue = 2;
+                        shouldBeDoor = true;
                     }
 
                     //world.SetTileValue(BigInteger.valueOf(absTileX).intValueExact(), BigInteger.valueOf(absTileY).intValueExact(), tileValue);
-                    if (tileValue == 2) {
+                    if (shouldBeDoor) {
                         entityService.AddWall(absTileX, absTileY);
                     }
                 }

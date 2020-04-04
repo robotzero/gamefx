@@ -14,7 +14,7 @@ public class World {
     public static final Vector3f ChunkDimInMeters = new Vector3f(TILES_PER_CHUNK*TileSideInMeters,
             TILES_PER_CHUNK * TileSideInMeters,
             TileSideInMeters);
-    public static final float TileDepthInMeters = TileSideInMeters;
+    public static final float TileDepthInMeters = 3.0f;
     public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
     public static float ScreenCenterX = 0.5f * DisplayManager.WIDTH;
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
