@@ -29,7 +29,7 @@ import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
 import static org.lwjgl.glfw.GLFW.glfwTerminate;
 
 public class GameApp implements Runnable {
-    public static final int TARGET_FPS = 30;
+    public static final int TARGET_FPS = 60;
 //    public static final int TARGET_FPS = (int) DisplayManager.refreshRate;
     private boolean running = false;
     private final DisplayManager displayManager;
@@ -39,7 +39,7 @@ public class GameApp implements Runnable {
     private final Timer timer;
     public static int fps;
     private double lastFps;
-    public static final int TARGET_UPS = 30;
+    public static final int TARGET_UPS = 60;
     private boolean sceneChanged;
     private final Vector3f cameraInc;
     private final AssetFactory assetFactory;
@@ -134,11 +134,11 @@ public class GameApp implements Runnable {
 
             input();
 
-//            while (accumulator >= interval) {
-//                update(interval);
-//                accumulator -= interval;
-//            }
-            update(interval);
+            while (accumulator >= interval) {
+                update(interval);
+                accumulator -= interval;
+            }
+//            update(interval);
             render();
             entityService.EndSim(gameMemory.simRegion);
             sync();
@@ -192,7 +192,7 @@ public class GameApp implements Runnable {
         }
 
         if (displayManager.isKeyPressed(GLFW_KEY_SPACE, true)) {
-            playerSpeed = 50;
+            playerSpeed = 180;
         }
     }
 

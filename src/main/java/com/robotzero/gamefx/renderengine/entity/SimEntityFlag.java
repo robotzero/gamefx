@@ -1,7 +1,7 @@
 package com.robotzero.gamefx.renderengine.entity;
 
 public enum SimEntityFlag {
-    COLLIDES(1 << 0), NONSPATIAL(1 << 1), SIMMING(1 << 30), MOVEABLE(1 << 2), ZSUPPORTED(1 << 4), TRAVERSABLE(0);
+    COLLIDES(1 << 0), NONSPATIAL(1 << 1), SIMMING(1 << 30), MOVEABLE(1 << 2), ZSUPPORTED(1 << 4), TRAVERSABLE(1 << 4);
 
     int i;
     SimEntityFlag(int i) {

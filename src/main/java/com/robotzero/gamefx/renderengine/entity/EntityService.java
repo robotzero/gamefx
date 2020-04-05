@@ -367,7 +367,19 @@ public class EntityService {
         group.PieceCount = group.PieceCount + 1;
     }
 
-    public Map<EntityType, List<Map.Entry<EntityType, Matrix4f>>> getModelMatrix() {
+    public void PushRectOutline(EntityVisiblePieceGroup group, Vector2f Offset, Vector2f Dim, Vector4f Color, float EntityZC) {
+        float Thickness = 0.1f;
+
+        // NOTE(casey): Top and bottom
+        pushPiece(group, Offset.sub(new Vector2f(0, 0.5f * Dim.y)), new Vector2f(0, 0), new Vector2f(Dim.x, Thickness), Color, EntityZC);
+        pushPiece(group, Offset.add(new Vector2f(0, 0.5f * Dim.y)), new Vector2f(0, 0), new Vector2f(Dim.x, Thickness), Color, EntityZC);
+
+        // NOTE(casey): Left and right
+        pushPiece(group, Offset.sub(new Vector2f(0.5f * Dim.x, 0)), new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
+        pushPiece(group, Offset.add(new Vector2f(0.5f * Dim.x, 0)), new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
+    }
+
+    public Map<EntityType, List<Map.Entry<EntityType, List<Matrix4f>>>> getModelMatrix() {
         EntityVisiblePieceGroup pieceGroup = new EntityVisiblePieceGroup();
 
         if (gameMemory.simRegion == null) {
@@ -387,8 +399,7 @@ public class EntityService {
                     case ("hero"): {
                         MoveSpec = DefaultMoveSpec();
                         MoveSpec.UnitMaxAccelVector = true;
-                        //MoveSpec.Speed = GameApp.playerSpeed == 1 ? 10.0f : GameApp.playerSpeed;
-                        MoveSpec.Speed = 50f;
+                        MoveSpec.Speed = GameApp.playerSpeed == 1 ? 50.0f : GameApp.playerSpeed;
                         MoveSpec.Drag = 8.0f;
                         pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
                     }
@@ -406,6 +417,19 @@ public class EntityService {
 
                     }
                     break;
+                    case ("space") : {
+//                        MakeSimpleGroundedCollision(GameState,
+//                                TilesPerWidth*GameState->World->TileSideInMeters,
+//                                TilesPerHeight*GameState->World->TileSideInMeters,
+//                                0.9f*GameState->World->TileDepthInMeters);
+//                        Group->TotalVolume.OffsetP = V3(0, 0, 0.5f*DimZ);
+//                        Group->TotalVolume.Dim = V3(DimX, DimY, DimZ);
+
+                        Vector2f OffsetP = new Vector2f(0.0f, 0.0f);
+                        Vector2f Dim = new Vector2f(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters);
+                        PushRectOutline(pieceGroup, OffsetP, Dim, new Vector4f(0, 0.5f, 1.0f, 1), 1.0f);
+                    }
+                    break;
                     default: {
                         throw new RuntimeException("INVALID PATH");
                     }
@@ -415,21 +439,27 @@ public class EntityService {
                     moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
                 }
 
-                final Matrix4f v = new Matrix4f();
-                float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * entity.P.x();
-                float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * entity.P.y();
-//            float PlayerLeft = EntityGroundPointX - 0.5f * World.MetersToPixels * lowEntity.Width;
-//            float PlayerTop = EntityGroundPointY - 0.5f * World.MetersToPixels * lowEntity.Height;
+                List<Matrix4f> listOfTranslactions = IntStream.range(0, pieceGroup.PieceCount).mapToObj(index -> {
+                    final Matrix4f v = new Matrix4f();
+                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * entity.P.x();
+                    float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * entity.P.y();
 
-                EntityVisiblePiece Piece = pieceGroup.Pieces[0];
+                    EntityVisiblePiece Piece = pieceGroup.Pieces[index];
 //                Vector3f Center = new Vector3f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y(), 0);
-                Vector3f Center = new Vector3f(EntityGroundPointX, EntityGroundPointY, 0);
-                Vector2f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector2f());
+                    Vector3f Center = new Vector3f(EntityGroundPointX, EntityGroundPointY, 0);
+                    Vector2f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector2f());
+                    if (entity.Type == EntityType.SPACE) {
+//                        Vector3f translation = new Vector3f(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0).x,
+//                                Center.add(new Vector3f(HalfDim.x, HalfDim.y, 0)).y, 0));
+                        return v.identity().translate(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0)));
+                    }
+//                    return Map.of(entity.Type, v.identity().translate(Center));
+                    return v.identity().translate(Center);
+                }).collect(Collectors.toList());
 
-                return Map.of(entity.Type, v.identity().translate(Center));
+                return Map.of(entity.Type, listOfTranslactions);
             }
             return null;
-//            return Map.of(lowEntity.Type, v.identity().translate(new Vector3f(PlayerLeft, PlayerTop, 0f)));
         }).filter(map -> map != null).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
             return a.getKey();
         }));
