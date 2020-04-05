@@ -1,6 +1,5 @@
 package com.robotzero.gamefx.renderengine;
 
-import com.robotzero.gamefx.world.GameMemory;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.opengl.GL;

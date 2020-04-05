@@ -9,7 +9,6 @@ import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.renderengine.model.Mesh;
-import com.robotzero.gamefx.renderengine.translations.MoveSpec;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
@@ -152,7 +151,7 @@ public class GameApp implements Runnable {
             fps = 0;
         }
         fps++;
-        render2D.render(displayManager.getWindow(), background, bird, quad, familiarA);
+        render2D.render(displayManager.getWindow(), background, bird, quad, familiarA, assetFactory.getRectangle1());
         displayManager.updateDisplay();
     }
 

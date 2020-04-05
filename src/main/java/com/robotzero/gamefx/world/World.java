@@ -15,7 +15,10 @@ public class World {
             TILES_PER_CHUNK * TileSideInMeters,
             TileSideInMeters);
     public static final float TileDepthInMeters = 3.0f;
-    public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
+    public static final float TypicalFloorHeight = 3.0f;
+//    public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
+    public static final float MetersToPixels = 42.0f;
+    public static final float PixelsToMeters = 1.0f / MetersToPixels;
     public static float ScreenCenterX = 0.5f * DisplayManager.WIDTH;
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
     public static WorldEntityBlock firstFree = null;

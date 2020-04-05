@@ -44,10 +44,10 @@ public class Render2D implements Render {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void render(final long window, Mesh background2, Mesh bird, Mesh quad, Mesh familiar) {
+    public void render(final long window, Mesh background2, Mesh bird, Mesh quad, Mesh familiar, Mesh rectangle1) {
         clear();
         glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
-        renderScene(background2, bird, quad, familiar);
+        renderScene(background2, bird, quad, familiar, rectangle1);
 
         int error = glGetError();
         if (error != GL_NO_ERROR) {
@@ -55,13 +55,13 @@ public class Render2D implements Render {
         }
     }
 
-    private void renderScene(Mesh background, Mesh bird, Mesh quad, Mesh familiar) {
+    private void renderScene(Mesh background, Mesh bird, Mesh quad, Mesh familiar, Mesh rectangle1) {
         final var translations = entityService.getModelMatrix();
         if (!translations.isEmpty()) {
             Matrix4f viewMatrix = camera.updateViewMatrix();
             Matrix4f projectionMatrix = camera.getProjectionMatrix();
             //@@TODO one player so far so we just get it.
-            Matrix4f playerModelMatrix = translations.get(EntityType.HERO).get(0).getValue().get(0);
+            Matrix4f playerModelMatrix = translations.get(EntityType.HERO).get(0);
             Matrix4f quadViewMatrix = new Matrix4f().identity();
 //        sceneShaderProgram.bind();
 //        sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
@@ -86,19 +86,24 @@ public class Render2D implements Render {
             quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
             quadShaderProgram.setUniform("vw_matrix", viewMatrix);
             translations.get(EntityType.WALL).forEach((key) -> {
-                quadShaderProgram.setUniform("ml_matrix", key.getValue().get(0));
+                quadShaderProgram.setUniform("ml_matrix", key);
                 quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
                 quad.render();
                 quad.endRender();
             });
             translations.get(EntityType.SPACE).forEach((key) -> {
-              key.getValue().forEach(a -> {
-                  quadShaderProgram.setUniform("ml_matrix", a);
+                  quadShaderProgram.setUniform("ml_matrix", key);
                   quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 0.5f, 0.0f, 1.0f));
                   quad.render();
                   quad.endRender();
-              });
             });
+
+//            translations.get(EntityType.DEBUG).forEach((key) -> {
+//                quadShaderProgram.setUniform("ml_matrix", key);
+//                quadShaderProgram.setUniform("t_color", new Vector4f(0.5f, 0.5f, 0.5f, 1.0f));
+//                rectangle1.render();
+//                rectangle1.endRender();
+//            });
             quadShaderProgram.unbind();
 
 //            Matrix4f familiarMatrix = entityService.getModelMatrix().get(EntityType.FAMILIAR).get(0).getValue();

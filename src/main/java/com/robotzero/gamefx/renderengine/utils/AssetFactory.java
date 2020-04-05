@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.renderengine.utils;
 
+import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.model.Material;
 import com.robotzero.gamefx.renderengine.model.Mesh;
@@ -70,6 +71,7 @@ public class AssetFactory {
     private Mesh bird;
     private Mesh quad2D;
     private Mesh familiar;
+    private Mesh rectangle1;
 
     public void init() {
         bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
@@ -78,6 +80,7 @@ public class AssetFactory {
         bird = new Mesh(vertices2, tcs2, indices2, birdTexture, null);
         quad2D = new Mesh(vertices3, tcs1, indices, null, new Material());
         familiar = new Mesh(vertices4, tcs1, indices, null, new Material());
+        rectangle1 = new Mesh(getVertices(DisplayManager.WIDTH, DisplayManager.HEIGHT), tcs1, indices, null, new Material());
     }
 
     public Mesh getBirdMesh() {
@@ -94,5 +97,18 @@ public class AssetFactory {
 
     public Mesh getFamiliarMesh() {
         return familiar;
+    }
+
+    public Mesh getRectangle1() {
+        return rectangle1;
+    }
+
+    private float[] getVertices(float width, float height) {
+        return new float[] {
+                0.0f, 0.0f, 0.0f,
+                0.0f, height, 0.0f,
+                width, height, 0.0f,
+                width, 0.0f, 0.0f
+        };
     }
 }

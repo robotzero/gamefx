@@ -2,6 +2,7 @@ package com.robotzero.gamefx.renderengine.entity;
 
 import com.robotzero.gamefx.GameApp;
 import com.robotzero.gamefx.renderengine.Camera;
+import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.renderengine.translations.MoveSpec;
 import com.robotzero.gamefx.world.GameMemory;
@@ -14,6 +15,7 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -379,13 +381,13 @@ public class EntityService {
         pushPiece(group, Offset.add(new Vector2f(0.5f * Dim.x, 0)), new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
     }
 
-    public Map<EntityType, List<Map.Entry<EntityType, List<Matrix4f>>>> getModelMatrix() {
+    public Map<EntityType, List<Matrix4f>> getModelMatrix() {
         EntityVisiblePieceGroup pieceGroup = new EntityVisiblePieceGroup();
 
         if (gameMemory.simRegion == null) {
             return Map.of();
         }
-        return IntStream.range(0, gameMemory.simRegion.EntityCount).mapToObj(HighEntityIndex -> {
+        Map<EntityType, List<Matrix4f>> aaa = IntStream.range(0, gameMemory.simRegion.EntityCount).mapToObj(HighEntityIndex -> {
             pieceGroup.PieceCount = 0;
             SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
 
@@ -417,7 +419,7 @@ public class EntityService {
 
                     }
                     break;
-                    case ("space") : {
+                    case ("space"): {
 //                        MakeSimpleGroundedCollision(GameState,
 //                                TilesPerWidth*GameState->World->TileSideInMeters,
 //                                TilesPerHeight*GameState->World->TileSideInMeters,
@@ -462,7 +464,36 @@ public class EntityService {
             return null;
         }).filter(map -> map != null).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
             return a.getKey();
-        }));
+        }, Collectors.flatMapping(a -> a.getValue().stream(), Collectors.toList())));
+
+        float ScreenWidthInMeters = DisplayManager.WIDTH * World.PixelsToMeters;
+        float ScreenHeightInMeters = DisplayManager.HEIGHT * World.PixelsToMeters;
+        Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
+                new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
+
+        // Debug drawing
+        World.WorldPosition MinChunkP = world.MapIntoChunkSpace(Camera.position, Rectangle.GetMinCorner(CameraBoundsInMeters));
+        World.WorldPosition MaxChunkP = world.MapIntoChunkSpace(Camera.position, Rectangle.GetMaxCorner(CameraBoundsInMeters));
+        Vector2f ScreenCenter = new Vector2f(DisplayManager.WIDTH * 0.5f, DisplayManager.HEIGHT * 0.5f);
+
+        List<Matrix4f> blah = new ArrayList();
+//        for(int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
+//            for(int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
+//                        World.WorldPosition ChunkCenterP = world.CenteredChunkPoint(ChunkX, ChunkY);
+//                        Vector3f RelP = World.subtract(ChunkCenterP, Camera.position);
+//                        Vector2f ScreenP = new Vector2f(ScreenCenter.x + World.MetersToPixels * RelP.x, ScreenCenter.y - World.MetersToPixels * RelP.y);
+//                        Vector2f ScreenDim = new Vector2f(World.MetersToPixels * World.ChunkDimInMeters.x, World.MetersToPixels * World.ChunkDimInMeters.y);
+//
+//                        Matrix4f aa = new Matrix4f().identity().translate(new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)).x,
+//                                new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)).y,
+//                                0.0f));
+//                        blah.add(aa);
+////                        DrawRectangleOutline(DrawBuffer, ScreenP - 0.5f*ScreenDim, ScreenP + 0.5f*ScreenDim, V3(1.0f, 1.0f, 0.0f));
+//                }
+//            }
+//        blah.add(new Matrix4f().identity().translate(new Vector3f(0.0f, 0.0f, 0.0f)));
+//        aaa.put(EntityType.DEBUG, blah);
+        return aaa;
     }
 
     public Vector3f GetSimSpaceP(SimRegion simRegion, LowEntity stored) {
