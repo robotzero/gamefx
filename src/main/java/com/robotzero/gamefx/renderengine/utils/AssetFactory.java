@@ -1,6 +1,5 @@
 package com.robotzero.gamefx.renderengine.utils;
 
-import com.robotzero.gamefx.GameApp;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.model.Material;
@@ -38,7 +37,7 @@ public class AssetFactory {
         background = new Mesh(getVertices(backgroundWidth, backgroundHeight), tcs, indices, bgTexture, null);
         birdTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bird.png")).orElseThrow().getPath());
         bird = new Mesh(getVertices(World.MetersToPixels * EntityService.PlayerWidth, World.MetersToPixels * EntityService.PlayerHeight), tcs, indices, birdTexture, null);
-        quad2D = new Mesh(getVertices(World.TileSideInPixels * GameApp.ZoomRate, World.TileSideInPixels * GameApp.ZoomRate), tcs, indices, null, new Material());
+        quad2D = new Mesh(getVertices(World.TileSideInPixels, World.TileSideInPixels), tcs, indices, null, new Material());
         familiar = new Mesh(getVertices(World.MetersToPixels * EntityService.FamiliarWidth, World.MetersToPixels * EntityService.FamiliarHeight), tcs, indices, null, new Material());
         rectangle1 = new Mesh(getVertices(DisplayManager.WIDTH, DisplayManager.HEIGHT), tcs, indices, null, new Material());
     }

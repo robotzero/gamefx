@@ -443,8 +443,8 @@ public class EntityService {
 
                 List<Matrix4f> listOfTranslactions = IntStream.range(0, pieceGroup.PieceCount).mapToObj(index -> {
                     final Matrix4f v = new Matrix4f();
-                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * new Vector3f(entity.P).x() * 0.2f;
-                    float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * new Vector3f(entity.P).y() * 0.2f;
+                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * new Vector3f(entity.P).x() * 0.1f;
+                    float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * new Vector3f(entity.P).y() * 0.1f;
 
                     EntityVisiblePiece Piece = pieceGroup.Pieces[index];
 //                Vector3f Center = new Vector3f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y(), 0);
@@ -453,10 +453,10 @@ public class EntityService {
                     if (entity.Type == EntityType.SPACE) {
 //                        Vector3f translation = new Vector3f(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0).x,
 //                                Center.add(new Vector3f(HalfDim.x, HalfDim.y, 0)).y, 0));
-                        return v.identity().translate(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0)));
+                        return v.identity().translate(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0))).scale(0.1f);
                     }
 //                    return Map.of(entity.Type, v.identity().translate(Center));
-                    return v.identity().translate(Center);
+                    return v.identity().translate(Center).scale(0.1f);
                 }).collect(Collectors.toList());
 
                 return Map.of(entity.Type, listOfTranslactions);
