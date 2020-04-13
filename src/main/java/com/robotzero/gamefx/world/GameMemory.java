@@ -25,6 +25,7 @@ public class GameMemory {
     public static final int DOUBLE_FIELD_SIZE   = 8;
     public static final int FLOAT_FIELD_SIZE    = 4;
     public static final Vector3f InvalidP = new Vector3f(100000.0f, 100000.0f, 1000000f);
+    public static float ZOffset = 0.0f;
 
     private boolean isInitialized;
     private PointerBuffer PermanentStorage;

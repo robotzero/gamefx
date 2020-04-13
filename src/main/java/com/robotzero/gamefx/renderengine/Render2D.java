@@ -5,7 +5,6 @@ import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.utils.FileUtils;
 import com.robotzero.gamefx.renderengine.utils.ShaderProgram;
-import com.robotzero.gamefx.world.World;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
 
@@ -19,17 +18,15 @@ import static org.lwjgl.opengl.GL11.glViewport;
 
 public class Render2D implements Render {
     private ShaderProgram sceneShaderProgram;
-    private World world;
     private ShaderProgram birdShaderProgram;
     private ShaderProgram quadShaderProgram;
     private ShaderProgram familiarShaderProgram;
     private final Camera camera;
     private final EntityService entityService;
 
-    public Render2D(Camera camera, EntityService entityService, World world) {
+    public Render2D(Camera camera, EntityService entityService) {
         this.camera = camera;
         this.entityService = entityService;
-        this.world = world;
     }
 
     public void init() throws Exception {
@@ -58,11 +55,10 @@ public class Render2D implements Render {
     private void renderScene(Mesh background, Mesh bird, Mesh quad, Mesh familiar, Mesh rectangle1) {
         final var translations = entityService.getModelMatrix();
         if (!translations.isEmpty()) {
-            Matrix4f viewMatrix = camera.updateViewMatrix();
+            Matrix4f viewMatrix = camera.getIdentity();
             Matrix4f projectionMatrix = camera.getProjectionMatrix();
             //@@TODO one player so far so we just get it.
             Matrix4f playerModelMatrix = translations.get(EntityType.HERO).get(0);
-            Matrix4f quadViewMatrix = new Matrix4f().identity();
 //        sceneShaderProgram.bind();
 //        sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
 //        sceneShaderProgram.setUniform("pr_matrix", projectionMatrix);

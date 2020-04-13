@@ -18,9 +18,11 @@ import com.robotzero.gamefx.renderengine.utils.Random;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_B;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
@@ -34,7 +36,6 @@ public class GameApp implements Runnable {
     private final DisplayManager displayManager;
     private final Render render2D;
     private float SIZE = 1.0f;
-    private Camera camera;
     private final Timer timer;
     public static int fps;
     private double lastFps;
@@ -49,6 +50,7 @@ public class GameApp implements Runnable {
     private final EntityService entityService;
     private final GameMemory gameMemory;
     private final World world;
+    public static float ZoomRate = 0.2f;
     public static int playerSpeed;
     private int LowIndex;
     private SimEntity monstar;
@@ -56,10 +58,9 @@ public class GameApp implements Runnable {
     int TileSpanX = 17 * 3;
     int TileSpanY = 9 * 3;
 
-    public GameApp(DisplayManager displayManager, Render render2D, Camera camera, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
+    public GameApp(DisplayManager displayManager, Render render2D, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
         this.displayManager = displayManager;
         this.render2D = render2D;
-        this.camera = camera;
         this.timer = timer;
         this.assetFactory = assetFactory;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
@@ -121,11 +122,6 @@ public class GameApp implements Runnable {
         float elapsedTime;
         float accumulator = 0f;
         float interval = 1f / TARGET_UPS;
-        double beforeTime, afterTime, timeDiff, sleepTime;
-        double overSleepTime = 0L;
-        int noDelays = 0;
-        long excess = 0L;
-        long period = 1000000000L / 30; //60 frames per second;
         boolean running = true;
         while (running && !displayManager.windowShouldClose()) {
             elapsedTime = timer.getElapsedTime();
@@ -137,7 +133,6 @@ public class GameApp implements Runnable {
                 update(interval);
                 accumulator -= interval;
             }
-//            update(interval);
             render();
             entityService.EndSim(gameMemory.simRegion);
             sync();
@@ -159,6 +154,7 @@ public class GameApp implements Runnable {
         playerSpeed = 1;
         cameraInc.set(0f, 0f, 0f);
         gameMemory.ControlledHero.ddP.set(0f, 0f, 0f);
+        ZoomRate = 0.0f;
         int heroFacingDirection = 0;
         if (displayManager.isKeyPressed(GLFW_KEY_W, true)) {
             sceneChanged = true;
@@ -193,6 +189,16 @@ public class GameApp implements Runnable {
         if (displayManager.isKeyPressed(GLFW_KEY_SPACE, true)) {
             playerSpeed = 180;
         }
+
+        if (displayManager.isKeyPressed(GLFW_KEY_V, true)) {
+            ZoomRate = 1.0f;
+        }
+
+        if (displayManager.isKeyPressed(GLFW_KEY_B, true)) {
+            ZoomRate = -1.0f;
+        }
+
+        GameMemory.ZOffset = GameMemory.ZOffset + ZoomRate * globalinterval;
     }
 
     private void sync() {

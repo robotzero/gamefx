@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.renderengine.utils;
 
+import com.robotzero.gamefx.GameApp;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.model.Material;
@@ -11,44 +12,8 @@ import java.util.Optional;
 
 public class AssetFactory {
     private static float backgroundWidth = 284f, backgroundHeight = 512f;
-    private static float birdWidth = 125f, birdHeight = 126f;
 
-    private final float[] vertices1 = new float[] {
-            0.0f, 0.0f, 0.0f,
-            0.0f, backgroundHeight, 0.0f,
-            backgroundWidth, backgroundHeight, 0.0f,
-            backgroundWidth, 0, 0.0f
-    };
-
-    private final float[] vertices2 = new float[] {
-            0.0f, 0.0f, 0.0f,
-            0.0f, World.MetersToPixels * EntityService.PlayerHeight, 0.0f,
-            World.MetersToPixels * EntityService.PlayerWidth, World.MetersToPixels * EntityService.PlayerHeight, 0.0f,
-            World.MetersToPixels * EntityService.PlayerWidth, 0.0f, 0.0f
-    };
-
-    private final float[] vertices3 = new float[] {
-            0.0f, 0.0f, 0.0f,
-            0.0f, World.TileSideInPixels, 0.0f,
-            World.TileSideInPixels, World.TileSideInPixels, 0.0f,
-            World.TileSideInPixels, 0.0f, 0.0f
-    };
-
-    private final float[] vertices4 = new float[] {
-            0.0f, 0.0f, 0.0f,
-            0.0f, World.MetersToPixels * EntityService.FamiliarHeight, 0.0f,
-            World.MetersToPixels * EntityService.FamiliarWidth, World.MetersToPixels * EntityService.FamiliarHeight, 0.0f,
-            World.MetersToPixels * EntityService.FamiliarWidth, 0.0f, 0.0f
-    };
-
-    private final float[] tcs1 = new float[] {
-            0, 0,
-            0, 1,
-            1, 1,
-            1, 0
-    };
-
-    private final float[] tcs2 = new float[] {
+    private final float[] tcs = new float[] {
             0, 0,
             0, 1,
             1, 1,
@@ -56,11 +21,6 @@ public class AssetFactory {
     };
 
     private final int[] indices = new int[] {
-            0, 1, 2,
-            2, 3, 0
-    };
-
-    private final int[] indices2 = new int[] {
             0, 1, 2,
             2, 3, 0
     };
@@ -75,12 +35,12 @@ public class AssetFactory {
 
     public void init() {
         bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
-        background = new Mesh(vertices1, tcs1, indices, bgTexture, null);
+        background = new Mesh(getVertices(backgroundWidth, backgroundHeight), tcs, indices, bgTexture, null);
         birdTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bird.png")).orElseThrow().getPath());
-        bird = new Mesh(vertices2, tcs2, indices2, birdTexture, null);
-        quad2D = new Mesh(vertices3, tcs1, indices, null, new Material());
-        familiar = new Mesh(vertices4, tcs1, indices, null, new Material());
-        rectangle1 = new Mesh(getVertices(DisplayManager.WIDTH, DisplayManager.HEIGHT), tcs1, indices, null, new Material());
+        bird = new Mesh(getVertices(World.MetersToPixels * EntityService.PlayerWidth, World.MetersToPixels * EntityService.PlayerHeight), tcs, indices, birdTexture, null);
+        quad2D = new Mesh(getVertices(World.TileSideInPixels * GameApp.ZoomRate, World.TileSideInPixels * GameApp.ZoomRate), tcs, indices, null, new Material());
+        familiar = new Mesh(getVertices(World.MetersToPixels * EntityService.FamiliarWidth, World.MetersToPixels * EntityService.FamiliarHeight), tcs, indices, null, new Material());
+        rectangle1 = new Mesh(getVertices(DisplayManager.WIDTH, DisplayManager.HEIGHT), tcs, indices, null, new Material());
     }
 
     public Mesh getBirdMesh() {

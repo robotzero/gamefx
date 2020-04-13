@@ -443,8 +443,8 @@ public class EntityService {
 
                 List<Matrix4f> listOfTranslactions = IntStream.range(0, pieceGroup.PieceCount).mapToObj(index -> {
                     final Matrix4f v = new Matrix4f();
-                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * entity.P.x();
-                    float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * entity.P.y();
+                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * new Vector3f(entity.P).x() * 0.2f;
+                    float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * new Vector3f(entity.P).y() * 0.2f;
 
                     EntityVisiblePiece Piece = pieceGroup.Pieces[index];
 //                Vector3f Center = new Vector3f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y(), 0);
