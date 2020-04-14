@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 public class EntityService {
     private final GameMemory gameMemory;
     private final World world;
-    public static final float PlayerHeight = 0.5f;
+    public static final float PlayerHeight = 1.0f;
     public static final float PlayerWidth = 1.0f;
     public static final float FamiliarHeight = 0.5f;
     public static final float FamiliarWidth = 1.0f;
@@ -443,8 +443,8 @@ public class EntityService {
 
                 List<Matrix4f> listOfTranslactions = IntStream.range(0, pieceGroup.PieceCount).mapToObj(index -> {
                     final Matrix4f v = new Matrix4f();
-                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * new Vector3f(entity.P).x() * 0.1f;
-                    float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * new Vector3f(entity.P).y() * 0.1f;
+                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * new Vector3f(entity.P).x();
+                    float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * new Vector3f(entity.P).y();
 
                     EntityVisiblePiece Piece = pieceGroup.Pieces[index];
 //                Vector3f Center = new Vector3f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y(), 0);
@@ -453,10 +453,10 @@ public class EntityService {
                     if (entity.Type == EntityType.SPACE) {
 //                        Vector3f translation = new Vector3f(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0).x,
 //                                Center.add(new Vector3f(HalfDim.x, HalfDim.y, 0)).y, 0));
-                        return v.identity().translate(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0))).scale(0.1f);
+                        return v.identity().translate(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0)));
                     }
 //                    return Map.of(entity.Type, v.identity().translate(Center));
-                    return v.identity().translate(Center).scale(0.1f);
+                    return v.identity().translate(Center);
                 }).collect(Collectors.toList());
 
                 return Map.of(entity.Type, listOfTranslactions);
@@ -672,8 +672,7 @@ public class EntityService {
                 ChangeEntityLocation(Entity.StorageIndex, Stored, NewP);
 
                 if (Entity.StorageIndex == gameMemory.CameraFollowingEntityIndex) {
-                    World.WorldPosition NewCameraP = new World.WorldPosition(Camera.position);
-                    NewCameraP = new World.WorldPosition(Stored.P);
+                    World.WorldPosition NewCameraP = new World.WorldPosition(Stored.P);
                     Camera.position = Stored.P;
                 }
             }

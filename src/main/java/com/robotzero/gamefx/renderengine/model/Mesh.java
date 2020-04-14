@@ -91,11 +91,11 @@ public class Mesh {
 
     public void render() {
         initRender();
-        if (vboIdList.containsKey("ibo"))
+        if (vboIdList.containsKey("ibo")) {
             glDrawElements(GL_TRIANGLES, vertexCount, GL_UNSIGNED_INT, 0);
-        else
+        } else {
             glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-
+        }
         endRender();
     }
 
