@@ -28,6 +28,7 @@ import static org.lwjgl.opengl.GL20.glLinkProgram;
 import static org.lwjgl.opengl.GL20.glShaderSource;
 import static org.lwjgl.opengl.GL20.glUniform1f;
 import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniform1iv;
 import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
 import static org.lwjgl.opengl.GL20.glUseProgram;
 import static org.lwjgl.opengl.GL20.glValidateProgram;
@@ -165,5 +166,10 @@ public class ShaderProgram {
         if (programId != 0) {
             glDeleteProgram(programId);
         }
+    }
+
+    public void setIntArray(String u_textures, int[] samplers, int maxTextureSlots) {
+        int location = glGetUniformLocation(programId, u_textures);
+        glUniform1iv(location, samplers);
     }
 }

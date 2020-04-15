@@ -1,11 +1,18 @@
 package com.robotzero.gamefx.renderengine.model;
 
 import com.robotzero.gamefx.renderengine.utils.FileUtils;
+import org.lwjgl.opengl.GL45;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
+import static org.lwjgl.opengl.GL45.glBindTextureUnit;
+import static org.lwjgl.opengl.GL45.glCreateTextures;
+import static org.lwjgl.opengl.GL45.glTextureParameteri;
+import static org.lwjgl.opengl.GL45.glTextureStorage2D;
+import static org.lwjgl.opengl.GL45.glTextureSubImage2D;
 import static org.lwjgl.system.MemoryStack.stackPush;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -23,6 +30,27 @@ public class Texture {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public Texture(int width, int height, int[] data) {
+        this.width = width;
+        this.height = height;
+
+        int InternalFormat = GL_RGBA8;
+        int DataFormat = GL_RGBA;
+
+        this.id = glCreateTextures(GL_TEXTURE_2D);
+        glTextureStorage2D(this.id, 1, InternalFormat, width, height);
+
+        glTextureParameteri(this.id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(this.id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+        glTextureParameteri(this.id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTextureParameteri(this.id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        int bpp = DataFormat == GL_RGBA ? 4 : 3;
+        glTextureSubImage2D(this.id, 0, 0, 0, width, height, DataFormat, GL_UNSIGNED_BYTE, data);
+
     }
 
     private void load(ByteBuffer imageData) {
@@ -59,6 +87,10 @@ public class Texture {
 
     public void bind() {
         glBindTexture(GL_TEXTURE_2D, this.id);
+    }
+
+    public void bind(int i) {
+        glBindTextureUnit(i, this.id);
     }
 
     public void unbind() {

@@ -43,7 +43,6 @@ public class GameApp implements Runnable {
     private boolean sceneChanged;
     private final Vector3f cameraInc;
     private final AssetFactory assetFactory;
-    private Mesh background;
     private Mesh bird;
     private Mesh quad;
     private Mesh familiarA;
@@ -93,7 +92,6 @@ public class GameApp implements Runnable {
         lastFps = timer.getTime();
         fps = 0;
         assetFactory.init();
-        background = assetFactory.getBackgroundMesh();
         bird = assetFactory.getBirdMesh();
         quad = assetFactory.getQuadMesh();
         familiarA = assetFactory.getFamiliarMesh();
@@ -146,7 +144,7 @@ public class GameApp implements Runnable {
             fps = 0;
         }
         fps++;
-        render2D.render(displayManager.getWindow(), background, bird, quad, familiarA, assetFactory.getRectangle1());
+        render2D.render(displayManager.getWindow(), bird, quad, familiarA, assetFactory.getRectangle1());
         displayManager.updateDisplay();
     }
 
@@ -215,7 +213,6 @@ public class GameApp implements Runnable {
 
     protected void cleanup() {
         render2D.cleanup();
-        background.cleanUp();
         gameMemory.free();
         glfwDestroyWindow(this.displayManager.getWindow());
         glfwTerminate();

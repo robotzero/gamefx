@@ -3,16 +3,29 @@ package com.robotzero.gamefx.renderengine;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.model.Mesh;
+import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.renderengine.utils.FileUtils;
 import com.robotzero.gamefx.renderengine.utils.ShaderProgram;
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.BufferUtils;
+
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.util.List;
 
 import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
 import static org.lwjgl.opengl.GL11.GL_NO_ERROR;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
+import static org.lwjgl.opengl.GL11.GL_UNSIGNED_INT;
+import static org.lwjgl.opengl.GL11.glBindTexture;
 import static org.lwjgl.opengl.GL11.glClear;
 import static org.lwjgl.opengl.GL11.glClearColor;
+import static org.lwjgl.opengl.GL11.glDrawElements;
 import static org.lwjgl.opengl.GL11.glGetError;
 import static org.lwjgl.opengl.GL11.glViewport;
 
@@ -23,6 +36,7 @@ public class Render2D implements Render {
     private ShaderProgram familiarShaderProgram;
     private final Camera camera;
     private final EntityService entityService;
+    private BatchData batchData;
 
     public Render2D(Camera camera, EntityService entityService) {
         this.camera = camera;
@@ -30,10 +44,10 @@ public class Render2D implements Render {
     }
 
     public void init() throws Exception {
-//        setupSceneShader();
-        setupBirdShader();
-        setUpQuadShader();
-        setUpFamiliarShader();
+//        setupBirdShader();
+//        setUpQuadShader();
+//        setUpFamiliarShader();
+        init2();
     }
 
     public void clear() {
@@ -41,10 +55,10 @@ public class Render2D implements Render {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void render(final long window, Mesh background2, Mesh bird, Mesh quad, Mesh familiar, Mesh rectangle1) {
+    public void render(final long window, Mesh bird, Mesh quad, Mesh familiar, Mesh rectangle1) {
         clear();
         glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
-        renderScene(background2, bird, quad, familiar, rectangle1);
+        renderScene(bird, quad, familiar, rectangle1);
 
         int error = glGetError();
         if (error != GL_NO_ERROR) {
@@ -52,7 +66,151 @@ public class Render2D implements Render {
         }
     }
 
-    private void renderScene(Mesh background, Mesh bird, Mesh quad, Mesh familiar, Mesh rectangle1) {
+    private void init2() throws Exception {
+        batchData = new BatchData();
+        BufferLayout bufferLayout = new BufferLayout(List.of(
+                new BufferElement(ShaderDataType.Float3, "a_Position"),
+                new BufferElement(ShaderDataType.Float4, "a_Color"),
+                new BufferElement(ShaderDataType.Float2, "a_TexCoord"),
+                new BufferElement(ShaderDataType.Float, "a_TexIndex"),
+                new BufferElement(ShaderDataType.Float, "a_TilingFactor")
+        ));
+        batchData.quadVertexArray = new VertexArray();
+        batchData.quadVertexBuffer = new VertexBuffer(BatchData.MaxVertices * 8);
+        batchData.quadVertexBuffer.setBufferLayout(bufferLayout);
+        batchData.quadVertexArray.addVertexBuffer(batchData.quadVertexBuffer);
+        batchData.QuadVertexBufferBase = new QuadVertex[BatchData.MaxVertices];
+        int[] quadIndices = new int[BatchData.MaxIndices];
+        int offset = 0;
+
+        for (int i = 0; i < BatchData.MaxIndices; i += 6) {
+                quadIndices[i + 0] = offset + 0;
+                quadIndices[i + 1] = offset + 1;
+                quadIndices[i + 2] = offset + 2;
+
+                quadIndices[i + 3] = offset + 2;
+                quadIndices[i + 4] = offset + 3;
+                quadIndices[i + 5] = offset + 0;
+
+                offset += 4;
+        }
+
+        IndexBuffer quadIB = new IndexBuffer(quadIndices, BatchData.MaxIndices);
+        batchData.quadVertexArray.setIndexBuffer(quadIB);
+        batchData.WhiteTexture = new Texture(1, 1, new int[]{0xffffffff});
+        int[] samplers = new int[BatchData.MaxTextureSlots];
+
+        for (int i = 0; i < BatchData.MaxTextureSlots; i++) {
+            samplers[i] = i;
+        }
+
+        batchData.textureShader = new ShaderProgram();
+        batchData.textureShader.createFragmentShader(FileUtils.loadAsString("shaders/Texture.frag"));
+        batchData.textureShader.createVertexShader(FileUtils.loadAsString("shaders/Texture.vert"));
+        batchData.textureShader.bind();
+        batchData.textureShader.setIntArray("u_Textures", samplers, BatchData.MaxTextureSlots);
+        batchData.TextureSlots[0] = batchData.WhiteTexture;
+        batchData.QuadVertexPositions[0] = new Vector3f(-0.5f, -0.5f, 0.0f);
+        batchData.QuadVertexPositions[1] = new Vector3f(0.5f, -0.5f, 0.0f);
+        batchData.QuadVertexPositions[2] = new Vector3f(0.5f, 0.5f, 0.0f);
+        batchData.QuadVertexPositions[3] = new Vector3f(-0.5f, 0.5f, 0.0f);
+    }
+
+    public void beginScene() {
+
+        batchData.textureShader.bind();
+        batchData.textureShader.setUniform("u_ViewProjection", camera.getProjectionMatrix());
+
+        batchData.QuadIndexCount = 0;
+        batchData.QuadVertexBufferPtr = batchData.QuadVertexBufferBase;
+
+        batchData.TextrueSlotIndex = 1;
+    }
+
+    public void endScene() {
+        int dataSize = batchData.QuadVertexBufferPtr.length - (batchData.QuadVertexBufferBase.length);
+
+        // Create a FloatBufer of the appropriate size for one vertex
+        ByteBuffer vertexByteBuffer = BufferUtils.createByteBuffer(QuadVertex.stride);
+
+        // Put each 'Vertex' in one FloatBuffer
+        ByteBuffer verticesByteBuffer = BufferUtils.createByteBuffer(batchData.QuadVertexBufferBase.length * QuadVertex.stride);
+        FloatBuffer verticesFloatBuffer = verticesByteBuffer.asFloatBuffer();
+        for (int i = 0; i < batchData.QuadVertexBufferBase.length; i++) {
+            // Add position, color and texture floats to the buffer
+            verticesFloatBuffer.put(batchData.QuadVertexBufferBase[i].getElements());
+        }
+        verticesFloatBuffer.flip();
+        batchData.quadVertexBuffer.setData(verticesFloatBuffer, dataSize);
+
+        flush();
+    }
+
+    public void flush() {
+        // Bind textures
+        for (int i = 0; i < batchData.TextrueSlotIndex; i++) {
+            batchData.TextureSlots[i].bind(i);
+        }
+
+        drawIndexed(batchData.quadVertexArray, batchData.QuadIndexCount);
+    }
+
+    private void drawIndexed(VertexArray vertexArray, int indexCount) {
+        int count = indexCount != 0 ? vertexArray.getIndexBuffer().getCount() : indexCount;
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    public void DrawQuad(Vector3f position, Vector2f size, Texture texture, float tilingFactor, Vector4f tintColor) {
+
+        Vector4f color = new Vector4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+        float textureIndex = 0.0f;
+        for (int i = 1; i < batchData.TextrueSlotIndex; i++) {
+            if (batchData.TextureSlots[i] == texture) {
+                textureIndex = (float)i;
+                break;
+            }
+        }
+
+        if (textureIndex == 0.0f) {
+            textureIndex = (float)batchData.TextrueSlotIndex;
+            batchData.TextureSlots[batchData.TextrueSlotIndex] = texture;
+            batchData.TextrueSlotIndex++;
+        }
+
+        batchData.QuadVertexBufferPtr[0].Position = batchData.QuadVertexPositions[0];
+        batchData.QuadVertexBufferPtr[0].Color = color;
+        batchData.QuadVertexBufferPtr[0].TexCoord = new Vector2f(0.0f, 0.0f);
+        batchData.QuadVertexBufferPtr[0].TexIndex = textureIndex;
+        batchData.QuadVertexBufferPtr[0].TilingFactor = tilingFactor;
+//
+//        s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[1];
+//        s_Data.QuadVertexBufferPtr->Color = color;
+//        s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 0.0f };
+//        s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+//        s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+//        s_Data.QuadVertexBufferPtr++;
+//
+//        s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[2];
+//        s_Data.QuadVertexBufferPtr->Color = color;
+//        s_Data.QuadVertexBufferPtr->TexCoord = { 1.0f, 1.0f };
+//        s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+//        s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+//        s_Data.QuadVertexBufferPtr++;
+//
+//        s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[3];
+//        s_Data.QuadVertexBufferPtr->Color = color;
+//        s_Data.QuadVertexBufferPtr->TexCoord = { 0.0f, 1.0f };
+//        s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
+//        s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
+//        s_Data.QuadVertexBufferPtr++;
+
+        batchData.QuadIndexCount += 6;
+    }
+
+
+    private void renderScene(Mesh bird, Mesh quad, Mesh familiar, Mesh rectangle1) {
         final var translations = entityService.getModelMatrix();
         if (!translations.isEmpty()) {
             Matrix4f viewMatrix = camera.getIdentity();
@@ -68,31 +226,31 @@ public class Render2D implements Render {
 //        background.endRender();
 //        sceneShaderProgram.unbind();
 //
-            birdShaderProgram.bind();
-            birdShaderProgram.setUniform("vw_matrix", viewMatrix);
-            birdShaderProgram.setUniform("pr_matrix", projectionMatrix);
-            birdShaderProgram.setUniform("ml_matrix", playerModelMatrix);
-            birdShaderProgram.setUniform("tex", 1);
-            bird.render();
-            bird.endRender();
-            birdShaderProgram.unbind();
-
-            quadShaderProgram.bind();
-            quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
-            quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
-            quadShaderProgram.setUniform("vw_matrix", viewMatrix);
-            translations.get(EntityType.WALL).forEach((key) -> {
-                quadShaderProgram.setUniform("ml_matrix", key);
-                quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
-                quad.render();
-                quad.endRender();
-            });
-            translations.get(EntityType.SPACE).forEach((key) -> {
-                  quadShaderProgram.setUniform("ml_matrix", key);
-                  quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 0.5f, 0.0f, 1.0f));
-                  quad.render();
-                  quad.endRender();
-            });
+//            birdShaderProgram.bind();
+//            birdShaderProgram.setUniform("vw_matrix", viewMatrix);
+//            birdShaderProgram.setUniform("pr_matrix", projectionMatrix);
+//            birdShaderProgram.setUniform("ml_matrix", playerModelMatrix);
+//            birdShaderProgram.setUniform("tex", 1);
+//            bird.render();
+//            bird.endRender();
+//            birdShaderProgram.unbind();
+//
+//            quadShaderProgram.bind();
+//            quadShaderProgram.setUniform("pr_matrix", projectionMatrix);
+//            quadShaderProgram.setUniform("t_color", quad.getMaterial().getColor());
+//            quadShaderProgram.setUniform("vw_matrix", viewMatrix);
+//            translations.get(EntityType.WALL).forEach((key) -> {
+//                quadShaderProgram.setUniform("ml_matrix", key);
+//                quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 1.0f, 0.0f, 1.0f));
+//                quad.render();
+//                quad.endRender();
+//            });
+//            translations.get(EntityType.SPACE).forEach((key) -> {
+//                  quadShaderProgram.setUniform("ml_matrix", key);
+//                  quadShaderProgram.setUniform("t_color", new Vector4f(1.0f, 0.5f, 0.0f, 1.0f));
+//                  quad.render();
+//                  quad.endRender();
+//            });
 
 //            translations.get(EntityType.DEBUG).forEach((key) -> {
 //                quadShaderProgram.setUniform("ml_matrix", key);
@@ -100,7 +258,7 @@ public class Render2D implements Render {
 //                rectangle1.render();
 //                rectangle1.endRender();
 //            });
-            quadShaderProgram.unbind();
+//            quadShaderProgram.unbind();
 
 //            Matrix4f familiarMatrix = entityService.getModelMatrix().get(EntityType.FAMILIAR).get(0).getValue();
 //            familiarShaderProgram.bind();
@@ -166,8 +324,8 @@ public class Render2D implements Render {
 
     public void cleanup() {
 //        sceneShaderProgram.cleanup();
-        familiarShaderProgram.cleanup();
-        birdShaderProgram.cleanup();
-        quadShaderProgram.cleanup();
+        //familiarShaderProgram.cleanup();
+        //birdShaderProgram.cleanup();
+        //quadShaderProgram.cleanup();
     }
 }
