@@ -33,9 +33,9 @@ public class AssetFactory {
     private Mesh rectangle1;
 
     public void init() {
-        bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
+//        bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
         background = new Mesh(getVertices(backgroundWidth, backgroundHeight), tcs, indices, bgTexture, null);
-        birdTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bird.png")).orElseThrow().getPath());
+//        birdTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bird.png")).orElseThrow().getPath());
         bird = new Mesh(getVertices(World.MetersToPixels * EntityService.PlayerWidth, World.MetersToPixels * EntityService.PlayerHeight), tcs, indices, birdTexture, null);
         quad2D = new Mesh(getVertices(World.TileSideInPixels, World.TileSideInPixels), tcs, indices, null, new Material());
         familiar = new Mesh(getVertices(World.MetersToPixels * EntityService.FamiliarWidth, World.MetersToPixels * EntityService.FamiliarHeight), tcs, indices, null, new Material());

@@ -106,7 +106,8 @@ public class Mesh {
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         }
 
-        Optional.ofNullable(texture).ifPresent(Texture::unbind);
+//        Optional.ofNullable(texture).ifPresent(Texture::unbind);
+        Optional.ofNullable(texture).ifPresent(texture1 -> texture1.delete());
     }
 
     private void initRender() {
@@ -136,7 +137,8 @@ public class Mesh {
         vboIdList.clear();
 
         if (texture != null) {
-            texture.cleanup();
+//            texture.cleanup();
+            texture.delete();
         }
 
         // Delete the VAO
@@ -146,5 +148,9 @@ public class Mesh {
 
     public Material getMaterial() {
         return material;
+    }
+
+    public Texture getTexture() {
+        return this.texture;
     }
 }

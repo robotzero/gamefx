@@ -55,10 +55,13 @@ public class Render2D implements Render {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
-    public void render(final long window, Mesh bird, Mesh quad, Mesh familiar, Mesh rectangle1) {
+    public void render(final long window, Mesh bird, Mesh quad, Mesh familiar, Mesh rectangle1) throws Exception {
         clear();
         glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
-        renderScene(bird, quad, familiar, rectangle1);
+//        renderScene(bird, quad, familiar, rectangle1);
+        beginScene();
+        DrawQuad(new Vector3f(20.0f, 3.0f, 1.0f), new Vector2f(10.0f, 10.0f), bird.getTexture(), 10.0f, null);
+        endScene();
 
         int error = glGetError();
         if (error != GL_NO_ERROR) {
@@ -95,9 +98,13 @@ public class Render2D implements Render {
                 offset += 4;
         }
 
-        IndexBuffer quadIB = new IndexBuffer(quadIndices, BatchData.MaxIndices);
+//        IndexBuffer quadIB = new IndexBuffer(quadIndices, BatchData.MaxIndices);
+        IndexBuffer quadIB = new IndexBuffer(new int[] {
+                0, 1, 2,
+                2, 3, 0
+        }, 6);
         batchData.quadVertexArray.setIndexBuffer(quadIB);
-        batchData.WhiteTexture = new Texture(1, 1, new int[]{0xffffffff});
+//        batchData.WhiteTexture = new Texture(1, 1, new int[]{0xffffffff});
         int[] samplers = new int[BatchData.MaxTextureSlots];
 
         for (int i = 0; i < BatchData.MaxTextureSlots; i++) {
@@ -107,19 +114,25 @@ public class Render2D implements Render {
         batchData.textureShader = new ShaderProgram();
         batchData.textureShader.createFragmentShader(FileUtils.loadAsString("shaders/Texture.frag"));
         batchData.textureShader.createVertexShader(FileUtils.loadAsString("shaders/Texture.vert"));
-        batchData.textureShader.bind();
-        batchData.textureShader.setIntArray("u_Textures", samplers, BatchData.MaxTextureSlots);
+        batchData.textureShader.link();
+//        batchData.textureShader.createUniform("u_Textures");
+//        batchData.textureShader.setIntArray("u_Textures", samplers, BatchData.MaxTextureSlots);
         batchData.TextureSlots[0] = batchData.WhiteTexture;
-        batchData.QuadVertexPositions[0] = new Vector3f(-0.5f, -0.5f, 0.0f);
-        batchData.QuadVertexPositions[1] = new Vector3f(0.5f, -0.5f, 0.0f);
-        batchData.QuadVertexPositions[2] = new Vector3f(0.5f, 0.5f, 0.0f);
-        batchData.QuadVertexPositions[3] = new Vector3f(-0.5f, 0.5f, 0.0f);
+        batchData.QuadVertexPositions[0] = new Vector3f(-0.5f, -0.5f, 1.0f);
+        batchData.QuadVertexPositions[1] = new Vector3f(0.5f, -0.5f, 1.0f);
+        batchData.QuadVertexPositions[2] = new Vector3f(0.5f, 0.5f, 1.0f);
+        batchData.QuadVertexPositions[3] = new Vector3f(-0.5f, 0.5f, 1.0f);
     }
 
-    public void beginScene() {
+    public void beginScene() throws Exception {
 
+        batchData.textureShader.createUniform("u_ViewProjection");
+        batchData.textureShader.createUniform("vw_matrix");
+        batchData.textureShader.createUniform("ml_matrix");
         batchData.textureShader.bind();
         batchData.textureShader.setUniform("u_ViewProjection", camera.getProjectionMatrix());
+        batchData.textureShader.setUniform("vw_matrix", camera.getIdentity());
+        batchData.textureShader.setUniform("ml_matrix", new Matrix4f().identity().translate(new Vector3f(300, 300, 0)));
 
         batchData.QuadIndexCount = 0;
         batchData.QuadVertexBufferPtr = batchData.QuadVertexBufferBase;
@@ -138,8 +151,12 @@ public class Render2D implements Render {
         FloatBuffer verticesFloatBuffer = verticesByteBuffer.asFloatBuffer();
         for (int i = 0; i < batchData.QuadVertexBufferBase.length; i++) {
             // Add position, color and texture floats to the buffer
-            verticesFloatBuffer.put(batchData.QuadVertexBufferBase[i].getElements());
+            if (batchData.QuadVertexBufferBase[i] != null) {
+                verticesFloatBuffer.put(batchData.QuadVertexBufferBase[i].getElements());
+                dataSize = batchData.QuadVertexBufferBase[i].getElements().length;
+            }
         }
+
         verticesFloatBuffer.flip();
         batchData.quadVertexBuffer.setData(verticesFloatBuffer, dataSize);
 
@@ -149,7 +166,7 @@ public class Render2D implements Render {
     public void flush() {
         // Bind textures
         for (int i = 0; i < batchData.TextrueSlotIndex; i++) {
-            batchData.TextureSlots[i].bind(i);
+//            batchData.TextureSlots[i].bind(i);
         }
 
         drawIndexed(batchData.quadVertexArray, batchData.QuadIndexCount);
@@ -158,7 +175,7 @@ public class Render2D implements Render {
     private void drawIndexed(VertexArray vertexArray, int indexCount) {
         int count = indexCount != 0 ? vertexArray.getIndexBuffer().getCount() : indexCount;
         glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
+//        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     public void DrawQuad(Vector3f position, Vector2f size, Texture texture, float tilingFactor, Vector4f tintColor) {
@@ -179,6 +196,7 @@ public class Render2D implements Render {
             batchData.TextrueSlotIndex++;
         }
 
+        batchData.QuadVertexBufferPtr[0] = new QuadVertex();
         batchData.QuadVertexBufferPtr[0].Position = batchData.QuadVertexPositions[0];
         batchData.QuadVertexBufferPtr[0].Color = color;
         batchData.QuadVertexBufferPtr[0].TexCoord = new Vector2f(0.0f, 0.0f);

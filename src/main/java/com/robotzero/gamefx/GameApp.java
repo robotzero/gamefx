@@ -2,6 +2,7 @@ package com.robotzero.gamefx;
 
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
+import com.robotzero.gamefx.renderengine.Renderer2D;
 import com.robotzero.gamefx.renderengine.entity.ControlledHero;
 import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
@@ -9,6 +10,7 @@ import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.renderengine.model.Mesh;
+import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
@@ -16,6 +18,8 @@ import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
 import com.robotzero.gamefx.renderengine.utils.Random;
 import org.joml.Vector3f;
+
+import java.nio.ByteBuffer;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_B;
@@ -35,6 +39,7 @@ public class GameApp implements Runnable {
     private boolean running = false;
     private final DisplayManager displayManager;
     private final Render render2D;
+    private final Renderer2D renderer2D;
     private float SIZE = 1.0f;
     private final Timer timer;
     public static int fps;
@@ -57,9 +62,10 @@ public class GameApp implements Runnable {
     int TileSpanX = 17 * 3;
     int TileSpanY = 9 * 3;
 
-    public GameApp(DisplayManager displayManager, Render render2D, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
+    public GameApp(DisplayManager displayManager, Render render2D, Renderer2D renderer2D, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
         this.displayManager = displayManager;
         this.render2D = render2D;
+        this.renderer2D = renderer2D;
         this.timer = timer;
         this.assetFactory = assetFactory;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
@@ -88,7 +94,8 @@ public class GameApp implements Runnable {
     private void init() throws Exception {
         displayManager.createDisplay();
         timer.init();
-        render2D.init();
+//        render2D.init();
+        renderer2D.init();
         lastFps = timer.getTime();
         fps = 0;
         assetFactory.init();
@@ -116,7 +123,7 @@ public class GameApp implements Runnable {
         gameMemory.ControlledHero.EntityIndex = LowIndex;
     }
 
-    public void gameLoop() {
+    public void gameLoop() throws Exception {
         float elapsedTime;
         float accumulator = 0f;
         float interval = 1f / TARGET_UPS;
@@ -131,20 +138,25 @@ public class GameApp implements Runnable {
                 update(interval);
                 accumulator -= interval;
             }
-            render();
+//            render();
             entityService.EndSim(gameMemory.simRegion);
             sync();
         }
     }
 
-    private void render() {
+    private void render() throws Exception {
         if ( timer.getLastLoopTime() - lastFps > 1 ) {
             lastFps = timer.getLastLoopTime();
             displayManager.setWindowTitle(DisplayManager.TITLE + " - " + fps + " FPS");
             fps = 0;
         }
         fps++;
-        render2D.render(displayManager.getWindow(), bird, quad, familiarA, assetFactory.getRectangle1());
+        Texture texture = Texture.loadTexture("resources/bird.png");
+        renderer2D.clear();
+        texture.bind();
+        renderer2D.begin();
+        renderer2D.end();
+//        render2D.render(displayManager.getWindow(), bird, quad, familiarA, assetFactory.getRectangle1());
         displayManager.updateDisplay();
     }
 

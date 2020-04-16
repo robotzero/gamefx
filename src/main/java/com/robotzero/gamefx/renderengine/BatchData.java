@@ -67,12 +67,12 @@ class VertexArray {
     public void addVertexBuffer(VertexBuffer vertexBuffer) {
         glBindVertexArray(this.id);
         vertexBuffer.bind();
-        List<BufferElement> elementList = vertexBuffer.getBufferLayout().getElementList();
-        for (BufferElement element : elementList) {
-            glEnableVertexAttribArray(vertexBufferIndex);
-            glVertexAttribPointer(vertexBufferIndex, element.type.getSize(), GL_FLOAT, false, vertexBuffer.getBufferLayout().getStride(), element.offset);
-            vertexBufferIndex++;
-        }
+//        List<BufferElement> elementList = vertexBuffer.getBufferLayout().getElementList();
+//        for (BufferElement element : elementList) {
+//            glEnableVertexAttribArray(vertexBufferIndex);
+//            glVertexAttribPointer(vertexBufferIndex, element.type.getSize(), GL_FLOAT, false, vertexBuffer.getBufferLayout().getStride(), element.offset);
+//            vertexBufferIndex++;
+//        }
         vertexBuffers.add(vertexBuffer);
     }
 
@@ -183,36 +183,42 @@ class QuadVertex {
     public static final int positionByteOffset = 0;
     public static final int colorByteOffset = positionByteOffset + positionBytesCount;
     public static final int textureByteOffset = colorByteOffset + colorByteCount;
-    public static final int texIndexByteOffset = textureByteOffset + 4;
-    public static final int tilingFactorByteOffset = texIndexByteOffset + 4;
+//    public static final int texIndexByteOffset = textureByteOffset + 4;
+//    public static final int tilingFactorByteOffset = texIndexByteOffset + 4;
 
     // The amount of elements that a vertex has
     public static final int elementCount = positionElementCount +
-            colorElementCount + textureElementCount + 1 + 1;
+            colorElementCount + textureElementCount;
     // The size of a vertex in bytes, like in C/C++: sizeof(Vertex)
     public static final int stride = positionBytesCount + colorByteCount +
-            textureByteCount + 4 + 4;
+            textureByteCount;
 
     public float[] getElements() {
-        float[] out = new float[QuadVertex.elementCount];
-        int i = 0;
-        // Insert XYZW elements
-        out[i++] = Position.x;
-        out[i++] = Position.y;
-        out[i++] = Position.z;
-
-        // Insert RGBA elements
-        out[i++] = Color.x;
-        out[i++] = Color.y;
-        out[i++] = Color.z;
-        out[i++] = Color.w;
-        // Insert ST elements
-        out[i++] = TexCoord.x;
-        out[i++] = TexCoord.y;
-        out[i++] = TexIndex;
-        out[i++] = TilingFactor;
-
-        return out;
+        return new float[] {
+                0.0f, 0.0f, 0.0f,
+                0.0f, 200, 0.0f,
+                100, 200, 0.0f,
+                100, 0.0f, 0.0f
+        };
+//        float[] out = new float[QuadVertex.elementCount];
+//        int i = 0;
+//        // Insert XYZW elements
+//        out[i++] = Position.x;
+//        out[i++] = Position.y;
+//        out[i++] = Position.z;
+//
+//        // Insert RGBA elements
+//        out[i++] = Color.x;
+//        out[i++] = Color.y;
+//        out[i++] = Color.z;
+//        out[i++] = Color.w;
+//        // Insert ST elements
+//        out[i++] = TexCoord.x;
+//        out[i++] = TexCoord.y;
+////        out[i++] = TexIndex;
+////        out[i++] = TilingFactor;
+//
+//        return out;
     }
 }
 
