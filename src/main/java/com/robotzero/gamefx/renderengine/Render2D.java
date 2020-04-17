@@ -234,7 +234,7 @@ public class Render2D implements Render {
             Matrix4f viewMatrix = camera.getIdentity();
             Matrix4f projectionMatrix = camera.getProjectionMatrix();
             //@@TODO one player so far so we just get it.
-            Matrix4f playerModelMatrix = translations.get(EntityType.HERO).get(0);
+//            Matrix4f playerModelMatrix = translations.get(EntityType.HERO).get(0);
 //        sceneShaderProgram.bind();
 //        sceneShaderProgram.setUniform("vw_matrix", viewMatrix);
 //        sceneShaderProgram.setUniform("pr_matrix", projectionMatrix);

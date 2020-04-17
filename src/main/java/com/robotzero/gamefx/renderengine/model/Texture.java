@@ -69,6 +69,7 @@ public class Texture {
      * @param data           Pixel data of the image
      */
     public void uploadData(int internalFormat, int width, int height, int format, ByteBuffer data) {
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     }
 

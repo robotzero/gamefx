@@ -381,13 +381,13 @@ public class EntityService {
         pushPiece(group, Offset.add(new Vector2f(0.5f * Dim.x, 0)), new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
     }
 
-    public Map<EntityType, List<Matrix4f>> getModelMatrix() {
+    public Map<EntityType, List<Vector3f>> getModelMatrix() {
         EntityVisiblePieceGroup pieceGroup = new EntityVisiblePieceGroup();
 
         if (gameMemory.simRegion == null) {
             return Map.of();
         }
-        Map<EntityType, List<Matrix4f>> aaa = IntStream.range(0, gameMemory.simRegion.EntityCount).mapToObj(HighEntityIndex -> {
+        Map<EntityType, List<Vector3f>> aaa = IntStream.range(0, gameMemory.simRegion.EntityCount).mapToObj(HighEntityIndex -> {
             pieceGroup.PieceCount = 0;
             SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
 
@@ -441,7 +441,7 @@ public class EntityService {
                     moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
                 }
 
-                List<Matrix4f> listOfTranslactions = IntStream.range(0, pieceGroup.PieceCount).mapToObj(index -> {
+                List<Vector3f> listOfTranslactions = IntStream.range(0, pieceGroup.PieceCount).mapToObj(index -> {
                     final Matrix4f v = new Matrix4f();
                     float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * new Vector3f(entity.P).x();
                     float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * new Vector3f(entity.P).y();
@@ -453,10 +453,12 @@ public class EntityService {
                     if (entity.Type == EntityType.SPACE) {
 //                        Vector3f translation = new Vector3f(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0).x,
 //                                Center.add(new Vector3f(HalfDim.x, HalfDim.y, 0)).y, 0));
-                        return v.identity().translate(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0)));
+//                        return v.identity().translate(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0)));
+                        return Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0));
                     }
 //                    return Map.of(entity.Type, v.identity().translate(Center));
-                    return v.identity().translate(Center);
+                    return Center;
+//                    return v.identity().translate(Center);
                 }).collect(Collectors.toList());
 
                 return Map.of(entity.Type, listOfTranslactions);

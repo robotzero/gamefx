@@ -7,7 +7,6 @@ import com.robotzero.gamefx.renderengine.model.ShaderProgram;
 import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.renderengine.model.VertexArrayObject;
 import com.robotzero.gamefx.renderengine.model.VertexBufferObject;
-import com.robotzero.gamefx.renderengine.utils.FileUtils;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
@@ -24,6 +23,7 @@ import static org.lwjgl.opengl.GL11.GL_SRC_ALPHA;
 import static org.lwjgl.opengl.GL11.GL_TRIANGLES;
 import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glClear;
+import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glDrawArrays;
 import static org.lwjgl.opengl.GL11.glEnable;
 import static org.lwjgl.opengl.GL15.GL_ARRAY_BUFFER;
@@ -49,14 +49,15 @@ public class Renderer2D {
         setupShaderProgram();
 
         /* Enable blending */
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+//        glEnable(GL_BLEND);
+//        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     /**
      * Clears the drawing area.
      */
     public void clear() {
+//        glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
@@ -261,13 +262,8 @@ public class Renderer2D {
      * Setups the default shader program.
      */
     private void setupShaderProgram() {
-//        if (Game.isDefaultContext()) {
-            /* Generate Vertex Array Object */
-            vao = new VertexArrayObject();
-            vao.bind();
-//        } else {
-//            vao = null;
-//        }
+        vao = new VertexArrayObject();
+        vao.bind();
 
         /* Generate Vertex Buffer Object */
         vbo = new VertexBufferObject();
@@ -286,22 +282,14 @@ public class Renderer2D {
 
         /* Load shaders */
         Shader vertexShader, fragmentShader;
-//        if (Game.isDefaultContext()) {
-
-            vertexShader = Shader.loadShader2(GL_VERTEX_SHADER, "shaders/default.vert");
-            fragmentShader = Shader.loadShader2(GL_FRAGMENT_SHADER, "shaders/default.frag");
-//        } else {
-//            vertexShader = Shader.loadShader(GL_VERTEX_SHADER, "resources/legacy.vert");
-//            fragmentShader = Shader.loadShader(GL_FRAGMENT_SHADER, "resources/legacy.frag");
-//        }
+        vertexShader = Shader.loadShader2(GL_VERTEX_SHADER, "shaders/default.vert");
+        fragmentShader = Shader.loadShader2(GL_FRAGMENT_SHADER, "shaders/default.frag");
 
         /* Create shader program */
         program = new ShaderProgram();
         program.attachShader(vertexShader);
         program.attachShader(fragmentShader);
-//        if (Game.isDefaultContext()) {
-            program.bindFragmentDataLocation(0, "fragColor");
-//        }
+        program.bindFragmentDataLocation(0, "fragColor");
         program.link();
         program.use();
 
@@ -338,8 +326,8 @@ public class Renderer2D {
         program.setUniform(uniView, view);
 
         /* Set projection matrix to an orthographic projection */
-//        Matrix4f projection = Matrix4f.orthographic(0f, width, 0f, height, -1f, 1f);
-        Matrix4f projection = new Matrix4f().ortho(0.0f, DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f, -1, 1);
+        Matrix4f projection = new Matrix4f().ortho(0f, width, 0f, height, -1f, 1f);
+//        Matrix4f projection = new Matrix4f().ortho(0.0f, DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f, -1, 1);
         int uniProjection = program.getUniformLocation("projection");
         program.setUniform(uniProjection, projection);
     }

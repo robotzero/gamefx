@@ -9,6 +9,7 @@ import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.Render;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
+import com.robotzero.gamefx.renderengine.model.Color;
 import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
@@ -17,7 +18,9 @@ import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
 import com.robotzero.gamefx.renderengine.utils.Random;
+import imgui.Col;
 import org.joml.Vector3f;
+import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 
@@ -98,10 +101,10 @@ public class GameApp implements Runnable {
         renderer2D.init();
         lastFps = timer.getTime();
         fps = 0;
-        assetFactory.init();
-        bird = assetFactory.getBirdMesh();
-        quad = assetFactory.getQuadMesh();
-        familiarA = assetFactory.getFamiliarMesh();
+//        assetFactory.init();
+//        bird = assetFactory.getBirdMesh();
+//        quad = assetFactory.getQuadMesh();
+//        familiarA = assetFactory.getFamiliarMesh();
 
         World.WorldPosition NewCameraP = entityService.ChunkPositionFromTilePosition(
                 WorldGenerator.CameraTileX,
@@ -138,8 +141,9 @@ public class GameApp implements Runnable {
                 update(interval);
                 accumulator -= interval;
             }
-//            render();
+            render();
             entityService.EndSim(gameMemory.simRegion);
+//            displayManager.updateDisplay();
             sync();
         }
     }
@@ -151,11 +155,20 @@ public class GameApp implements Runnable {
             fps = 0;
         }
         fps++;
-        Texture texture = Texture.loadTexture("resources/bird.png");
-        renderer2D.clear();
-        texture.bind();
-        renderer2D.begin();
-        renderer2D.end();
+        final var blah = entityService.getModelMatrix();
+        if (!blah.isEmpty()) {
+            final var hero = blah.get(EntityType.HERO).get(0);
+            Texture texture = Texture.loadTexture(this.getClass().getClassLoader().getResource("bird.png").getFile());
+            renderer2D.clear();
+            texture.bind();
+            renderer2D.begin();
+            renderer2D.drawTextureRegion(hero.x, hero.y, hero.x + 60, hero.y + 60, 0, 0, 1, 1);
+            blah.get(EntityType.WALL).forEach(a -> {
+                renderer2D.drawTextureRegion(a.x, a.y, a.x + 60, a.y + 60, 0, 0, 1, 1);
+            });
+            renderer2D.end();
+            texture.delete();
+        }
 //        render2D.render(displayManager.getWindow(), bird, quad, familiarA, assetFactory.getRectangle1());
         displayManager.updateDisplay();
     }
@@ -224,7 +237,8 @@ public class GameApp implements Runnable {
     }
 
     protected void cleanup() {
-        render2D.cleanup();
+//        render2D.cleanup();
+        renderer2D.dispose();
         gameMemory.free();
         glfwDestroyWindow(this.displayManager.getWindow());
         glfwTerminate();
