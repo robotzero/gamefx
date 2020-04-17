@@ -162,9 +162,11 @@ public class GameApp implements Runnable {
             renderer2D.clear();
             texture.bind();
             renderer2D.begin();
-            renderer2D.drawTextureRegion(hero.x, hero.y, hero.x + 60, hero.y + 60, 0, 0, 1, 1);
+            renderer2D.drawTexture(texture, hero.x, hero.y);
+//            texture.delete();
             blah.get(EntityType.WALL).forEach(a -> {
-                renderer2D.drawTextureRegion(a.x, a.y, a.x + 60, a.y + 60, 0, 0, 1, 1);
+//                renderer2D.drawTexture(texture, a.x, a.y);
+                renderer2D.drawTextureRegion(a.x, a.y, a.x + 60, a.y + 60, 0, 0, 1, 1, Color.BLUE);
             });
             renderer2D.end();
             texture.delete();

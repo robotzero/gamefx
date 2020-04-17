@@ -4,10 +4,26 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import org.lwjgl.system.MemoryStack;
 
-import static org.lwjgl.opengl.GL11.*;
+import static com.jogamp.opengl.GL.GL_NEAREST;
+import static com.jogamp.opengl.GL.GL_RGBA;
+import static com.jogamp.opengl.GL.GL_RGBA8;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_2D;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_S;
+import static org.lwjgl.opengl.GL11.GL_TEXTURE_WRAP_T;
+import static org.lwjgl.opengl.GL11.GL_UNPACK_ALIGNMENT;
+import static org.lwjgl.opengl.GL11.glBindTexture;
+import static org.lwjgl.opengl.GL11.glDeleteTextures;
+import static org.lwjgl.opengl.GL11.glGenTextures;
+import static org.lwjgl.opengl.GL11.glPixelStorei;
+import static org.lwjgl.opengl.GL11.glTexImage2D;
+import static org.lwjgl.opengl.GL11.glTexParameteri;
 import static org.lwjgl.opengl.GL13.GL_CLAMP_TO_BORDER;
-import static org.lwjgl.stb.STBImage.*;
-
+import static org.lwjgl.stb.STBImage.stbi_failure_reason;
+import static org.lwjgl.stb.STBImage.stbi_load;
+import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
 
 public class Texture {
 
@@ -69,7 +85,6 @@ public class Texture {
      * @param data           Pixel data of the image
      */
     public void uploadData(int internalFormat, int width, int height, int format, ByteBuffer data) {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     }
 
@@ -136,6 +151,7 @@ public class Texture {
 
         texture.bind();
 
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         texture.setParameter(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         texture.setParameter(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         texture.setParameter(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
