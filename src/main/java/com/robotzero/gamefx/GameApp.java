@@ -20,6 +20,7 @@ import com.robotzero.gamefx.world.WorldGenerator;
 import com.robotzero.gamefx.renderengine.utils.Random;
 import imgui.Col;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
@@ -163,10 +164,11 @@ public class GameApp implements Runnable {
             texture.bind();
             renderer2D.begin();
             renderer2D.drawTexture(texture, hero.x, hero.y);
-//            texture.delete();
+            renderer2D.flush();
+            texture.delete();
             blah.get(EntityType.WALL).forEach(a -> {
 //                renderer2D.drawTexture(texture, a.x, a.y);
-                renderer2D.drawTextureRegion(a.x, a.y, a.x + 60, a.y + 60, 0, 0, 1, 1, Color.BLUE);
+                renderer2D.drawTextureRegion(a.x, a.y, a.x + 60, a.y + 60, 0, 0, 1, 1, new Color(1.0f, 0.0f, 0.0f, 1.0f));
             });
             renderer2D.end();
             texture.delete();
