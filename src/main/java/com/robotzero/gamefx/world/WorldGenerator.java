@@ -35,7 +35,7 @@ public class WorldGenerator {
 
             entityService.AddStandardRoom(
                     screenX * tilesPerWidth + tilesPerWidth / 2,
-                    screenY * tilesPerHeight + tilesPerHeight /2);
+                    screenY * tilesPerHeight + tilesPerHeight / 2);
 
             for (int tileY = 0;
                  tileY < tilesPerHeight;

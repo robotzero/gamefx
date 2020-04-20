@@ -138,6 +138,10 @@ public class DisplayManager {
 //        Display.destroy();
     }
 
+    public boolean isClosing() {
+        return glfwWindowShouldClose(this.window);
+    }
+
     public long getWindow() {
         return this.window;
     }

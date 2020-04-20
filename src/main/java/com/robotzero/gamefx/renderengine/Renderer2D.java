@@ -1,12 +1,15 @@
 
 package com.robotzero.gamefx.renderengine;
 
+import com.robotzero.gamefx.renderengine.entity.EntityService;
+import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.model.Color;
 import com.robotzero.gamefx.renderengine.model.Shader;
 import com.robotzero.gamefx.renderengine.model.ShaderProgram;
 import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.renderengine.model.VertexArrayObject;
 import com.robotzero.gamefx.renderengine.model.VertexBufferObject;
+import com.robotzero.gamefx.world.World;
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
@@ -35,17 +38,22 @@ public class Renderer2D {
     private FloatBuffer vertices;
     private int numVertices;
     private boolean drawing;
+    private final EntityService entityService;
+    private final Camera camera;
+    private Texture texture;
+
+    public Renderer2D(EntityService entityService, Camera camera) {
+        this.entityService = entityService;
+        this.camera = camera;
+    }
 
     /**
      * Initializes the renderer.
      */
     public void init() {
         /* Setup shader programs */
+        texture = Texture.loadTexture(this.getClass().getClassLoader().getResource("bird.png").getFile());
         setupShaderProgram();
-
-        /* Enable blending */
-//        glEnable(GL_BLEND);
-//        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
     /**
@@ -65,6 +73,28 @@ public class Renderer2D {
         }
         drawing = true;
         numVertices = 0;
+    }
+
+    public void render() {
+        final var entityStates = entityService.getModelMatrix();
+        if (!entityStates.isEmpty()) {
+            clear();
+            begin();
+            final var hero = entityStates.get(EntityType.HERO).get(0);
+            drawTextureRegion(hero.x, hero.y, hero.x + World.MetersToPixels * EntityService.PlayerWidth, hero.y + World.MetersToPixels * EntityService.PlayerHeight, 0, 0, 1, 1, 1.0f, Color.WHITE);
+            entityStates.get(EntityType.WALL).forEach(a -> {
+                drawTextureRegion(a.x, a.y, a.x + World.TileSideInPixels, a.y + World.TileSideInPixels, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
+            });
+            entityStates.get(EntityType.SPACE).forEach(a -> {
+                drawTextureRegion(a.x, a.y, a.x + World.TileSideInPixels, a.y + World.TileSideInPixels, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 1.0f, 1.0f));
+            });
+            entityStates.get(EntityType.DEBUG).forEach(a -> {
+
+            });
+//            drawTextureRegion(30f, 50f, 40f, 100f, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 1.0f, 1.0f));
+            // DrawRectangleOutline(DrawBuffer, ScreenP - 0.5f*ScreenDim, ScreenP + 0.5f*ScreenDim, V3(1.0f, 1.0f, 0.0f));
+            end();
+        }
     }
 
     /**
@@ -139,7 +169,7 @@ public class Renderer2D {
         float s2 = 1f;
         float t2 = 1f;
 
-        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, 1.0f, c);
     }
 
     /**
@@ -154,8 +184,8 @@ public class Renderer2D {
      * @param regWidth  Width of the texture region
      * @param regHeight Height of the texture region
      */
-    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight) {
-        drawTextureRegion(texture, x, y, regX, regY, regWidth, regHeight, Color.WHITE);
+    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight, float isTexture) {
+        drawTextureRegion(texture, x, y, regX, regY, regWidth, regHeight, isTexture, Color.WHITE);
     }
 
     /**
@@ -171,7 +201,7 @@ public class Renderer2D {
      * @param regHeight Height of the texture region
      * @param c         The color to use
      */
-    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight, Color c) {
+    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight, float isTexture, Color c) {
         /* Vertex positions */
         float x1 = x;
         float y1 = y;
@@ -184,7 +214,7 @@ public class Renderer2D {
         float s2 = (regX + regWidth) / texture.getWidth();
         float t2 = (regY + regHeight) / texture.getHeight();
 
-        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, isTexture, c);
     }
 
     /**
@@ -200,8 +230,8 @@ public class Renderer2D {
      * @param s2 Top right s coordinate
      * @param t2 Top right t coordinate
      */
-    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2) {
-        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, Color.WHITE);
+    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, float isTexture) {
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, isTexture, Color.WHITE);
     }
 
     /**
@@ -218,8 +248,8 @@ public class Renderer2D {
      * @param t2 Top right t coordinate
      * @param c  The color to use
      */
-    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, Color c) {
-        if (vertices.remaining() < 7 * 6) {
+    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, float isTexture, Color c) {
+        if (vertices.remaining() < 8 * 6) {
             /* We need more space in the buffer, so flush it */
             flush();
         }
@@ -229,13 +259,13 @@ public class Renderer2D {
         float b = c.getBlue();
         float a = c.getAlpha();
 
-        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
-        vertices.put(x1).put(y2).put(r).put(g).put(b).put(a).put(s1).put(t2);
-        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
+        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1).put(isTexture);
+        vertices.put(x1).put(y2).put(r).put(g).put(b).put(a).put(s1).put(t2).put(isTexture);
+        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2).put(isTexture);
 
-        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
-        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
-        vertices.put(x2).put(y1).put(r).put(g).put(b).put(a).put(s2).put(t1);
+        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1).put(isTexture);
+        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2).put(isTexture);
+        vertices.put(x2).put(y1).put(r).put(g).put(b).put(a).put(s2).put(t1).put(isTexture);
 
         numVertices += 6;
     }
@@ -251,6 +281,7 @@ public class Renderer2D {
         }
         vbo.delete();
         program.delete();
+        texture.delete();
     }
 
     /**
@@ -321,10 +352,8 @@ public class Renderer2D {
         program.setUniform(uniView, view);
 
         /* Set projection matrix to an orthographic projection */
-        Matrix4f projection = new Matrix4f().ortho(0f, width, 0f, height, -1f, 1f);
-//        Matrix4f projection = new Matrix4f().ortho(0.0f, DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f, -1, 1);
         int uniProjection = program.getUniformLocation("projection");
-        program.setUniform(uniProjection, projection);
+        program.setUniform(uniProjection, camera.getProjectionMatrix());
     }
 
     /**
@@ -334,16 +363,20 @@ public class Renderer2D {
         /* Specify Vertex Pointer */
         int posAttrib = program.getAttributeLocation("position");
         program.enableVertexAttribute(posAttrib);
-        program.pointVertexAttribute(posAttrib, 2, 8 * Float.BYTES, 0);
+        program.pointVertexAttribute(posAttrib, 2, 9 * Float.BYTES, 0);
 
         /* Specify Color Pointer */
         int colAttrib = program.getAttributeLocation("color");
         program.enableVertexAttribute(colAttrib);
-        program.pointVertexAttribute(colAttrib, 4, 8 * Float.BYTES, 2 * Float.BYTES);
+        program.pointVertexAttribute(colAttrib, 4, 9 * Float.BYTES, 2 * Float.BYTES);
 
         /* Specify Texture Pointer */
         int texAttrib = program.getAttributeLocation("texcoord");
         program.enableVertexAttribute(texAttrib);
-        program.pointVertexAttribute(texAttrib, 2, 8 * Float.BYTES, 6 * Float.BYTES);
+        program.pointVertexAttribute(texAttrib, 2, 9 * Float.BYTES, 6 * Float.BYTES);
+
+        int boolAttib = program.getAttributeLocation("renderTexture");
+        program.enableVertexAttribute(boolAttib);
+        program.pointVertexAttribute(boolAttib, 1, 9 * Float.BYTES, 8 * Float.BYTES);
     }
 }

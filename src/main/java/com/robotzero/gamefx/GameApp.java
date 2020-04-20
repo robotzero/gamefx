@@ -4,26 +4,21 @@ import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Renderer2D;
 import com.robotzero.gamefx.renderengine.entity.ControlledHero;
-import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
-import com.robotzero.gamefx.renderengine.Render;
+import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
-import com.robotzero.gamefx.renderengine.model.Color;
 import com.robotzero.gamefx.renderengine.model.Mesh;
-import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.renderengine.utils.AssetFactory;
+import com.robotzero.gamefx.renderengine.utils.Random;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
-import com.robotzero.gamefx.renderengine.utils.Random;
-import imgui.Col;
 import org.joml.Vector3f;
-import org.joml.Vector4f;
-import org.lwjgl.system.MemoryUtil;
 
-import java.nio.ByteBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_B;
@@ -42,7 +37,6 @@ public class GameApp implements Runnable {
 //    public static final int TARGET_FPS = (int) DisplayManager.refreshRate;
     private boolean running = false;
     private final DisplayManager displayManager;
-    private final Render render2D;
     private final Renderer2D renderer2D;
     private float SIZE = 1.0f;
     private final Timer timer;
@@ -66,9 +60,8 @@ public class GameApp implements Runnable {
     int TileSpanX = 17 * 3;
     int TileSpanY = 9 * 3;
 
-    public GameApp(DisplayManager displayManager, Render render2D, Renderer2D renderer2D, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
+    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
         this.displayManager = displayManager;
-        this.render2D = render2D;
         this.renderer2D = renderer2D;
         this.timer = timer;
         this.assetFactory = assetFactory;
@@ -78,8 +71,9 @@ public class GameApp implements Runnable {
         this.world = world;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
-        entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null, null);
+        entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null);
         gameMemory.HighEntityCount = 1;
+        gameMemory.StandardRoomCollision = entityService.MakeSimpleGroundedCollision(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters, 0.9f * World.TileDepthInMeters);
         World.renderWorld(entityService);
     }
 
@@ -128,22 +122,38 @@ public class GameApp implements Runnable {
     }
 
     public void gameLoop() throws Exception {
-        float elapsedTime;
+        float delta;
         float accumulator = 0f;
         float interval = 1f / TARGET_UPS;
+        float alpha;
+
         boolean running = true;
-        while (running && !displayManager.windowShouldClose()) {
-            elapsedTime = timer.getElapsedTime();
-            accumulator += elapsedTime;
+        while (running) {
+            if (displayManager.isClosing()) {
+                running = false;
+            }
+            /* Get delta time and update the accumulator */
+            delta = timer.getDelta();
+            accumulator += delta;
 
             input();
 
             while (accumulator >= interval) {
-                update(interval);
-                accumulator -= interval;
+               update(1f / TARGET_UPS);
+               timer.updateUPS();
+               accumulator -= interval;
             }
+
+            alpha = accumulator / interval;
+
+            /* Render game and update timer FPS */
             render();
             entityService.EndSim(gameMemory.simRegion);
+            timer.updateFPS();
+
+            /* Update timer */
+            timer.update();
+
 //            displayManager.updateDisplay();
             sync();
         }
@@ -156,23 +166,7 @@ public class GameApp implements Runnable {
             fps = 0;
         }
         fps++;
-        final var blah = entityService.getModelMatrix();
-        if (!blah.isEmpty()) {
-            final var hero = blah.get(EntityType.HERO).get(0);
-            Texture texture = Texture.loadTexture(this.getClass().getClassLoader().getResource("bird.png").getFile());
-            renderer2D.clear();
-            texture.bind();
-            renderer2D.begin();
-            renderer2D.drawTexture(texture, hero.x, hero.y);
-            renderer2D.flush();
-            texture.delete();
-            blah.get(EntityType.WALL).forEach(a -> {
-//                renderer2D.drawTexture(texture, a.x, a.y);
-                renderer2D.drawTextureRegion(a.x, a.y, a.x + 60, a.y + 60, 0, 0, 1, 1, new Color(1.0f, 0.0f, 0.0f, 1.0f));
-            });
-            renderer2D.end();
-            texture.delete();
-        }
+        renderer2D.render();
 //        render2D.render(displayManager.getWindow(), bird, quad, familiarA, assetFactory.getRectangle1());
         displayManager.updateDisplay();
     }
@@ -230,13 +224,23 @@ public class GameApp implements Runnable {
 
     private void sync() {
         float loopSlot = 1f / TARGET_FPS;
-        double endTime = timer.getLastLoopTime() + loopSlot;
-        while (timer.getTime() < endTime) {
+        double lastLoopTime = timer.getLastLoopTime();
+        double now = timer.getTime();
+        float targetTime = 1f / TARGET_FPS;
+
+        while (now - lastLoopTime < targetTime) {
+            Thread.yield();
+
+            /* This is optional if you want your game to stop consuming too much
+             * CPU but you will loose some accuracy because Thread.sleep(1)
+             * could sleep longer than 1 millisecond */
             try {
                 Thread.sleep(1);
-            } catch (InterruptedException ie) {
-                System.out.println("BLAH");
+            } catch (InterruptedException ex) {
+                Logger.getLogger(GameApp.class.getName()).log(Level.SEVERE, null, ex);
             }
+
+            now = timer.getTime();
         }
     }
 
@@ -251,6 +255,6 @@ public class GameApp implements Runnable {
     private void update(float interval) {
         globalinterval = interval;
         Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector3f(0f, 0f, 0f), new Vector3f(TileSpanX, TileSpanY, 0f).mul(World.TileSideInMeters));
-        gameMemory.simRegion = entityService.BeginSim(Camera.position, CameraBounds, interval);
+        gameMemory.simRegion = entityService.BeginSim(Camera.position, CameraBounds, globalinterval);
     }
 }

@@ -8,17 +8,14 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class World {
-    public static final int TILES_PER_CHUNK = 16;
     public static final int TileSideInPixels = 60;
     public static final float TileSideInMeters = 1.4f;
-    public static final Vector3f ChunkDimInMeters = new Vector3f(TILES_PER_CHUNK*TileSideInMeters,
-            TILES_PER_CHUNK * TileSideInMeters,
-            TileSideInMeters);
+    public static final int GroundBufferHeight = 256;
     public static final float TileDepthInMeters = 3.0f;
     public static final float TypicalFloorHeight = 3.0f;
-//    public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
-    public static final float MetersToPixels = 42.0f;
-    public static final float PixelsToMeters = 1.0f / MetersToPixels;
+    public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
+    public static final float PixelsToMeters = 1.0f / 42f;
+    public static final Vector3f WorldChunkDimInMeters = new Vector3f(PixelsToMeters * GroundBufferHeight, PixelsToMeters * GroundBufferHeight, TypicalFloorHeight);
     public static float ScreenCenterX = 0.5f * DisplayManager.WIDTH;
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
     public static WorldEntityBlock firstFree = null;
@@ -59,7 +56,7 @@ public class World {
 
     public boolean IsCanonical(Vector3f Offset)
     {
-        boolean Result = (IsCanonical(ChunkDimInMeters.x(), Offset.x()) && IsCanonical(ChunkDimInMeters.y(), Offset.y()));
+        boolean Result = (IsCanonical(WorldChunkDimInMeters.x(), Offset.x()) && IsCanonical(WorldChunkDimInMeters.y(), Offset.y()));
 
         return(Result);
     }
@@ -97,7 +94,7 @@ public class World {
     public static Vector3f subtract(WorldPosition A, WorldPosition B)
     {
         Vector3f dTile = new Vector3f((float) A.ChunkX - (float) B.ChunkX, (float) A.ChunkY - (float) B.ChunkY, 0.0f);
-        return EntityService.Hadamard(ChunkDimInMeters, dTile).add(new Vector3f(A.Offset).sub(new Vector3f(B.Offset)));
+        return EntityService.Hadamard(WorldChunkDimInMeters, dTile).add(new Vector3f(A.Offset).sub(new Vector3f(B.Offset)));
     }
 
     public float[] TestWall(float WallX, float RelX, float RelY, float PlayerDeltaX, float PlayerDeltaY,
@@ -126,7 +123,7 @@ public class World {
         WorldPosition Result = new WorldPosition(BasePos);
 
         Result.Offset = new Vector3f(Result.Offset).add(Offset);
-        RecanonicalizeCoord(ChunkDimInMeters, Result);
+        RecanonicalizeCoord(WorldChunkDimInMeters, Result);
 
         return(Result);
     }

@@ -10,4 +10,5 @@ public class EntityVisiblePiece {
     public Vector2fc Dim;
     public Vector4f Color;
     public float EntityZC;
+    public float OffsetZ;
 }

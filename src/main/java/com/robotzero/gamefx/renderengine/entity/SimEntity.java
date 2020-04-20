@@ -20,6 +20,7 @@ public class SimEntity {
     public List<SimEntityFlag> flags = new ArrayList<>();
     public boolean Updatable = false;
     public float DistanceLimit = 0.0f;
+    public SimEntityCollisionVolumeGroup Collision;
 
     public SimEntity(SimEntity sim) {
 //        P = sim.P;
@@ -30,6 +31,7 @@ public class SimEntity {
         flags = new ArrayList<>(sim.flags);
         tBob = sim.tBob;
         StorageIndex = sim.StorageIndex;
+        Collision = sim.Collision;
         Updatable = sim.Updatable;
         if(sim.Hash == null) {
             Hash = new HashMap<>();

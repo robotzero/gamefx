@@ -42,7 +42,7 @@ public class EntityService {
 
     public AddLowEntityResult AddPlayer() {
         World.WorldPosition P = Camera.position;
-        AddLowEntityResult entity = AddGroundedEntity(EntityType.HERO, P, new Vector3f(PlayerWidth, PlayerHeight, 1.2f), SimEntityFlag.COLLIDES, SimEntityFlag.MOVEABLE);
+        AddLowEntityResult entity = AddGroundedEntity(EntityType.HERO, P, null, SimEntityFlag.COLLIDES, SimEntityFlag.MOVEABLE);
 
         if (gameMemory.CameraFollowingEntityIndex == 0) {
             gameMemory.CameraFollowingEntityIndex = entity.LowIndex;
@@ -51,15 +51,15 @@ public class EntityService {
         return entity;
     }
 
-    public AddLowEntityResult AddLowEntity(EntityType Type, World.WorldPosition P, Vector3f Dim, SimEntityFlag ...flags) {
+    public AddLowEntityResult AddLowEntity(EntityType Type, World.WorldPosition P, SimEntityCollisionVolumeGroup Collision, SimEntityFlag ...flags) {
         int EntityIndex = gameMemory.LowEntityCount;
         gameMemory.LowEntityCount = EntityIndex + 1;
 
         gameMemory.LowEntities[EntityIndex] = new LowEntity();
         gameMemory.LowEntities[EntityIndex].Sim = new SimEntity();
         gameMemory.LowEntities[EntityIndex].Sim.Type = Type;
-        gameMemory.LowEntities[EntityIndex].Sim.Dim = Dim;
         gameMemory.LowEntities[EntityIndex].Sim.P = new Vector3f();
+        gameMemory.LowEntities[EntityIndex].Sim.Collision = Collision;
         gameMemory.LowEntities[EntityIndex].P = NullPosition();
         if (flags != null && flags.length > 0) {
             for (int i = 0; i < flags.length; ++i) {
@@ -78,7 +78,7 @@ public class EntityService {
     public AddLowEntityResult AddWall(int ChunkX, int ChunkY) {
         Vector3f Dim = new Vector3f(World.TileSideInMeters, World.TileSideInMeters, World.TileDepthInMeters);
         World.WorldPosition P = ChunkPositionFromTilePosition(ChunkX, ChunkY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult entity = AddGroundedEntity(EntityType.WALL, P, Dim, SimEntityFlag.COLLIDES);
+        AddLowEntityResult entity = AddGroundedEntity(EntityType.WALL, P, null, SimEntityFlag.COLLIDES);
 
         return entity;
     }
@@ -185,21 +185,22 @@ public class EntityService {
 
     public AddLowEntityResult AddMonstar(int AbsTileX, int AbsTileY) {
         World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult Entity = AddGroundedEntity(EntityType.MONSTAR, P,  new Vector3f(1.0f, 0.5f, 0.5f), SimEntityFlag.COLLIDES, SimEntityFlag.MOVEABLE);
+        AddLowEntityResult Entity = AddGroundedEntity(EntityType.MONSTAR, P, null, SimEntityFlag.COLLIDES, SimEntityFlag.MOVEABLE);
 
         return(Entity);
     }
 
     public AddLowEntityResult AddFamiliar(int AbsTileX, int AbsTileY) {
         World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult Entity = AddGroundedEntity(EntityType.FAMILIAR, P, new Vector3f(1.0f, 0.5f, 0.5f), SimEntityFlag.COLLIDES, SimEntityFlag.MOVEABLE);
+        AddLowEntityResult Entity = AddGroundedEntity(EntityType.FAMILIAR, P, null, SimEntityFlag.COLLIDES, SimEntityFlag.MOVEABLE);
 
         return(Entity);
     }
 
-    public AddLowEntityResult AddGroundedEntity(EntityType Type, World.WorldPosition P, Vector3f Dim, SimEntityFlag ...flags) {
-        World.WorldPosition OffsetP = world.MapIntoChunkSpace(P, new Vector3f(0, 0, 0));
-        AddLowEntityResult Entity = AddLowEntity(Type, OffsetP, Dim, flags);
+    public AddLowEntityResult AddGroundedEntity(EntityType Type, World.WorldPosition P, SimEntityCollisionVolumeGroup Collision, SimEntityFlag ...flags) {
+//        World.WorldPosition OffsetP = world.MapIntoChunkSpace(P, new Vector3f(0, 0, 0));
+        AddLowEntityResult Entity = AddLowEntity(Type, P, Collision, flags);
+
         return(Entity);
     }
 
@@ -208,7 +209,7 @@ public class EntityService {
         AddLowEntityResult Entity = AddGroundedEntity(
                 EntityType.SPACE,
                 P,
-                new Vector3f(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters, 0.9f * World.TileDepthInMeters),
+                gameMemory.StandardRoomCollision,
                 SimEntityFlag.TRAVERSABLE
         );
 
@@ -220,7 +221,7 @@ public class EntityService {
         SimEntity ClosestHero = null;
         float ClosestHeroDSq = (float) Math.pow(10.0f, 2);
             SimEntity TestEntity = simRegion.simEntities[0];
-            //@TODO huh, index is moved but not looping through all entities
+            // @TODO huh, index is moved but not looping through all entities
             for (int testEntityIndex = 0; testEntityIndex < simRegion.EntityCount; ++testEntityIndex) {
                 assert (TestEntity != null);
                 if (TestEntity.Type == EntityType.HERO) {
@@ -354,31 +355,40 @@ public class EntityService {
         }
     }
 
-    void pushPiece(EntityVisiblePieceGroup group, Vector2f offset, Vector2f align, Vector2f Dim, Vector4f Color, float EntityZC) {
+    void pushPiece(EntityVisiblePieceGroup group, Vector2f offset, float OffsetZ, Vector2f align, Vector2f Dim, Vector4f Color, float EntityZC) {
         assert(group.PieceCount < group.Pieces.length);
 
         EntityVisiblePiece piece = group.Pieces[group.PieceCount];
         if (piece == null) {
             piece = new EntityVisiblePiece();
         }
-        piece.Offset = new Vector2f(offset.x(), -offset.y()).mul(World.MetersToPixels).sub(align);
+        piece.Offset = new Vector2f(offset.x(), offset.y()).mul(World.MetersToPixels).sub(align);
         piece.EntityZC = EntityZC;
         piece.Color = Color;
         piece.Dim = Dim;
+        piece.OffsetZ = OffsetZ;
         group.Pieces[group.PieceCount] = piece;
         group.PieceCount = group.PieceCount + 1;
     }
 
-    public void PushRectOutline(EntityVisiblePieceGroup group, Vector2f Offset, Vector2f Dim, Vector4f Color, float EntityZC) {
+    void pushBitmap(EntityVisiblePieceGroup group, Vector2f Offset, float OffsetZ, Vector2f Align, float Alpha, float EntityZC) {
+        pushPiece(group, Offset, OffsetZ, Align, new Vector2f(0, 0), new Vector4f(1.0f, 1.0f, 1.0f, Alpha), EntityZC);
+    }
+
+    void pushRect(EntityVisiblePieceGroup group, Vector2f Offset, float OffsetZ, Vector2f Dim, Vector4f Color, float EntityZC) {
+        pushPiece(group, Offset, OffsetZ, new Vector2f(0, 0), Dim, Color, EntityZC);
+    }
+
+    public void PushRectOutline(EntityVisiblePieceGroup group, Vector2f Offset, float OffsetZ, Vector2f Dim, Vector4f Color, float EntityZC) {
         float Thickness = 0.1f;
 
         // NOTE(casey): Top and bottom
-        pushPiece(group, Offset.sub(new Vector2f(0, 0.5f * Dim.y)), new Vector2f(0, 0), new Vector2f(Dim.x, Thickness), Color, EntityZC);
-        pushPiece(group, Offset.add(new Vector2f(0, 0.5f * Dim.y)), new Vector2f(0, 0), new Vector2f(Dim.x, Thickness), Color, EntityZC);
+        pushPiece(group, Offset.sub(new Vector2f(0, 0.5f * Dim.y)), OffsetZ, new Vector2f(0, 0), new Vector2f(Dim.x, Thickness), Color, EntityZC);
+        pushPiece(group, Offset.add(new Vector2f(0, 0.5f * Dim.y)), OffsetZ, new Vector2f(0, 0), new Vector2f(Dim.x, Thickness), Color, EntityZC);
 
         // NOTE(casey): Left and right
-        pushPiece(group, Offset.sub(new Vector2f(0.5f * Dim.x, 0)), new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
-        pushPiece(group, Offset.add(new Vector2f(0.5f * Dim.x, 0)), new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
+        pushPiece(group, Offset.sub(new Vector2f(0.5f * Dim.x, 0)), OffsetZ, new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
+        pushPiece(group, Offset.add(new Vector2f(0.5f * Dim.x, 0)), OffsetZ, new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
     }
 
     public Map<EntityType, List<Vector3f>> getModelMatrix() {
@@ -395,7 +405,7 @@ public class EntityService {
                 MoveSpec MoveSpec = null;
                 switch (entity.Type.name().toLowerCase()) {
                     case ("wall"): {
-                        pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(40f, 80f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
+                        pushBitmap(pieceGroup, new Vector2f(0.0f, 0.0f), 0, new Vector2f(40f, 80f), 0f, 0f);
                     }
                     break;
                     case ("hero"): {
@@ -403,7 +413,7 @@ public class EntityService {
                         MoveSpec.UnitMaxAccelVector = true;
                         MoveSpec.Speed = GameApp.playerSpeed == 1 ? 50.0f : GameApp.playerSpeed;
                         MoveSpec.Drag = 8.0f;
-                        pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
+                        pushBitmap(pieceGroup, new Vector2f(0.0f, 0.0f), 0, new Vector2f(40f, 80f), 0f, 0f);
                     }
                     break;
                     case ("familiar"): {
@@ -420,16 +430,10 @@ public class EntityService {
                     }
                     break;
                     case ("space"): {
-//                        MakeSimpleGroundedCollision(GameState,
-//                                TilesPerWidth*GameState->World->TileSideInMeters,
-//                                TilesPerHeight*GameState->World->TileSideInMeters,
-//                                0.9f*GameState->World->TileDepthInMeters);
-//                        Group->TotalVolume.OffsetP = V3(0, 0, 0.5f*DimZ);
-//                        Group->TotalVolume.Dim = V3(DimX, DimY, DimZ);
-
-                        Vector2f OffsetP = new Vector2f(0.0f, 0.0f);
-                        Vector2f Dim = new Vector2f(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters);
-                        PushRectOutline(pieceGroup, OffsetP, Dim, new Vector4f(0, 0.5f, 1.0f, 1), 1.0f);
+                        for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
+                            SimEntityCollisionVolume Volume = entity.Collision.Volumes[VolumeIndex];
+                            PushRectOutline(pieceGroup, new Vector2f(Volume.OffsetP.x, Volume.OffsetP.y), 0, new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), 0.0f);
+                        }
                     }
                     break;
                     default: {
@@ -442,13 +446,16 @@ public class EntityService {
                 }
 
                 List<Vector3f> listOfTranslactions = IntStream.range(0, pieceGroup.PieceCount).mapToObj(index -> {
-                    final Matrix4f v = new Matrix4f();
-                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * new Vector3f(entity.P).x();
-                    float EntityGroundPointY = World.ScreenCenterY - World.MetersToPixels * new Vector3f(entity.P).y();
+                    EntityVisiblePiece piece = pieceGroup.Pieces[index];
+                    Vector3f EntityBaseP = GetEntityGroundPoint(entity);
+                    float ZFudge = (1.0f + 0.1f * (EntityBaseP.z() + piece.OffsetZ));
+                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * ZFudge * new Vector3f(entity.P).x();
+                    float EntityGroundPointY = World.ScreenCenterY + World.MetersToPixels * ZFudge * new Vector3f(entity.P).y();
+                    float EntityZ = -World.MetersToPixels * EntityBaseP.z();
 
                     EntityVisiblePiece Piece = pieceGroup.Pieces[index];
 //                Vector3f Center = new Vector3f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y(), 0);
-                    Vector3f Center = new Vector3f(EntityGroundPointX, EntityGroundPointY, 0);
+                    Vector3f Center = new Vector3f(EntityGroundPointX + piece.Offset.x(), EntityGroundPointY + piece.Offset.y() + piece.EntityZC * EntityZ, 0);
                     Vector2f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector2f());
                     if (entity.Type == EntityType.SPACE) {
 //                        Vector3f translation = new Vector3f(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0).x,
@@ -478,23 +485,22 @@ public class EntityService {
         World.WorldPosition MaxChunkP = world.MapIntoChunkSpace(Camera.position, Rectangle.GetMaxCorner(CameraBoundsInMeters));
         Vector2f ScreenCenter = new Vector2f(DisplayManager.WIDTH * 0.5f, DisplayManager.HEIGHT * 0.5f);
 
-        List<Matrix4f> blah = new ArrayList();
-//        for(int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
-//            for(int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
-//                        World.WorldPosition ChunkCenterP = world.CenteredChunkPoint(ChunkX, ChunkY);
-//                        Vector3f RelP = World.subtract(ChunkCenterP, Camera.position);
-//                        Vector2f ScreenP = new Vector2f(ScreenCenter.x + World.MetersToPixels * RelP.x, ScreenCenter.y - World.MetersToPixels * RelP.y);
-//                        Vector2f ScreenDim = new Vector2f(World.MetersToPixels * World.ChunkDimInMeters.x, World.MetersToPixels * World.ChunkDimInMeters.y);
-//
-//                        Matrix4f aa = new Matrix4f().identity().translate(new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)).x,
-//                                new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)).y,
-//                                0.0f));
-//                        blah.add(aa);
-////                        DrawRectangleOutline(DrawBuffer, ScreenP - 0.5f*ScreenDim, ScreenP + 0.5f*ScreenDim, V3(1.0f, 1.0f, 0.0f));
-//                }
-//            }
-//        blah.add(new Matrix4f().identity().translate(new Vector3f(0.0f, 0.0f, 0.0f)));
-//        aaa.put(EntityType.DEBUG, blah);
+        List<Vector3f> blah = new ArrayList();
+        for(int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
+            for(int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
+                World.WorldPosition ChunkCenterP = world.CenteredChunkPoint(ChunkX, ChunkY);
+                Vector3f RelP = World.subtract(ChunkCenterP, Camera.position);
+                Vector2f ScreenP = new Vector2f(ScreenCenter.x + World.MetersToPixels * RelP.x, ScreenCenter.y - World.MetersToPixels * RelP.y);
+                Vector2f ScreenDim = new Vector2f(World.MetersToPixels * World.WorldChunkDimInMeters.x, World.MetersToPixels * World.WorldChunkDimInMeters.y);
+
+                Vector3f aa = new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)).x,
+                                new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)).y,
+                                0.0f);
+                 blah.add(aa);
+            }
+        }
+
+        aaa.put(EntityType.DEBUG, blah);
         return aaa;
     }
 
@@ -732,5 +738,23 @@ public class EntityService {
 
     private boolean isValid(World.WorldPosition P) {
         return P != null && P.ChunkX != Integer.MAX_VALUE;
+    }
+
+    private Vector3f GetEntityGroundPoint(SimEntity Entity) {
+        Vector3f Result = new Vector3f(Entity.P);
+
+        return(Result);
+    }
+
+    public SimEntityCollisionVolumeGroup MakeSimpleGroundedCollision(float DimX, float DimY, float DimZ) {
+        SimEntityCollisionVolumeGroup Group = new SimEntityCollisionVolumeGroup();
+        Group.VolumeCount = 1;
+        Group.Volumes = new SimEntityCollisionVolume[1];
+        Group.TotalVolume = new SimEntityCollisionVolume();
+        Group.TotalVolume.OffsetP = new Vector3f(0, 0, 0.5f * DimZ);
+        Group.TotalVolume.Dim = new Vector3f(DimX, DimY, DimZ);
+        Group.Volumes[0] = Group.TotalVolume;
+
+        return Group;
     }
 }

@@ -12,6 +12,7 @@ public class Camera {
     }
 
     public Matrix4f getProjectionMatrix() {
-        return new Matrix4f().ortho(0.0f, DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f, -1, 1);
+        return new Matrix4f().ortho(0f, DisplayManager.WIDTH, 0f, DisplayManager.HEIGHT, -1f, 1f);
+//        return new Matrix4f().ortho(0.0f, DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f, -1, 1);
     }
 }
