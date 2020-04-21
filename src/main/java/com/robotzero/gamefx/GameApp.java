@@ -8,13 +8,13 @@ import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
-import com.robotzero.gamefx.renderengine.model.Mesh;
-import com.robotzero.gamefx.renderengine.utils.AssetFactory;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
 import com.robotzero.gamefx.renderengine.utils.Random;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import java.util.logging.Level;
@@ -35,7 +35,6 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 public class GameApp implements Runnable {
     public static final int TARGET_FPS = 60;
 //    public static final int TARGET_FPS = (int) DisplayManager.refreshRate;
-    private boolean running = false;
     private final DisplayManager displayManager;
     private final Renderer2D renderer2D;
     private float SIZE = 1.0f;
@@ -45,13 +44,8 @@ public class GameApp implements Runnable {
     public static final int TARGET_UPS = 60;
     private boolean sceneChanged;
     private final Vector3f cameraInc;
-    private final AssetFactory assetFactory;
-    private Mesh bird;
-    private Mesh quad;
-    private Mesh familiarA;
     private final EntityService entityService;
     private final GameMemory gameMemory;
-    private final World world;
     public static float ZoomRate = 0.2f;
     public static int playerSpeed;
     private int LowIndex;
@@ -59,22 +53,23 @@ public class GameApp implements Runnable {
     public static float globalinterval;
     int TileSpanX = 17 * 3;
     int TileSpanY = 9 * 3;
+    public static Vector2f ScreenCenter;
+    public static RenderGroup renderGroup;
 
-    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, AssetFactory assetFactory, EntityService entityService, GameMemory g, World world) {
+    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g) {
         this.displayManager = displayManager;
         this.renderer2D = renderer2D;
         this.timer = timer;
-        this.assetFactory = assetFactory;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         this.gameMemory = g;
         this.entityService = entityService;
-        this.world = world;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
         entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null);
         gameMemory.HighEntityCount = 1;
         gameMemory.StandardRoomCollision = entityService.MakeSimpleGroundedCollision(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters, 0.9f * World.TileDepthInMeters);
         World.renderWorld(entityService);
+        renderGroup = entityService.initRenderGroup();
     }
 
     public void run() {
@@ -92,14 +87,9 @@ public class GameApp implements Runnable {
     private void init() throws Exception {
         displayManager.createDisplay();
         timer.init();
-//        render2D.init();
         renderer2D.init();
         lastFps = timer.getTime();
         fps = 0;
-//        assetFactory.init();
-//        bird = assetFactory.getBirdMesh();
-//        quad = assetFactory.getQuadMesh();
-//        familiarA = assetFactory.getFamiliarMesh();
 
         World.WorldPosition NewCameraP = entityService.ChunkPositionFromTilePosition(
                 WorldGenerator.CameraTileX,
@@ -245,7 +235,6 @@ public class GameApp implements Runnable {
     }
 
     protected void cleanup() {
-//        render2D.cleanup();
         renderer2D.dispose();
         gameMemory.free();
         glfwDestroyWindow(this.displayManager.getWindow());
@@ -253,8 +242,15 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
+        ScreenCenter = new Vector2f(0.5f * DisplayManager.WIDTH, 0.5f * DisplayManager.HEIGHT);
         globalinterval = interval;
-        Rectangle CameraBounds = Rectangle.RectCenterDim(new Vector3f(0f, 0f, 0f), new Vector3f(TileSpanX, TileSpanY, 0f).mul(World.TileSideInMeters));
-        gameMemory.simRegion = entityService.BeginSim(Camera.position, CameraBounds, globalinterval);
+        float ScreenWidthInMeters = DisplayManager.WIDTH * World.PixelsToMeters;
+        float ScreenHeightInMeters = DisplayManager.HEIGHT * World.PixelsToMeters;
+        Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
+                new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
+
+        Vector3f SimBoundsExpansion = new Vector3f(15.0f, 15.0f, 15.0f);
+        Rectangle SimBounds = entityService.AddRadiusTo(CameraBoundsInMeters, SimBoundsExpansion);
+        gameMemory.simRegion = entityService.BeginSim(Camera.position, SimBounds, globalinterval);
     }
 }

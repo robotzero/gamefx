@@ -4,36 +4,38 @@ import com.robotzero.gamefx.GameApp;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderBasis;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
 import com.robotzero.gamefx.renderengine.translations.MoveSpec;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldChunk;
 import com.robotzero.gamefx.world.WorldEntityBlock;
-import com.robotzero.gamefx.world.WorldGenerator;
-import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class EntityService {
     private final GameMemory gameMemory;
     private final World world;
+    private final RenderGroupService renderGroupService;
     public static final float PlayerHeight = 1.0f;
     public static final float PlayerWidth = 1.0f;
     public static final float FamiliarHeight = 0.5f;
     public static final float FamiliarWidth = 1.0f;
 
-    public EntityService(GameMemory gameMemory, World world) {
+    public EntityService(GameMemory gameMemory, World world, RenderGroupService renderGroupService) {
         this.gameMemory = gameMemory;
         this.world = world;
+        this.renderGroupService = renderGroupService;
     }
 
     public World getWorld() {
@@ -355,126 +357,71 @@ public class EntityService {
         }
     }
 
-    void pushPiece(EntityVisiblePieceGroup group, Vector2f offset, float OffsetZ, Vector2f align, Vector2f Dim, Vector4f Color, float EntityZC) {
-        assert(group.PieceCount < group.Pieces.length);
-
-        EntityVisiblePiece piece = group.Pieces[group.PieceCount];
-        if (piece == null) {
-            piece = new EntityVisiblePiece();
-        }
-        piece.Offset = new Vector2f(offset.x(), offset.y()).mul(World.MetersToPixels).sub(align);
-        piece.EntityZC = EntityZC;
-        piece.Color = Color;
-        piece.Dim = Dim;
-        piece.OffsetZ = OffsetZ;
-        group.Pieces[group.PieceCount] = piece;
-        group.PieceCount = group.PieceCount + 1;
-    }
-
-    void pushBitmap(EntityVisiblePieceGroup group, Vector2f Offset, float OffsetZ, Vector2f Align, float Alpha, float EntityZC) {
-        pushPiece(group, Offset, OffsetZ, Align, new Vector2f(0, 0), new Vector4f(1.0f, 1.0f, 1.0f, Alpha), EntityZC);
-    }
-
-    void pushRect(EntityVisiblePieceGroup group, Vector2f Offset, float OffsetZ, Vector2f Dim, Vector4f Color, float EntityZC) {
-        pushPiece(group, Offset, OffsetZ, new Vector2f(0, 0), Dim, Color, EntityZC);
-    }
-
-    public void PushRectOutline(EntityVisiblePieceGroup group, Vector2f Offset, float OffsetZ, Vector2f Dim, Vector4f Color, float EntityZC) {
-        float Thickness = 0.1f;
-
-        // NOTE(casey): Top and bottom
-        pushPiece(group, Offset.sub(new Vector2f(0, 0.5f * Dim.y)), OffsetZ, new Vector2f(0, 0), new Vector2f(Dim.x, Thickness), Color, EntityZC);
-        pushPiece(group, Offset.add(new Vector2f(0, 0.5f * Dim.y)), OffsetZ, new Vector2f(0, 0), new Vector2f(Dim.x, Thickness), Color, EntityZC);
-
-        // NOTE(casey): Left and right
-        pushPiece(group, Offset.sub(new Vector2f(0.5f * Dim.x, 0)), OffsetZ, new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
-        pushPiece(group, Offset.add(new Vector2f(0.5f * Dim.x, 0)), OffsetZ, new Vector2f(0, 0), new Vector2f(Thickness, Dim.y), Color, EntityZC);
-    }
-
     public Map<EntityType, List<Vector3f>> getModelMatrix() {
-        EntityVisiblePieceGroup pieceGroup = new EntityVisiblePieceGroup();
-
         if (gameMemory.simRegion == null) {
             return Map.of();
         }
-        Map<EntityType, List<Vector3f>> aaa = IntStream.range(0, gameMemory.simRegion.EntityCount).mapToObj(HighEntityIndex -> {
-            pieceGroup.PieceCount = 0;
-            SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
 
-            if (entity.Updatable) {
-                MoveSpec MoveSpec = null;
-                switch (entity.Type.name().toLowerCase()) {
-                    case ("wall"): {
-                        pushBitmap(pieceGroup, new Vector2f(0.0f, 0.0f), 0, new Vector2f(40f, 80f), 0f, 0f);
-                    }
-                    break;
-                    case ("hero"): {
-                        MoveSpec = DefaultMoveSpec();
-                        MoveSpec.UnitMaxAccelVector = true;
-                        MoveSpec.Speed = GameApp.playerSpeed == 1 ? 50.0f : GameApp.playerSpeed;
-                        MoveSpec.Drag = 8.0f;
-                        pushBitmap(pieceGroup, new Vector2f(0.0f, 0.0f), 0, new Vector2f(40f, 80f), 0f, 0f);
-                    }
-                    break;
-                    case ("familiar"): {
+        IntStream.range(0, gameMemory.simRegion.EntityCount).forEach(HighEntityIndex -> {
+                    SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
+                    RenderBasis renderBasis = new RenderBasis();
+                    GameApp.renderGroup.DefaultBasis = renderBasis;
+
+                    if (entity.Updatable) {
+                        MoveSpec MoveSpec = null;
+                        switch (entity.Type.name().toLowerCase()) {
+                            case ("wall"): {
+                                renderGroupService.pushBitmap(GameApp.renderGroup, null, new Vector2f(0.0f, 0.0f), 0, new Vector2f(40f, 80f), 0f, 0f, entity.Type);
+                            }
+                            break;
+                            case ("hero"): {
+                                MoveSpec = DefaultMoveSpec();
+                                MoveSpec.UnitMaxAccelVector = true;
+                                MoveSpec.Speed = GameApp.playerSpeed == 1 ? 50.0f : GameApp.playerSpeed;
+                                MoveSpec.Drag = 8.0f;
+                                renderGroupService.pushBitmap(GameApp.renderGroup, null, new Vector2f(0.0f, 0.0f), 0, new Vector2f(40f, 80f), 0f, 0f, entity.Type);
+                            }
+                            break;
+                            case ("familiar"): {
 //                        UpdateFamiliar(gameMemory.simRegion, entity, GameApp.globalinterval);
 //                        entity.tBob = entity.tBob + GameApp.globalinterval;
 //                        if (entity.tBob > 2.0f * Math.PI) {
 //                            entity.tBob = (float) (entity.tBob - (2.0f * Math.PI));
 //                        }
 //                        pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
-                    }
-                    break;
-                    case ("monstar"): {
+                            }
+                            break;
+                            case ("monstar"): {
 
-                    }
-                    break;
-                    case ("space"): {
-                        for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
-                            SimEntityCollisionVolume Volume = entity.Collision.Volumes[VolumeIndex];
-                            PushRectOutline(pieceGroup, new Vector2f(Volume.OffsetP.x, Volume.OffsetP.y), 0, new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), 0.0f);
+                            }
+                            break;
+                            case ("space"): {
+                                for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
+                                    SimEntityCollisionVolume Volume = entity.Collision.Volumes[VolumeIndex];
+                                    renderGroupService.PushRectOutline(GameApp.renderGroup, new Vector2f(Volume.OffsetP.x, Volume.OffsetP.y), 0, new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), 0.0f, entity.Type);
+                                }
+                            }
+                            break;
+                            default: {
+                                throw new RuntimeException("INVALID PATH");
+                            }
                         }
+
+                        if (!IsSet(entity, SimEntityFlag.NONSPATIAL) && MoveSpec != null && IsSet(entity, SimEntityFlag.MOVEABLE)) {
+                            moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
+                        }
+
+                        renderBasis.P = GetEntityGroundPoint(entity);
                     }
-                    break;
-                    default: {
-                        throw new RuntimeException("INVALID PATH");
-                    }
-                }
+                });
+//        }).filter(map -> map != null).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
+//            return a.getKey();
+//        }, Collectors.flatMapping(a -> a.getValue().stream(), Collectors.toList())));
 
-                if (!IsSet(entity, SimEntityFlag.NONSPATIAL) && MoveSpec != null && IsSet(entity, SimEntityFlag.MOVEABLE)) {
-                    moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
-                }
+        return renderGroupService.RenderGroupToOutput(GameApp.renderGroup, GameApp.ScreenCenter.x, GameApp.ScreenCenter.y);
+    }
 
-                List<Vector3f> listOfTranslactions = IntStream.range(0, pieceGroup.PieceCount).mapToObj(index -> {
-                    EntityVisiblePiece piece = pieceGroup.Pieces[index];
-                    Vector3f EntityBaseP = GetEntityGroundPoint(entity);
-                    float ZFudge = (1.0f + 0.1f * (EntityBaseP.z() + piece.OffsetZ));
-                    float EntityGroundPointX = World.ScreenCenterX + World.MetersToPixels * ZFudge * new Vector3f(entity.P).x();
-                    float EntityGroundPointY = World.ScreenCenterY + World.MetersToPixels * ZFudge * new Vector3f(entity.P).y();
-                    float EntityZ = -World.MetersToPixels * EntityBaseP.z();
-
-                    EntityVisiblePiece Piece = pieceGroup.Pieces[index];
-//                Vector3f Center = new Vector3f(EntityGroundPointX + Piece.Offset.x(), EntityGroundPointY + Piece.Offset.y(), 0);
-                    Vector3f Center = new Vector3f(EntityGroundPointX + piece.Offset.x(), EntityGroundPointY + piece.Offset.y() + piece.EntityZC * EntityZ, 0);
-                    Vector2f HalfDim = Piece.Dim.mul(0.5f * World.MetersToPixels, new Vector2f());
-                    if (entity.Type == EntityType.SPACE) {
-//                        Vector3f translation = new Vector3f(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0).x,
-//                                Center.add(new Vector3f(HalfDim.x, HalfDim.y, 0)).y, 0));
-//                        return v.identity().translate(Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0)));
-                        return Center.sub(new Vector3f(HalfDim.x, HalfDim.y, 0));
-                    }
-//                    return Map.of(entity.Type, v.identity().translate(Center));
-                    return Center;
-//                    return v.identity().translate(Center);
-                }).collect(Collectors.toList());
-
-                return Map.of(entity.Type, listOfTranslactions);
-            }
-            return null;
-        }).filter(map -> map != null).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
-            return a.getKey();
-        }, Collectors.flatMapping(a -> a.getValue().stream(), Collectors.toList())));
-
+    public Map<Integer, List<Vector3f>> getDebug() {
         float ScreenWidthInMeters = DisplayManager.WIDTH * World.PixelsToMeters;
         float ScreenHeightInMeters = DisplayManager.HEIGHT * World.PixelsToMeters;
         Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
@@ -485,7 +432,7 @@ public class EntityService {
         World.WorldPosition MaxChunkP = world.MapIntoChunkSpace(Camera.position, Rectangle.GetMaxCorner(CameraBoundsInMeters));
         Vector2f ScreenCenter = new Vector2f(DisplayManager.WIDTH * 0.5f, DisplayManager.HEIGHT * 0.5f);
 
-        List<Vector3f> blah = new ArrayList();
+        Map<Integer, List<Vector3f>> blah = new HashMap<>();
         for(int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
             for(int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
                 World.WorldPosition ChunkCenterP = world.CenteredChunkPoint(ChunkX, ChunkY);
@@ -493,15 +440,18 @@ public class EntityService {
                 Vector2f ScreenP = new Vector2f(ScreenCenter.x + World.MetersToPixels * RelP.x, ScreenCenter.y - World.MetersToPixels * RelP.y);
                 Vector2f ScreenDim = new Vector2f(World.MetersToPixels * World.WorldChunkDimInMeters.x, World.MetersToPixels * World.WorldChunkDimInMeters.y);
 
-                Vector3f aa = new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)).x,
-                                new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)).y,
-                                0.0f);
-                 blah.add(aa);
+//                blah.put(ChunkX + ChunkY, List.of(
+//                        new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)), 0),
+//                        new Vector3f(new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)), 0)
+//                ));
             }
         }
 
-        aaa.put(EntityType.DEBUG, blah);
-        return aaa;
+        blah.put(10000, List.of(
+                new Vector3f(0.0f, 0.0f, 0.0f),
+                new Vector3f(DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f)
+        ));
+        return blah;
     }
 
     public Vector3f GetSimSpaceP(SimRegion simRegion, LowEntity stored) {
@@ -685,6 +635,10 @@ public class EntityService {
                 }
             }
         }
+
+        if (GameApp.renderGroup != null && GameApp.renderGroup.PushBufferBase != null) {
+            GameApp.renderGroup.clear();
+        }
     }
 
     public boolean IsSet(SimEntity Entity, SimEntityFlag Flag) {
@@ -756,5 +710,9 @@ public class EntityService {
         Group.Volumes[0] = Group.TotalVolume;
 
         return Group;
+    }
+
+    public RenderGroup initRenderGroup() {
+        return renderGroupService.AllocateRenderGroup(1000000, World.MetersToPixels);
     }
 }

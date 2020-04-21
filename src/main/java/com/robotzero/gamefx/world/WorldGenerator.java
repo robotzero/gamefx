@@ -63,7 +63,6 @@ public class WorldGenerator {
                         shouldBeDoor = true;
                     }
 
-                    //world.SetTileValue(BigInteger.valueOf(absTileX).intValueExact(), BigInteger.valueOf(absTileY).intValueExact(), tileValue);
                     if (shouldBeDoor) {
 //                        if (screenIndex == 0) {
                             entityService.AddWall(absTileX, absTileY);

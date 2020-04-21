@@ -16,6 +16,14 @@ public class WorldChunk {
         ChunkY = tileChunkY;
     }
 
+    public int getChunkX() {
+        return ChunkX;
+    }
+
+    public int getChunkY() {
+        return ChunkY;
+    }
+
     public LinkedList<WorldEntityBlock> getFirstBlock(boolean initialize) {
         if (FirstBlock.isEmpty() && initialize) {
             FirstBlock.add(new WorldEntityBlock());

@@ -79,6 +79,11 @@ public class World {
         return(Result);
     }
 
+    public WorldPosition CenteredChunkPoint(WorldChunk chunk)
+    {
+        return CenteredChunkPoint(chunk.getChunkX(), chunk.getChunkY());
+    }
+
     WorldPosition RecanonicalizeCoord(Vector3f ChunkDim, WorldPosition Pos)
     {
         int OffsetX = Math.round(Pos.Offset.x() / ChunkDim.x());

@@ -10,7 +10,9 @@ import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.renderengine.model.VertexArrayObject;
 import com.robotzero.gamefx.renderengine.model.VertexBufferObject;
 import com.robotzero.gamefx.world.World;
+import imgui.Col;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -40,7 +42,7 @@ public class Renderer2D {
     private boolean drawing;
     private final EntityService entityService;
     private final Camera camera;
-    private Texture texture;
+    public Texture texture;
 
     public Renderer2D(EntityService entityService, Camera camera) {
         this.entityService = entityService;
@@ -77,6 +79,7 @@ public class Renderer2D {
 
     public void render() {
         final var entityStates = entityService.getModelMatrix();
+        final var debugStates = entityService.getDebug();
         if (!entityStates.isEmpty()) {
             clear();
             begin();
@@ -88,11 +91,16 @@ public class Renderer2D {
             entityStates.get(EntityType.SPACE).forEach(a -> {
                 drawTextureRegion(a.x, a.y, a.x + World.TileSideInPixels, a.y + World.TileSideInPixels, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 1.0f, 1.0f));
             });
-            entityStates.get(EntityType.DEBUG).forEach(a -> {
+            debugStates.forEach((a, b) -> {
+                Vector3f Min = b.get(0);
+                Vector3f Max = b.get(1);
+
+                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Min.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+                drawTextureRegion(Min.x - 2.0f, Max.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Min.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+                drawTextureRegion(Max.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
 
             });
-//            drawTextureRegion(30f, 50f, 40f, 100f, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 1.0f, 1.0f));
-            // DrawRectangleOutline(DrawBuffer, ScreenP - 0.5f*ScreenDim, ScreenP + 0.5f*ScreenDim, V3(1.0f, 1.0f, 0.0f));
             end();
         }
     }
