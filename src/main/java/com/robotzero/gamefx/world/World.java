@@ -13,7 +13,6 @@ public class World {
     public static final int GroundBufferHeight = 256;
     public static final float TileDepthInMeters = 3.0f;
     public static final float TypicalFloorHeight = 3.0f;
-    public static final float MetersToPixels = TileSideInPixels / TileSideInMeters;
     public static final float PixelsToMeters = 1.0f / 42f;
     public static final Vector3f WorldChunkDimInMeters = new Vector3f(PixelsToMeters * GroundBufferHeight, PixelsToMeters * GroundBufferHeight, TypicalFloorHeight);
     public static float ScreenCenterX = 0.5f * DisplayManager.WIDTH;

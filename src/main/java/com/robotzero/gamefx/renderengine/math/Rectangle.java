@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.renderengine.math;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 public class Rectangle {
@@ -78,6 +79,18 @@ public class Rectangle {
     public Rectangle ToRectangleXY(Rectangle A) {
         Rectangle Result = new Rectangle(new Vector3f(A.Min.x, A.Min.y, 0), new Vector3f(A.Max.x, A.Max.y, 0));
 
+        return(Result);
+    }
+
+    public static Vector3f GetDim(Rectangle Rect)
+    {
+        Vector3f Result = Rect.Max.sub(Rect.Min);
+        return(Result);
+    }
+
+    public static Vector2f GetDimV2(Rectangle Rect)
+    {
+        Vector2f Result = new Vector2f(Rect.getMax().x, Rect.getMax().y).sub(new Vector2f(Rect.getMin().x, Rect.getMin().y));
         return(Result);
     }
 }

@@ -23,8 +23,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAddress;
 
 public class DisplayManager {
-    public static int WIDTH = 950;
-    public static int HEIGHT = 536;
+    public static int WIDTH = 960;
+    public static int HEIGHT = 540;
     public static float refreshRate = 60f;
     public static String TITLE = "Fred64";
     private long window;

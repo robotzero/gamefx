@@ -26,7 +26,7 @@ public class Robot {
             EntityService entityService = new EntityService(gameMemory, world, renderGroupService);
             Camera camera = new Camera();
             Renderer2D renderer2D = new Renderer2D(entityService, camera);
-            GameApp gameApp = new GameApp(displayManager, renderer2D, timer, entityService, gameMemory);
+            GameApp gameApp = new GameApp(displayManager, renderer2D, timer, entityService, gameMemory, renderGroupService);
             gameApp.run();
         } catch (Throwable t) {
             System.out.println(t.toString());

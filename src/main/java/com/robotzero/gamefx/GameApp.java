@@ -9,6 +9,7 @@ import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
 import com.robotzero.gamefx.renderengine.utils.Random;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
@@ -16,6 +17,7 @@ import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -38,16 +40,15 @@ public class GameApp implements Runnable {
     //    public static final int TARGET_FPS = (int) DisplayManager.refreshRate;
     private final DisplayManager displayManager;
     private final Renderer2D renderer2D;
-    private float SIZE = 1.0f;
     private final Timer timer;
     public static int fps;
+    private final RenderGroupService renderGroupService;
     private double lastFps;
     public static final int TARGET_UPS = 60;
-    private boolean sceneChanged;
     private final Vector3f cameraInc;
     private final EntityService entityService;
     private final GameMemory gameMemory;
-    public static float ZoomRate = 0.2f;
+    public static float ZoomRate = 1.0f;
     public static int playerSpeed;
     private int LowIndex;
     private SimEntity monstar;
@@ -57,13 +58,14 @@ public class GameApp implements Runnable {
     public static World.WorldPosition SimCenterP;
     public static Vector3f CameraP;
 
-    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g) {
+    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g, RenderGroupService renderGroupService) {
         this.displayManager = displayManager;
         this.renderer2D = renderer2D;
         this.timer = timer;
         this.cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         this.gameMemory = g;
         this.entityService = entityService;
+        this.renderGroupService = renderGroupService;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
         entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null);
@@ -169,32 +171,26 @@ public class GameApp implements Runnable {
         ZoomRate = 0.0f;
         int heroFacingDirection = 0;
         if (displayManager.isKeyPressed(GLFW_KEY_W, true)) {
-            sceneChanged = true;
             cameraInc.y = -1;
             gameMemory.ControlledHero.ddP.y = 1;
             heroFacingDirection = 1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_S, true)) {
-            sceneChanged = true;
             cameraInc.y = 1;
             gameMemory.ControlledHero.ddP.y = -1;
             heroFacingDirection = 2;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_A, true)) {
-            sceneChanged = true;
             cameraInc.x = -1;
             gameMemory.ControlledHero.ddP.x = -1;
             heroFacingDirection = 3;
         } else if (displayManager.isKeyPressed(GLFW_KEY_D, gameMemory.simRegion != null)) {
-            sceneChanged = true;
             cameraInc.x = 1;
             gameMemory.ControlledHero.ddP.x = 1;
             heroFacingDirection = 4;
         }
         if (displayManager.isKeyPressed(GLFW_KEY_Z, true)) {
-            sceneChanged = true;
             cameraInc.z = -1;
         } else if (displayManager.isKeyPressed(GLFW_KEY_X, true)) {
-            sceneChanged = true;
             cameraInc.z = 1;
         }
 
@@ -245,17 +241,24 @@ public class GameApp implements Runnable {
     private void update(float interval) {
         ScreenCenter = new Vector2f(0.5f * DisplayManager.WIDTH, 0.5f * DisplayManager.HEIGHT);
         globalinterval = interval;
+//        Rectangle ScreenBounds = renderGroupService.GetCameraRectangleAtTarget(renderGroup);
+//        Rectangle CameraBoundsInMeters = Rectangle.RectMinMax(new Vector3f(ScreenBounds.getMin()), new Vector3f(ScreenBounds.getMax()));
         float ScreenWidthInMeters = DisplayManager.WIDTH * World.PixelsToMeters;
         float ScreenHeightInMeters = DisplayManager.HEIGHT * World.PixelsToMeters;
         Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
-                new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
+                  new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
+
         CameraBoundsInMeters.getMin().z = -3.0f * World.TypicalFloorHeight;
         CameraBoundsInMeters.getMax().z = 1.0f * World.TypicalFloorHeight;
 
         Vector3f SimBoundsExpansion = new Vector3f(15.0f, 15.0f, 0.0f);
         Rectangle SimBounds = entityService.AddRadiusTo(CameraBoundsInMeters, SimBoundsExpansion);
         SimCenterP = new World.WorldPosition(Camera.position);
-        CameraP = World.subtract(new World.WorldPosition(Camera.position), new World.WorldPosition(SimCenterP));
         gameMemory.simRegion = entityService.BeginSim(SimCenterP, SimBounds, globalinterval);
+
+        CameraP = World.subtract(new World.WorldPosition(Camera.position), new World.WorldPosition(SimCenterP));
+//        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(ScreenBounds), new Vector4f(1.0f, 1.0f, 0.0f, 1), EntityType.DEBUG);
+//        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(SimBounds), new Vector4f(0.0f, 1.0f, 1.0f, 1), EntityType.DEBUG);
+//        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(gameMemory.simRegion.Bounds), new Vector4f(0f, 0.0f, 1.0f, 1), EntityType.DEBUG);
     }
 }

@@ -381,15 +381,16 @@ public class EntityService {
                         MoveSpec MoveSpec = null;
                         switch (entity.Type.name().toLowerCase()) {
                             case ("wall"): {
-                                renderGroupService.pushBitmap(GameApp.renderGroup, Renderer2D.texture, new Vector2f(60, 60), new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1, 0.5f, 0f, 1f), entity.Type);
+                                renderGroupService.pushBitmap(GameApp.renderGroup, Renderer2D.texture, new Vector2f(60, 60), 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1, 0.5f, 0f, 1f), entity.Type);
                             }
                             break;
                             case ("hero"): {
+                                float HeroSizeC = 2.5f;
                                 MoveSpec = DefaultMoveSpec();
                                 MoveSpec.UnitMaxAccelVector = true;
                                 MoveSpec.Speed = GameApp.playerSpeed == 1 ? 50.0f : GameApp.playerSpeed;
                                 MoveSpec.Drag = 8.0f;
-                                renderGroupService.pushBitmap(GameApp.renderGroup, Renderer2D.texture, new Vector2f(60, 60), new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
+                                renderGroupService.pushBitmap(GameApp.renderGroup, Renderer2D.texture, new Vector2f(60, 60), HeroSizeC * 0.4f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
                             }
                             break;
                             case ("familiar"): {
@@ -429,12 +430,12 @@ public class EntityService {
 //        }, Collectors.flatMapping(a -> a.getValue().stream(), Collectors.toList())));
 
 //        DrawPoints();
-        return renderGroupService.RenderGroupToOutput(GameApp.renderGroup, GameApp.ScreenCenter.x, GameApp.ScreenCenter.y);
+        return renderGroupService.RenderGroupToOutput(GameApp.renderGroup);
     }
 
     public Map<Integer, List<Vector3f>> getDebug() {
-        float ScreenWidthInMeters = DisplayManager.WIDTH * World.PixelsToMeters;
-        float ScreenHeightInMeters = DisplayManager.HEIGHT * World.PixelsToMeters;
+        float ScreenWidthInMeters = DisplayManager.WIDTH;
+        float ScreenHeightInMeters = DisplayManager.HEIGHT;
         Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
                 new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
 
@@ -448,13 +449,13 @@ public class EntityService {
             for(int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
                 World.WorldPosition ChunkCenterP = world.CenteredChunkPoint(ChunkX, ChunkY);
                 Vector3f RelP = World.subtract(ChunkCenterP, Camera.position);
-                Vector2f ScreenP = new Vector2f(ScreenCenter.x + World.MetersToPixels * RelP.x, ScreenCenter.y - World.MetersToPixels * RelP.y);
-                Vector2f ScreenDim = new Vector2f(World.MetersToPixels * World.WorldChunkDimInMeters.x, World.MetersToPixels * World.WorldChunkDimInMeters.y);
+//                Vector2f ScreenP = new Vector2f(ScreenCenter.x + World.MetersToPixels * RelP.x, ScreenCenter.y - World.MetersToPixels * RelP.y);
+//                Vector2f ScreenDim = new Vector2f(World.MetersToPixels * World.WorldChunkDimInMeters.x, World.MetersToPixels * World.WorldChunkDimInMeters.y);
 
-                blah.put(ChunkX + ChunkY, List.of(
-                        new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)), 0),
-                        new Vector3f(new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)), 0)
-                ));
+//                blah.put(ChunkX + ChunkY, List.of(
+//                        new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)), 0),
+//                        new Vector3f(new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)), 0)
+//                ));
             }
         }
 
@@ -724,7 +725,7 @@ public class EntityService {
     }
 
     public RenderGroup initRenderGroup() {
-        return renderGroupService.AllocateRenderGroup(1000000, World.MetersToPixels);
+        return renderGroupService.AllocateRenderGroup(1000000, DisplayManager.WIDTH, DisplayManager.HEIGHT);
     }
 
     public RenderEntryCoordinateSystem CoordinateSystem(RenderGroup Group, Vector2f Origin, Vector2f XAxis, Vector2f YAxis, Vector4f Color) {

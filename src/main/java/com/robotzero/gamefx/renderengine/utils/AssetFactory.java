@@ -7,8 +7,6 @@ import com.robotzero.gamefx.renderengine.model.Mesh;
 import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.world.World;
 
-import java.util.Optional;
-
 public class AssetFactory {
     private static float backgroundWidth = 284f, backgroundHeight = 512f;
 
@@ -36,9 +34,9 @@ public class AssetFactory {
 //        bgTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bg.jpeg")).orElseThrow().getPath());
         background = new Mesh(getVertices(backgroundWidth, backgroundHeight), tcs, indices, bgTexture, null);
 //        birdTexture = new Texture(Optional.ofNullable(this.getClass().getClassLoader().getResource("bird.png")).orElseThrow().getPath());
-        bird = new Mesh(getVertices(World.MetersToPixels * EntityService.PlayerWidth, World.MetersToPixels * EntityService.PlayerHeight), tcs, indices, birdTexture, null);
+        bird = new Mesh(getVertices(EntityService.PlayerWidth, EntityService.PlayerHeight), tcs, indices, birdTexture, null);
         quad2D = new Mesh(getVertices(World.TileSideInPixels, World.TileSideInPixels), tcs, indices, null, new Material());
-        familiar = new Mesh(getVertices(World.MetersToPixels * EntityService.FamiliarWidth, World.MetersToPixels * EntityService.FamiliarHeight), tcs, indices, null, new Material());
+        familiar = new Mesh(getVertices(EntityService.FamiliarWidth, EntityService.FamiliarHeight), tcs, indices, null, new Material());
         rectangle1 = new Mesh(getVertices(DisplayManager.WIDTH, DisplayManager.HEIGHT), tcs, indices, null, new Material());
     }
 
