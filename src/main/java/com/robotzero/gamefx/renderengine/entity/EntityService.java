@@ -3,9 +3,13 @@ package com.robotzero.gamefx.renderengine.entity;
 import com.robotzero.gamefx.GameApp;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
+import com.robotzero.gamefx.renderengine.Renderer2D;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderBasis;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderData;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderEntryCoordinateSystem;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupEntryType;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
 import com.robotzero.gamefx.renderengine.translations.MoveSpec;
 import com.robotzero.gamefx.world.GameMemory;
@@ -357,8 +361,8 @@ public class EntityService {
         }
     }
 
-    public Map<EntityType, List<Vector3f>> getModelMatrix() {
-        if (gameMemory.simRegion == null) {
+    public Map<EntityType, List<RenderData>> getModelMatrix() {
+        if (gameMemory.simRegion == null || Renderer2D.texture == null) {
             return Map.of();
         }
 
@@ -368,10 +372,16 @@ public class EntityService {
                     GameApp.renderGroup.DefaultBasis = renderBasis;
 
                     if (entity.Updatable) {
+                        Vector3f CameraRelativeGroundP = GetEntityGroundPoint(entity).sub(GameApp.CameraP);
+                        float FadeTopEndZ = 0.75f * World.TypicalFloorHeight;
+                        float FadeTopStartZ = 0.5f * World.TypicalFloorHeight;
+                        float FadeBottomStartZ = -2.0f * World.TypicalFloorHeight;
+                        float FadeBottomEndZ = -2.25f * World.TypicalFloorHeight;;
+
                         MoveSpec MoveSpec = null;
                         switch (entity.Type.name().toLowerCase()) {
                             case ("wall"): {
-                                renderGroupService.pushBitmap(GameApp.renderGroup, null, new Vector2f(0.0f, 0.0f), 0, new Vector2f(40f, 80f), 0f, 0f, entity.Type);
+                                renderGroupService.pushBitmap(GameApp.renderGroup, Renderer2D.texture, new Vector2f(60, 60), new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1, 0.5f, 0f, 1f), entity.Type);
                             }
                             break;
                             case ("hero"): {
@@ -379,7 +389,7 @@ public class EntityService {
                                 MoveSpec.UnitMaxAccelVector = true;
                                 MoveSpec.Speed = GameApp.playerSpeed == 1 ? 50.0f : GameApp.playerSpeed;
                                 MoveSpec.Drag = 8.0f;
-                                renderGroupService.pushBitmap(GameApp.renderGroup, null, new Vector2f(0.0f, 0.0f), 0, new Vector2f(40f, 80f), 0f, 0f, entity.Type);
+                                renderGroupService.pushBitmap(GameApp.renderGroup, Renderer2D.texture, new Vector2f(60, 60), new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
                             }
                             break;
                             case ("familiar"): {
@@ -398,7 +408,7 @@ public class EntityService {
                             case ("space"): {
                                 for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
                                     SimEntityCollisionVolume Volume = entity.Collision.Volumes[VolumeIndex];
-                                    renderGroupService.PushRectOutline(GameApp.renderGroup, new Vector2f(Volume.OffsetP.x, Volume.OffsetP.y), 0, new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), 0.0f, entity.Type);
+                                    renderGroupService.PushRectOutline(GameApp.renderGroup, new Vector3f(Volume.OffsetP).sub(new Vector3f(0, 0, 0.5f * Volume.Dim.z)) , new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), entity.Type);
                                 }
                             }
                             break;
@@ -411,13 +421,14 @@ public class EntityService {
                             moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
                         }
 
-                        renderBasis.P = GetEntityGroundPoint(entity);
+                        renderBasis.P = GetEntityGroundPoint(entity).add(new Vector3f(0, 0, GameMemory.ZOffset));
                     }
                 });
 //        }).filter(map -> map != null).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
 //            return a.getKey();
 //        }, Collectors.flatMapping(a -> a.getValue().stream(), Collectors.toList())));
 
+//        DrawPoints();
         return renderGroupService.RenderGroupToOutput(GameApp.renderGroup, GameApp.ScreenCenter.x, GameApp.ScreenCenter.y);
     }
 
@@ -440,17 +451,17 @@ public class EntityService {
                 Vector2f ScreenP = new Vector2f(ScreenCenter.x + World.MetersToPixels * RelP.x, ScreenCenter.y - World.MetersToPixels * RelP.y);
                 Vector2f ScreenDim = new Vector2f(World.MetersToPixels * World.WorldChunkDimInMeters.x, World.MetersToPixels * World.WorldChunkDimInMeters.y);
 
-//                blah.put(ChunkX + ChunkY, List.of(
-//                        new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)), 0),
-//                        new Vector3f(new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)), 0)
-//                ));
+                blah.put(ChunkX + ChunkY, List.of(
+                        new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)), 0),
+                        new Vector3f(new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)), 0)
+                ));
             }
         }
 
-        blah.put(10000, List.of(
-                new Vector3f(0.0f, 0.0f, 0.0f),
-                new Vector3f(DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f)
-        ));
+//        blah.put(10000, List.of(
+//                new Vector3f(0.0f, 0.0f, 0.0f),
+//                new Vector3f(DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f)
+//        ));
         return blah;
     }
 
@@ -581,7 +592,7 @@ public class EntityService {
         simRegion.MaxEntityVelocity = 30.0f;
         float UpdateSafetyMargin = simRegion.MaxEntityRadius + interval * simRegion.MaxEntityVelocity;
         simRegion.Origin = Origin;
-        simRegion.UpdatableBounds = AddRadiusTo(Bounds, new Vector3f(simRegion.MaxEntityRadius, simRegion.MaxEntityRadius, simRegion.MaxEntityRadius));
+        simRegion.UpdatableBounds = AddRadiusTo(Bounds, new Vector3f(simRegion.MaxEntityRadius, simRegion.MaxEntityRadius, 0.0f));
         simRegion.Bounds = AddRadiusTo(simRegion.UpdatableBounds, new Vector3f(UpdateSafetyMargin, UpdateSafetyMargin, 0.0f));
 
 
@@ -694,7 +705,7 @@ public class EntityService {
         return P != null && P.ChunkX != Integer.MAX_VALUE;
     }
 
-    private Vector3f GetEntityGroundPoint(SimEntity Entity) {
+    public Vector3f GetEntityGroundPoint(SimEntity Entity) {
         Vector3f Result = new Vector3f(Entity.P);
 
         return(Result);
@@ -714,5 +725,33 @@ public class EntityService {
 
     public RenderGroup initRenderGroup() {
         return renderGroupService.AllocateRenderGroup(1000000, World.MetersToPixels);
+    }
+
+    public RenderEntryCoordinateSystem CoordinateSystem(RenderGroup Group, Vector2f Origin, Vector2f XAxis, Vector2f YAxis, Vector4f Color) {
+        RenderEntryCoordinateSystem Entry = (RenderEntryCoordinateSystem) renderGroupService.PushRenderElement(Group, RenderGroupEntryType.COORDINATE);
+
+        Entry.Origin = Origin;
+        Entry.XAxis = XAxis;
+        Entry.YAxis = YAxis;
+        Entry.Color = Color;
+        Entry.EntityType = EntityType.DEBUG;
+
+        return(Entry);
+    }
+
+    public void DrawPoints() {
+        GameApp.Time += GameApp.globalinterval;
+        float Angle = GameApp.Time;
+
+        Vector2f Origin = new Vector2f(GameApp.ScreenCenter).add(new Vector2f((float) Math.sin(Angle), 0.0f).mul(10.0f));
+        Vector2f XAxis = new Vector2f((float) Math.cos(Angle), (float) Math.sin(Angle)).mul(100.0f + 25.0f * (float) Math.cos(4.2f * Angle));
+        Vector2f YAxis = new Vector2f((float) Math.cos(Angle + 1.0f), (float) Math.sin(Angle + 1.0f)).mul(100.0f + 50.0f * (float) Math.sin(3.9f*Angle));
+        int PIndex = 0;
+        RenderEntryCoordinateSystem C = CoordinateSystem(GameApp.renderGroup, Origin, XAxis, YAxis, new Vector4f(0.5f + 0.5f * (float) Math.sin(Angle), 0.5f +0.5f * (float) Math.sin(2.9f * Angle), 0.5f + 0.5f * (float) Math.cos(9.9f * Angle), 1));
+        for (float Y = 0.0f; Y < 1.0f; Y += 0.25f) {
+            for (float X = 0.0f; X < 1.0f; X += 0.25f) {
+                C.Points[PIndex++] = new Vector2f(X, Y);
+            }
+        }
     }
 }

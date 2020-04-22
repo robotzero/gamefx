@@ -1,10 +1,10 @@
 package com.robotzero.gamefx.renderengine.rendergroup;
 
-import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 public class RenderEntityBasis {
     public RenderBasis Basis;
-    public Vector2f Offset;
+    public Vector3f Offset;
     public float OffsetZ;
     public float EntityZC;
 }

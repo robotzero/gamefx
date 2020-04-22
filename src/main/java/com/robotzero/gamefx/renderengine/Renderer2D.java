@@ -9,10 +9,7 @@ import com.robotzero.gamefx.renderengine.model.ShaderProgram;
 import com.robotzero.gamefx.renderengine.model.Texture;
 import com.robotzero.gamefx.renderengine.model.VertexArrayObject;
 import com.robotzero.gamefx.renderengine.model.VertexBufferObject;
-import com.robotzero.gamefx.world.World;
-import imgui.Col;
 import org.joml.Matrix4f;
-import org.joml.Vector3f;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
@@ -42,7 +39,7 @@ public class Renderer2D {
     private boolean drawing;
     private final EntityService entityService;
     private final Camera camera;
-    public Texture texture;
+    public static Texture texture;
 
     public Renderer2D(EntityService entityService, Camera camera) {
         this.entityService = entityService;
@@ -79,28 +76,32 @@ public class Renderer2D {
 
     public void render() {
         final var entityStates = entityService.getModelMatrix();
-        final var debugStates = entityService.getDebug();
+//        final var debugStates = entityService.getDebug();
         if (!entityStates.isEmpty()) {
             clear();
             begin();
             final var hero = entityStates.get(EntityType.HERO).get(0);
-            drawTextureRegion(hero.x, hero.y, hero.x + World.MetersToPixels * EntityService.PlayerWidth, hero.y + World.MetersToPixels * EntityService.PlayerHeight, 0, 0, 1, 1, 1.0f, Color.WHITE);
-            entityStates.get(EntityType.WALL).forEach(a -> {
-                drawTextureRegion(a.x, a.y, a.x + World.TileSideInPixels, a.y + World.TileSideInPixels, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
+//            drawTextureRegion(hero.x, hero.y, hero.x + World.MetersToPixels * EntityService.PlayerWidth, hero.y + World.MetersToPixels * EntityService.PlayerHeight, 0, 0, 1, 1, 1.0f, Color.WHITE);
+            drawTextureRegion(hero.getMin().x, hero.getMin().y, hero.getMax().x, hero.getMax().y, 0, 0, 1, 1, 1.0f, Color.WHITE);
+            entityStates.get(EntityType.WALL).forEach(wall -> {
+                drawTextureRegion(wall.getMin().x, wall.getMin().y, wall.getMax().x, wall.getMax().y, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
             });
             entityStates.get(EntityType.SPACE).forEach(a -> {
-                drawTextureRegion(a.x, a.y, a.x + World.TileSideInPixels, a.y + World.TileSideInPixels, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 1.0f, 1.0f));
+                drawTextureRegion(a.getMin().x, a.getMin().y, a.getMax().x, a.getMax().y, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 1.0f, 1.0f));
             });
-            debugStates.forEach((a, b) -> {
-                Vector3f Min = b.get(0);
-                Vector3f Max = b.get(1);
-
-                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Min.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-                drawTextureRegion(Min.x - 2.0f, Max.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Min.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-                drawTextureRegion(Max.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-
-            });
+//            debugStates.forEach((a, b) -> {
+//                Vector3f Min = b.get(0);
+//                Vector3f Max = b.get(1);
+//
+//                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Min.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+//                drawTextureRegion(Min.x - 2.0f, Max.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+//                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Min.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+//                drawTextureRegion(Max.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+//
+//            });
+//            entityStates.get(EntityType.DEBUG).forEach(a -> {
+//                drawTextureRegion(a.x, a.y, a.x + World.TileSideInPixels, a.y + World.TileSideInPixels, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
+//            });
             end();
         }
     }

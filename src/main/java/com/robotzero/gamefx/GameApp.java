@@ -34,7 +34,8 @@ import static org.lwjgl.glfw.GLFW.glfwTerminate;
 
 public class GameApp implements Runnable {
     public static final int TARGET_FPS = 60;
-//    public static final int TARGET_FPS = (int) DisplayManager.refreshRate;
+    public static float Time;
+    //    public static final int TARGET_FPS = (int) DisplayManager.refreshRate;
     private final DisplayManager displayManager;
     private final Renderer2D renderer2D;
     private float SIZE = 1.0f;
@@ -51,10 +52,10 @@ public class GameApp implements Runnable {
     private int LowIndex;
     private SimEntity monstar;
     public static float globalinterval;
-    int TileSpanX = 17 * 3;
-    int TileSpanY = 9 * 3;
     public static Vector2f ScreenCenter;
     public static RenderGroup renderGroup;
+    public static World.WorldPosition SimCenterP;
+    public static Vector3f CameraP;
 
     public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g) {
         this.displayManager = displayManager;
@@ -248,9 +249,13 @@ public class GameApp implements Runnable {
         float ScreenHeightInMeters = DisplayManager.HEIGHT * World.PixelsToMeters;
         Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
                 new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
+        CameraBoundsInMeters.getMin().z = -3.0f * World.TypicalFloorHeight;
+        CameraBoundsInMeters.getMax().z = 1.0f * World.TypicalFloorHeight;
 
-        Vector3f SimBoundsExpansion = new Vector3f(15.0f, 15.0f, 15.0f);
+        Vector3f SimBoundsExpansion = new Vector3f(15.0f, 15.0f, 0.0f);
         Rectangle SimBounds = entityService.AddRadiusTo(CameraBoundsInMeters, SimBoundsExpansion);
-        gameMemory.simRegion = entityService.BeginSim(Camera.position, SimBounds, globalinterval);
+        SimCenterP = new World.WorldPosition(Camera.position);
+        CameraP = World.subtract(new World.WorldPosition(Camera.position), new World.WorldPosition(SimCenterP));
+        gameMemory.simRegion = entityService.BeginSim(SimCenterP, SimBounds, globalinterval);
     }
 }
