@@ -172,6 +172,10 @@ public class Texture {
     public static Texture loadTexture(String path) {
         ByteBuffer image;
         int width, height;
+        String OS = System.getProperty("os.name").toLowerCase();
+        if ((OS.contains("win"))) {
+            path = path.replaceFirst("/", "");
+        }
         try (MemoryStack stack = MemoryStack.stackPush()) {
             /* Prepare image buffers */
             IntBuffer w = stack.mallocInt(1);
