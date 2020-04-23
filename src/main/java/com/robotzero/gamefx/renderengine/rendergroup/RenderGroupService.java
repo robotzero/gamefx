@@ -81,7 +81,7 @@ public class RenderGroupService {
         RenderEntryRectangle piece = (RenderEntryRectangle) PushRenderElement(Group, RenderGroupEntryType.RECTANGLE);
         piece.EntityBasis = new RenderEntityBasis();
         piece.EntityBasis.Basis = Group.DefaultBasis;
-        piece.EntityBasis.Offset = new Vector3f(Offset).sub(new Vector3f(Dim, 0).mul(0.5f));
+        piece.EntityBasis.Offset = new Vector3f(Offset).sub((new Vector3f(Dim, 0).mul(0.5f)));
         piece.Color = Color;
         piece.entityType = entityType;
         piece.Dim = Dim;

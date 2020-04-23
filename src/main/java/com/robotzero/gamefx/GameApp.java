@@ -241,12 +241,12 @@ public class GameApp implements Runnable {
     private void update(float interval) {
         ScreenCenter = new Vector2f(0.5f * DisplayManager.WIDTH, 0.5f * DisplayManager.HEIGHT);
         globalinterval = interval;
-//        Rectangle ScreenBounds = renderGroupService.GetCameraRectangleAtTarget(renderGroup);
-//        Rectangle CameraBoundsInMeters = Rectangle.RectMinMax(new Vector3f(ScreenBounds.getMin()), new Vector3f(ScreenBounds.getMax()));
-        float ScreenWidthInMeters = DisplayManager.WIDTH * World.PixelsToMeters;
-        float ScreenHeightInMeters = DisplayManager.HEIGHT * World.PixelsToMeters;
-        Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
-                  new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
+        Rectangle ScreenBounds = renderGroupService.GetCameraRectangleAtTarget(renderGroup);
+        Rectangle CameraBoundsInMeters = Rectangle.RectMinMax(new Vector3f(ScreenBounds.getMin()), new Vector3f(ScreenBounds.getMax()));
+//        float ScreenWidthInMeters = DisplayManager.WIDTH * World.PixelsToMeters;
+//        float ScreenHeightInMeters = DisplayManager.HEIGHT * World.PixelsToMeters;
+//        Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
+//                  new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
 
         CameraBoundsInMeters.getMin().z = -3.0f * World.TypicalFloorHeight;
         CameraBoundsInMeters.getMax().z = 1.0f * World.TypicalFloorHeight;
