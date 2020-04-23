@@ -1,6 +1,7 @@
 package com.robotzero.gamefx.renderengine.rendergroup;
 
 import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 import java.util.List;
 import java.util.Map;
@@ -23,5 +24,7 @@ public class RenderGroup {
         PushBufferBase.get(RenderGroupEntryType.RECTANGLE).clear();
         PushBufferBase.get(RenderGroupEntryType.CLEAR).clear();
         PushBufferBase.get(RenderGroupEntryType.COORDINATE).clear();
+        DefaultBasis = new RenderBasis();
+        DefaultBasis.P = new Vector3f(0, 0, 0);
     }
 }

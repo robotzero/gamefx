@@ -409,7 +409,7 @@ public class EntityService {
                             case ("space"): {
                                 for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
                                     SimEntityCollisionVolume Volume = entity.Collision.Volumes[VolumeIndex];
-                                    renderGroupService.PushRectOutline(GameApp.renderGroup, new Vector3f(Volume.OffsetP).sub(new Vector3f(0, 0, 0.5f * Volume.Dim.z)) , new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), entity.Type);
+//                                    renderGroupService.PushRectOutline(GameApp.renderGroup, new Vector3f(Volume.OffsetP).sub(new Vector3f(0, 0, 0.5f * Volume.Dim.z)) , new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), entity.Type);
                                 }
                             }
                             break;
@@ -491,7 +491,6 @@ public class EntityService {
 
     SimEntity AddEntityRaw(SimRegion simRegion, int StorageIndex, LowEntity Source) {
         SimEntity Entity = null;
-
         SimEntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
         if (Entry.Ptr == null) {
             if (simRegion.EntityCount < simRegion.MaxEntityCount) {
@@ -647,10 +646,6 @@ public class EntityService {
                 }
             }
         }
-
-        if (GameApp.renderGroup != null && GameApp.renderGroup.PushBufferBase != null) {
-            GameApp.renderGroup.clear();
-        }
     }
 
     public boolean IsSet(SimEntity Entity, SimEntityFlag Flag) {
@@ -678,8 +673,8 @@ public class EntityService {
 
     public Rectangle AddRadiusTo(Rectangle A, Vector3f Radius) {
         return new Rectangle(
-                A.getMin().sub(Radius),
-                A.getMax().add(Radius)
+                new Vector3f(A.getMin()).sub(Radius),
+                new Vector3f(A.getMax()).add(Radius)
         );
     }
 

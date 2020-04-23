@@ -81,7 +81,7 @@ public class RenderGroupService {
         RenderEntryRectangle piece = (RenderEntryRectangle) PushRenderElement(Group, RenderGroupEntryType.RECTANGLE);
         piece.EntityBasis = new RenderEntityBasis();
         piece.EntityBasis.Basis = Group.DefaultBasis;
-        piece.EntityBasis.Offset = new Vector3f(Offset).sub((new Vector3f(Dim, 0).mul(0.5f)));
+        piece.EntityBasis.Offset = new Vector3f(Offset).sub((new Vector3f(new Vector2f(Dim).mul(0.5f), 0)));
         piece.Color = Color;
         piece.entityType = entityType;
         piece.Dim = Dim;
@@ -91,12 +91,12 @@ public class RenderGroupService {
         float Thickness = 0.1f;
 
         // NOTE(casey): Top and bottom
-        PushRect(Group, Offset.sub(new Vector3f(0, 0.5f * Dim.y, 0)), new Vector2f(Dim.x, Thickness), Color, entityType);
-        PushRect(Group, Offset.add(new Vector3f(0, 0.5f * Dim.y, 0)), new Vector2f(Dim.x, Thickness), Color, entityType);
+        PushRect(Group, new Vector3f(Offset).sub(new Vector3f(0, 0.5f * Dim.y, 0)), new Vector2f(Dim.x, Thickness), Color, entityType);
+        PushRect(Group, new Vector3f(Offset).add(new Vector3f(0, 0.5f * Dim.y, 0)), new Vector2f(Dim.x, Thickness), Color, entityType);
 
         // NOTE(casey): Left and right
-        PushRect(Group, Offset.sub(new Vector3f(0.5f * Dim.x, 0, 0)), new Vector2f(Thickness, Dim.y), Color, entityType);
-        PushRect(Group, Offset.add(new Vector3f(0.5f * Dim.x, 0, 0)), new Vector2f(Thickness, Dim.y), Color, entityType);
+        PushRect(Group, new Vector3f(Offset).sub(new Vector3f(0.5f * Dim.x, 0, 0)), new Vector2f(Thickness, Dim.y), Color, entityType);
+        PushRect(Group, new Vector3f(Offset).add(new Vector3f(0.5f * Dim.x, 0, 0)), new Vector2f(Thickness, Dim.y), Color, entityType);
     }
 
     public RenderGroup AllocateRenderGroup(int MaxPushBufferSize, int ResolutionPixelsX, int ResolutionPixelsY) {
@@ -114,7 +114,7 @@ public class RenderGroupService {
         Result.GameCamera = new RenderGroupCamera();
         Result.GameCamera.FocalLength = 0.6f;
         Result.GameCamera.DistanceAboveTarget = 9.0f;
-        Result.RenderCamera = Result.GameCamera;
+        Result.RenderCamera = new RenderGroupCamera(Result.GameCamera);
         Result.RenderCamera.DistanceAboveTarget = 30.0f;
         Result.MetersToPixels = ResolutionPixelsX * WidthOfMonitor;
         float PixelsToMeters = 1.0f / Result.MetersToPixels;
@@ -138,7 +138,7 @@ public class RenderGroupService {
             RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
             EntityBasisPResult P = GetRenderEntityBasisP(RenderGroup, bitmap.EntityBasis, ScreenDim);
 //                return Map.of(bitmap.entityType, new Vector3f(P.P.mul(P.Scale), 0));
-                return Map.of(bitmap.entityType, new RenderData(new Vector3f(P.P, 0), new Vector3f(P.P, 0).add(new Vector3f(bitmap.Size.x, bitmap.Size.y, 0).mul(P.Scale))));
+                return Map.of(bitmap.entityType, new RenderData(new Vector3f(P.P, 0), new Vector3f(P.P, 0).add(new Vector3f(bitmap.Size.x, bitmap.Size.y, 0).mul(P.Scale)), null));
             }).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
                 return a.getKey();
             }, Collectors.mapping(a -> a.getValue(), Collectors.toList())));
@@ -147,7 +147,7 @@ public class RenderGroupService {
             RenderEntryRectangle rectangle = (RenderEntryRectangle) entry;
             EntityBasisPResult P = GetRenderEntityBasisP(RenderGroup, rectangle.EntityBasis, ScreenDim);
 //                DrawRectangle(OutputTarget, P, P + Entry -> Dim, Entry -> R, Entry -> G, Entry -> B);
-            return Map.of(rectangle.entityType, new RenderData(new Vector3f(P.P, 0), new Vector3f(P.P, 0).add(new Vector3f(rectangle.Dim.x(), rectangle.Dim.y(), 0).mul(P.Scale))));
+            return Map.of(rectangle.entityType, new RenderData(new Vector3f(P.P, 0), new Vector3f(P.P, 0).add((new Vector3f(rectangle.Dim.x, rectangle.Dim.y, 0).mul(P.Scale))), rectangle.Color));
 //            return Map.of(rectangle.entityType, List.of(new Vector3f(P.P.mul(P.Scale), 0), new Vector3f(P.P.add(rectangle.Dim).mul(P.Scale), 0)));
         }).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
             return a.getKey();
@@ -220,7 +220,7 @@ public class RenderGroupService {
     }
 
     public Vector2f Unproject(RenderGroup Group, Vector2f ProjectedXY, float AtDistanceFromCamera) {
-        Vector2f WorldXY = ProjectedXY.mul(AtDistanceFromCamera / Group.GameCamera.FocalLength);
+        Vector2f WorldXY = new Vector2f(ProjectedXY).mul(AtDistanceFromCamera / Group.GameCamera.FocalLength);
         return(WorldXY);
     }
 

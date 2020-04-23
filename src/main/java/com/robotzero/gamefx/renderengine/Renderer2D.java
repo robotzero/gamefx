@@ -86,8 +86,12 @@ public class Renderer2D {
             entityStates.get(EntityType.WALL).forEach(wall -> {
                 drawTextureRegion(wall.getMin().x, wall.getMin().y, wall.getMax().x, wall.getMax().y, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
             });
-            entityStates.get(EntityType.SPACE).forEach(a -> {
-                drawTextureRegion(a.getMin().x, a.getMin().y, a.getMax().x, a.getMax().y, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 1.0f, 1.0f));
+//            entityStates.get(EntityType.SPACE).forEach(a -> {
+//                drawTextureRegion(a.getMin().x, a.getMin().y, a.getMax().x, a.getMax().y, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 1.0f, 1.0f));
+//            });
+
+            entityStates.get(EntityType.DEBUG).forEach(a -> {
+                drawTextureRegion(a.getMin().x, a.getMin().y, a.getMax().x, a.getMax().y, 0, 0, 1, 1,0.0f, new Color(a.getColor().x, a.getColor().y, a.getColor().z));
             });
 //            debugStates.forEach((a, b) -> {
 //                Vector3f Min = b.get(0);

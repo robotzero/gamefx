@@ -72,7 +72,6 @@ public class GameApp implements Runnable {
         gameMemory.HighEntityCount = 1;
         gameMemory.StandardRoomCollision = entityService.MakeSimpleGroundedCollision(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters, 0.9f * World.TileDepthInMeters);
         World.renderWorld(entityService);
-        renderGroup = entityService.initRenderGroup();
     }
 
     public void run() {
@@ -90,6 +89,7 @@ public class GameApp implements Runnable {
     private void init() throws Exception {
         displayManager.createDisplay();
         timer.init();
+        renderGroup = entityService.initRenderGroup();
         renderer2D.init();
         lastFps = timer.getTime();
         fps = 0;
@@ -131,11 +131,11 @@ public class GameApp implements Runnable {
 
             input();
 
-            while (accumulator >= interval) {
+//            while (accumulator >= interval) {
                update(1f / TARGET_UPS);
                timer.updateUPS();
                accumulator -= interval;
-            }
+//            }
 
             alpha = accumulator / interval;
 
@@ -239,14 +239,11 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
+        renderGroup = entityService.initRenderGroup();
         ScreenCenter = new Vector2f(0.5f * DisplayManager.WIDTH, 0.5f * DisplayManager.HEIGHT);
         globalinterval = interval;
         Rectangle ScreenBounds = renderGroupService.GetCameraRectangleAtTarget(renderGroup);
         Rectangle CameraBoundsInMeters = Rectangle.RectMinMax(new Vector3f(ScreenBounds.getMin()), new Vector3f(ScreenBounds.getMax()));
-//        float ScreenWidthInMeters = DisplayManager.WIDTH * World.PixelsToMeters;
-//        float ScreenHeightInMeters = DisplayManager.HEIGHT * World.PixelsToMeters;
-//        Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
-//                  new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
 
         CameraBoundsInMeters.getMin().z = -3.0f * World.TypicalFloorHeight;
         CameraBoundsInMeters.getMax().z = 1.0f * World.TypicalFloorHeight;
@@ -257,8 +254,8 @@ public class GameApp implements Runnable {
         gameMemory.simRegion = entityService.BeginSim(SimCenterP, SimBounds, globalinterval);
 
         CameraP = World.subtract(new World.WorldPosition(Camera.position), new World.WorldPosition(SimCenterP));
-//        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(ScreenBounds), new Vector4f(1.0f, 1.0f, 0.0f, 1), EntityType.DEBUG);
-//        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(SimBounds), new Vector4f(0.0f, 1.0f, 1.0f, 1), EntityType.DEBUG);
-//        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(gameMemory.simRegion.Bounds), new Vector4f(0f, 0.0f, 1.0f, 1), EntityType.DEBUG);
+        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(ScreenBounds), new Vector4f(1.0f, 1.0f, 0.0f, 1.0f), EntityType.DEBUG);
+        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(SimBounds), new Vector4f(0.0f, 1.0f, 1.0f, 1.0f), EntityType.DEBUG);
+        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(gameMemory.simRegion.Bounds), new Vector4f(1.0f, 0.0f, 1.0f, 1.0f), EntityType.DEBUG);
     }
 }
