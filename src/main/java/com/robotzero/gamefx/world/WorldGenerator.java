@@ -33,9 +33,9 @@ public class WorldGenerator {
                 doorTop = true;
             }
 
-            entityService.AddStandardRoom(
-                    screenX * tilesPerWidth + tilesPerWidth / 2,
-                    screenY * tilesPerHeight + tilesPerHeight / 2);
+//            entityService.AddStandardRoom(
+//                    screenX * tilesPerWidth + tilesPerWidth / 2,
+//                    screenY * tilesPerHeight + tilesPerHeight / 2);
 
             for (int tileY = 0;
                  tileY < tilesPerHeight;
@@ -65,7 +65,7 @@ public class WorldGenerator {
 
                     if (shouldBeDoor) {
 //                        if (screenIndex == 0) {
-                            entityService.AddWall(absTileX, absTileY);
+//                            entityService.AddWall(absTileX, absTileY);
 //                        }
                     }
                 }

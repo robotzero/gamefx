@@ -1,8 +1,6 @@
 
 package com.robotzero.gamefx.renderengine;
 
-import com.robotzero.gamefx.renderengine.entity.EntityService;
-import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.model.Color;
 import com.robotzero.gamefx.renderengine.model.Shader;
 import com.robotzero.gamefx.renderengine.model.ShaderProgram;
@@ -37,12 +35,10 @@ public class Renderer2D {
     private FloatBuffer vertices;
     private int numVertices;
     private boolean drawing;
-    private final EntityService entityService;
     private final Camera camera;
     public static Texture texture;
 
-    public Renderer2D(EntityService entityService, Camera camera) {
-        this.entityService = entityService;
+    public Renderer2D(Camera camera) {
         this.camera = camera;
     }
 
@@ -74,41 +70,55 @@ public class Renderer2D {
         numVertices = 0;
     }
 
-    public void render() {
-        final var entityStates = entityService.getModelMatrix();
-//        final var debugStates = entityService.getDebug();
-        if (!entityStates.isEmpty()) {
-            clear();
-            begin();
-            final var hero = entityStates.get(EntityType.HERO).get(0);
-//            drawTextureRegion(hero.x, hero.y, hero.x + World.MetersToPixels * EntityService.PlayerWidth, hero.y + World.MetersToPixels * EntityService.PlayerHeight, 0, 0, 1, 1, 1.0f, Color.WHITE);
-            drawTextureRegion(hero.getMin().x, hero.getMin().y, hero.getMax().x, hero.getMax().y, 0, 0, 1, 1, 1.0f, Color.WHITE);
-            entityStates.get(EntityType.WALL).forEach(wall -> {
-                drawTextureRegion(wall.getMin().x, wall.getMin().y, wall.getMax().x, wall.getMax().y, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
-            });
-//            entityStates.get(EntityType.SPACE).forEach(a -> {
-//                drawTextureRegion(a.getMin().x, a.getMin().y, a.getMax().x, a.getMax().y, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 1.0f, 1.0f));
-//            });
-
-            entityStates.get(EntityType.DEBUG).forEach(a -> {
-                drawTextureRegion(a.getMin().x, a.getMin().y, a.getMax().x, a.getMax().y, 0, 0, 1, 1,0.0f, new Color(a.getColor().x, a.getColor().y, a.getColor().z));
-            });
-//            debugStates.forEach((a, b) -> {
-//                Vector3f Min = b.get(0);
-//                Vector3f Max = b.get(1);
+//    public void render(RenderGroup RenderGroup) {
+////        final var entityStates = entityService.getModelMatrix();
+////        final var debugStates = entityService.getDebug();
+//        if (!entityStates.isEmpty()) {
+//            clear();
+//            begin();
 //
-//                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Min.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-//                drawTextureRegion(Min.x - 2.0f, Max.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-//                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Min.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-//                drawTextureRegion(Max.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+//            Vector2f ScreenDim = new Vector2f(DisplayManager.WIDTH, DisplayManager.HEIGHT);
 //
+//            List<RenderEntry> renderEntryBitmap = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.BITMAP);
+//            List<RenderEntry> renderEntryRectangle = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.RECTANGLE);
+//            List<RenderEntry> renderEntryClear = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.CLEAR);
+//            List<RenderEntry> renderEntryPoints = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.COORDINATE);
+//
+//
+//            renderEntryBitmap.stream().map(entry -> {
+//                RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
+//                EntityBasisPResult P = GetRenderEntityBasisP(RenderGroup, bitmap.EntityBasis, ScreenDim);
+//                return Map.of(bitmap.entityType, new RenderData(new Vector3f(P.P, 0), new Vector3f(P.P, 0).add(new Vector3f(bitmap.Size.x, bitmap.Size.y, 0).mul(P.Scale)), bitmap.Color));
+//            }).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
+//                return a.getKey();
+//            }, Collectors.mapping(a -> a.getValue(), Collectors.toList())));
+//
+//
+//
+//            final var hero = entityStates.get(EntityType.HERO).get(0);
+//            drawTextureRegion(hero.getMin().x, hero.getMin().y, hero.getMax().x, hero.getMax().y, 0, 0, 1, 1, 1.0f, Color.WHITE);
+//            entityStates.get(EntityType.WALL).forEach(wall -> {
+//                drawTextureRegion(wall.getMin().x, wall.getMin().y, wall.getMax().x, wall.getMax().y, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
 //            });
 //            entityStates.get(EntityType.DEBUG).forEach(a -> {
-//                drawTextureRegion(a.x, a.y, a.x + World.TileSideInPixels, a.y + World.TileSideInPixels, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
+//                drawTextureRegion(a.getMin().x, a.getMin().y, a.getMax().x, a.getMax().y, 0, 0, 1, 1,0.0f, new Color(a.getColor().x, a.getColor().y, a.getColor().z));
 //            });
-            end();
-        }
-    }
+////            debugStates.forEach((a, b) -> {
+////                Vector3f Min = b.get(0);
+////                Vector3f Max = b.get(1);
+////
+////                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Min.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+////                drawTextureRegion(Min.x - 2.0f, Max.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+////                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Min.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+////                drawTextureRegion(Max.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
+////
+////            });
+////            entityStates.get(EntityType.DEBUG).forEach(a -> {
+////                drawTextureRegion(a.x, a.y, a.x + World.TileSideInPixels, a.y + World.TileSideInPixels, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
+////            });
+//            end();
+//        }
+//    }
 
     /**
      * End rendering.

@@ -27,7 +27,7 @@ public class DisplayManager {
     public static int HEIGHT = 540;
     public static float refreshRate = 60f;
     public static String TITLE = "Fred64";
-    private long window;
+    private static long window;
 
 
     public void createDisplay() {
@@ -143,10 +143,14 @@ public class DisplayManager {
     }
 
     public long getWindow() {
-        return this.window;
+        return window;
     }
 
     public void setWindowTitle(String title) {
         glfwSetWindowTitle(window, title);
+    }
+
+    public static long getW() {
+        return window;
     }
 }

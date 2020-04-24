@@ -5,8 +5,8 @@ import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Renderer2D;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
+import com.robotzero.gamefx.renderengine.rendergroup.LoadedBitmap;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderBasis;
-import com.robotzero.gamefx.renderengine.rendergroup.RenderData;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderEntryCoordinateSystem;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupEntryType;
@@ -25,21 +25,24 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
 public class EntityService {
     private final GameMemory gameMemory;
     private final World world;
     private final RenderGroupService renderGroupService;
+    private final ExecutorService executorService;
     public static final float PlayerHeight = 1.0f;
     public static final float PlayerWidth = 1.0f;
     public static final float FamiliarHeight = 0.5f;
     public static final float FamiliarWidth = 1.0f;
 
-    public EntityService(GameMemory gameMemory, World world, RenderGroupService renderGroupService) {
+    public EntityService(GameMemory gameMemory, World world, RenderGroupService renderGroupService, ExecutorService executorService) {
         this.gameMemory = gameMemory;
         this.world = world;
         this.renderGroupService = renderGroupService;
+        this.executorService = executorService;
     }
 
     public World getWorld() {
@@ -361,76 +364,77 @@ public class EntityService {
         }
     }
 
-    public Map<EntityType, List<RenderData>> getModelMatrix() {
+    public void pushToRender(RenderGroup renderGroup) {
         if (gameMemory.simRegion == null || Renderer2D.texture == null) {
-            return Map.of();
+            return;
         }
 
         IntStream.range(0, gameMemory.simRegion.EntityCount).forEach(HighEntityIndex -> {
-                    SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
-                    RenderBasis renderBasis = new RenderBasis();
-                    GameApp.renderGroup.DefaultBasis = renderBasis;
-
-                    if (entity.Updatable) {
-                        Vector3f CameraRelativeGroundP = GetEntityGroundPoint(entity).sub(GameApp.CameraP);
-                        float FadeTopEndZ = 0.75f * World.TypicalFloorHeight;
-                        float FadeTopStartZ = 0.5f * World.TypicalFloorHeight;
-                        float FadeBottomStartZ = -2.0f * World.TypicalFloorHeight;
-                        float FadeBottomEndZ = -2.25f * World.TypicalFloorHeight;;
-
-                        MoveSpec MoveSpec = null;
-                        switch (entity.Type.name().toLowerCase()) {
-                            case ("wall"): {
-                                renderGroupService.pushBitmap(GameApp.renderGroup, Renderer2D.texture, new Vector2f(60, 60), 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1, 0.5f, 0f, 1f), entity.Type);
-                            }
-                            break;
-                            case ("hero"): {
-                                float HeroSizeC = 2.5f;
-                                MoveSpec = DefaultMoveSpec();
-                                MoveSpec.UnitMaxAccelVector = true;
-                                MoveSpec.Speed = GameApp.playerSpeed == 1 ? 50.0f : GameApp.playerSpeed;
-                                MoveSpec.Drag = 8.0f;
-                                renderGroupService.pushBitmap(GameApp.renderGroup, Renderer2D.texture, new Vector2f(60, 60), HeroSizeC * 0.4f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
-                            }
-                            break;
-                            case ("familiar"): {
+                SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
+                if (entity.Updatable) {
+                    MoveSpec MoveSpec = null;
+                    switch (entity.Type.name().toLowerCase()) {
+                        case ("hero"): {
+                            MoveSpec = DefaultMoveSpec();
+                            MoveSpec.UnitMaxAccelVector = true;
+                            MoveSpec.Speed = GameApp.playerSpeed == 1 ? 50.0f : GameApp.playerSpeed;
+                            MoveSpec.Drag = 8.0f;
+                        }
+                        break;
+                        case ("familiar"): {
 //                        UpdateFamiliar(gameMemory.simRegion, entity, GameApp.globalinterval);
 //                        entity.tBob = entity.tBob + GameApp.globalinterval;
 //                        if (entity.tBob > 2.0f * Math.PI) {
 //                            entity.tBob = (float) (entity.tBob - (2.0f * Math.PI));
 //                        }
 //                        pushPiece(pieceGroup, new Vector2f(0.0f, 0.0f), new Vector2f(72f, 182f), new Vector2f(0, 0), new Vector4f(0, 0, 0, 0), 0f);
-                            }
-                            break;
-                            case ("monstar"): {
-
-                            }
-                            break;
-                            case ("space"): {
-                                for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
-                                    SimEntityCollisionVolume Volume = entity.Collision.Volumes[VolumeIndex];
-//                                    renderGroupService.PushRectOutline(GameApp.renderGroup, new Vector3f(Volume.OffsetP).sub(new Vector3f(0, 0, 0.5f * Volume.Dim.z)) , new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), entity.Type);
-                                }
-                            }
-                            break;
-                            default: {
-                                throw new RuntimeException("INVALID PATH");
-                            }
                         }
+                        break;
+                        case ("monstar"): {
 
-                        if (!IsSet(entity, SimEntityFlag.NONSPATIAL) && MoveSpec != null && IsSet(entity, SimEntityFlag.MOVEABLE)) {
-                            moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
+                        } break;
+                        default: {
+                            throw new RuntimeException("Invalid code path");
                         }
-
-                        renderBasis.P = GetEntityGroundPoint(entity).add(new Vector3f(0, 0, GameMemory.ZOffset));
                     }
-                });
-//        }).filter(map -> map != null).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
-//            return a.getKey();
-//        }, Collectors.flatMapping(a -> a.getValue().stream(), Collectors.toList())));
 
+                    if (!IsSet(entity, SimEntityFlag.NONSPATIAL) && MoveSpec != null && IsSet(entity, SimEntityFlag.MOVEABLE)) {
+                        moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
+                    }
+
+                    renderGroup.Transform.OffsetP = GetEntityGroundPoint(entity);
+
+                    switch(entity.Type.name().toLowerCase()) {
+                        case ("wall"): {
+                            LoadedBitmap loadedBitmap = new LoadedBitmap();
+                            loadedBitmap.texture = Renderer2D.texture;
+                            loadedBitmap.Width = 60;
+                            loadedBitmap.Height = 60;
+                            loadedBitmap.WidthOverHeight = 1;
+                            renderGroupService.pushBitmap(renderGroup, loadedBitmap, 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1, 0.5f, 0f, 1f), entity.Type);
+                        } break;
+                        case ("hero"): {
+                            LoadedBitmap loadedBitmap = new LoadedBitmap();
+                            loadedBitmap.texture = Renderer2D.texture;
+                            loadedBitmap.Width = 60;
+                            loadedBitmap.Height = 60;
+                            loadedBitmap.WidthOverHeight = 1;
+                            float HeroSizeC = 2.5f;
+                            renderGroupService.pushBitmap(renderGroup, loadedBitmap, HeroSizeC * 0.4f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
+                        } break;
+                        case ("space"): {
+                            for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
+                                SimEntityCollisionVolume Volume = entity.Collision.Volumes[VolumeIndex];
+//                                    renderGroupService.PushRectOutline(GameApp.renderGroup, new Vector3f(Volume.OffsetP).sub(new Vector3f(0, 0, 0.5f * Volume.Dim.z)) , new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), entity.Type);
+                            }
+                        } break;
+                        default: {
+                            throw new RuntimeException("Invalid code path");
+                        }
+                    }
+                }
+            });
 //        DrawPoints();
-        return renderGroupService.RenderGroupToOutput(GameApp.renderGroup);
     }
 
     public Map<Integer, List<Vector3f>> getDebug() {
