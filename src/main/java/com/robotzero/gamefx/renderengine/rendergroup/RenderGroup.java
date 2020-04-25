@@ -7,7 +7,6 @@ import java.util.Map;
 
 public class RenderGroup {
     public RenderTransform Transform;
-    public float MetersToPixels;
     public int PieceCount;
     public int MaxPushBufferSize;
     public int PushBufferSize;

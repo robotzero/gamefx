@@ -65,7 +65,7 @@ public class WorldGenerator {
 
                     if (shouldBeDoor) {
 //                        if (screenIndex == 0) {
-//                            entityService.AddWall(absTileX, absTileY);
+                            entityService.AddWall(absTileX, absTileY);
 //                        }
                     }
                 }

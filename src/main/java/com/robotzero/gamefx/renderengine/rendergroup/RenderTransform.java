@@ -10,6 +10,7 @@ public class RenderTransform {
     public Vector2f ScreenCenter;
     public Vector3f OffsetP;
     public float Scale;
+    public boolean Orthographic;
 
     public RenderTransform() {}
     public RenderTransform(RenderTransform renderGroupCamera) {

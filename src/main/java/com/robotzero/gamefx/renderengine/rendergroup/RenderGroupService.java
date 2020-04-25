@@ -83,7 +83,7 @@ public class RenderGroupService {
 
         if (EntityBasis.Valid) {
             piece.Bitmap = Bitmap;
-            piece.P = new Vector3f(P);
+            piece.P = new Vector3f(EntityBasis.P, 0f);
             piece.entityType = entityType;
             piece.Color = Color;
             piece.Size = Size.mul(EntityBasis.Scale);
@@ -115,8 +115,7 @@ public class RenderGroupService {
         PushRect(Group, new Vector3f(Offset).add(new Vector3f(0.5f * Dim.x, 0, 0)), new Vector2f(Thickness, Dim.y), Color, entityType);
     }
 
-    public RenderGroup AllocateRenderGroup(int MaxPushBufferSize, int ResolutionPixelsX, int ResolutionPixelsY) {
-        float WidthOfMonitor = 0.635f;
+    public RenderGroup AllocateRenderGroup(int MaxPushBufferSize) {
         RenderGroup Result = new RenderGroup();
         Result.PushBufferBase = new HashMap<>();
         Result.PushBufferBase.put(RenderGroupEntryType.BITMAP, new ArrayList<>());
@@ -124,17 +123,9 @@ public class RenderGroupService {
         Result.PushBufferBase.put(RenderGroupEntryType.CLEAR, new ArrayList<>());
         Result.PushBufferBase.put(RenderGroupEntryType.COORDINATE, new ArrayList<>());
 
-        float MetersToPixels = ResolutionPixelsX * WidthOfMonitor;
-        float PixelsToMeters = 1.0f / Result.MetersToPixels;
-        Result.MonitorHalfDimInMeters = new Vector2f(0.5f * ResolutionPixelsX * PixelsToMeters,
-                0.5f * ResolutionPixelsY * PixelsToMeters);
         Result.MaxPushBufferSize = MaxPushBufferSize;
         Result.PushBufferSize = 0;
         Result.Transform = new RenderTransform();
-        Result.Transform.MetersToPixels = MetersToPixels;
-        Result.Transform.FocalLength = 0.6f;
-        Result.Transform.DistanceAboveTarget = 9.0f;
-        Result.Transform.ScreenCenter = new Vector2f(0.5f * ResolutionPixelsX, 0.5f * ResolutionPixelsY);
         Result.Transform.OffsetP = new Vector3f(0.0f, 0.0f, 0.0f);
         Result.Transform.Scale = 1.0f;
 
@@ -210,19 +201,26 @@ public class RenderGroupService {
     public EntityBasisPResult GetRenderEntityBasisP(RenderTransform Transform, Vector3f OriginalP) {
         EntityBasisPResult Result = new EntityBasisPResult();
         Vector3f P = new Vector3f(OriginalP).add(Transform.OffsetP);
-        float OffsetZ = 0.0f;
-        float DistanceAboveTarget = Transform.DistanceAboveTarget;
 
-        float DistanceToPZ = (DistanceAboveTarget - P.z);
-        float NearClipPlane = 0.2f;
-
-        Vector3f RawXY = new Vector3f(new Vector2f(P.x, P.y), 1.0f);
-
-        if (DistanceToPZ > NearClipPlane) {
-            Vector3f ProjectedXY = RawXY.mul((1.0f / DistanceToPZ) * Transform.FocalLength);
-            Result.P = new Vector2f(Transform.ScreenCenter).add(new Vector2f(ProjectedXY.x, ProjectedXY.y).mul(Transform.MetersToPixels)).add(new Vector2f(0.0f, Result.Scale * OffsetZ));
-            Result.Scale = ProjectedXY.z * Transform.MetersToPixels;
+        if (Transform.Orthographic) {
+            Result.P = new Vector2f(Transform.ScreenCenter).add((new Vector2f(P.x, P.y).mul(Transform.MetersToPixels)));
+            Result.Scale = Transform.MetersToPixels;
             Result.Valid = true;
+        } else {
+            float OffsetZ = 0.0f;
+            float DistanceAboveTarget = Transform.DistanceAboveTarget;
+//            DistanceAboveTarget += 50f;
+            float DistanceToPZ = (DistanceAboveTarget - P.z);
+            float NearClipPlane = 0.2f;
+
+            Vector3f RawXY = new Vector3f(new Vector2f(P.x, P.y), 1.0f);
+
+            if (DistanceToPZ > NearClipPlane) {
+                Vector3f ProjectedXY = RawXY.mul((1.0f / DistanceToPZ) * Transform.FocalLength);
+                Result.P = new Vector2f(Transform.ScreenCenter).add(new Vector2f(ProjectedXY.x, ProjectedXY.y).mul(Transform.MetersToPixels)).add(new Vector2f(0.0f, Result.Scale * OffsetZ));
+                Result.Scale = ProjectedXY.z * Transform.MetersToPixels;
+                Result.Valid = true;
+            }
         }
 
         return Result;
@@ -324,5 +322,30 @@ public class RenderGroupService {
         }
 
         return fillRect;
+    }
+
+    public void Perspective(RenderGroup renderGroup, int PixelWidth, int PixelHeight, float MetersToPixels, float FocalLength, float DistanceAboveTarget) {
+        float PixelsToMeters = 1.0f / MetersToPixels;
+
+        renderGroup.MonitorHalfDimInMeters = new Vector2f(0.5f * PixelWidth * PixelsToMeters, 0.5f * PixelHeight*PixelsToMeters);
+
+        renderGroup.Transform.MetersToPixels = MetersToPixels;
+        renderGroup.Transform.FocalLength =  FocalLength;
+        renderGroup.Transform.DistanceAboveTarget = DistanceAboveTarget;
+        renderGroup.Transform.ScreenCenter = new Vector2f(0.5f * PixelWidth, 0.5f * PixelHeight);
+
+        renderGroup.Transform.Orthographic = false;
+    }
+
+    public void Orthographic(RenderGroup renderGroup, int PixelWidth, int PixelHeight, float MetersToPixels) {
+        float PixelsToMeters = 1.0f / MetersToPixels;
+        renderGroup.MonitorHalfDimInMeters = new Vector2f(0.5f * PixelWidth*PixelsToMeters,0.5f*PixelHeight*PixelsToMeters);
+
+        renderGroup.Transform.MetersToPixels = MetersToPixels;
+        renderGroup.Transform.FocalLength = 1.0f;
+        renderGroup.Transform.DistanceAboveTarget = 1.0f;
+        renderGroup.Transform.ScreenCenter = new Vector2f(0.5f * PixelWidth, 0.5f * PixelHeight);
+
+        renderGroup.Transform.Orthographic = true;
     }
 }

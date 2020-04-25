@@ -240,6 +240,11 @@ public class GameApp implements Runnable {
 
     private void update(float interval) {
         renderGroup = entityService.initRenderGroup();
+        float WidthOfMonitor = 0.635f;
+        float MetersToPixels = DisplayManager.WIDTH * WidthOfMonitor;
+        float FocalLength = 0.6f;
+        float DistanceAboveGround = 9.0f;
+        renderGroupService.Perspective(renderGroup, DisplayManager.WIDTH, DisplayManager.HEIGHT, MetersToPixels, FocalLength, DistanceAboveGround);
         gameMemory.loadedBitmap = new LoadedBitmap();
         gameMemory.loadedBitmap.Width = DisplayManager.WIDTH;
         gameMemory.loadedBitmap.Height = DisplayManager.HEIGHT;
@@ -257,9 +262,9 @@ public class GameApp implements Runnable {
         gameMemory.simRegion = entityService.BeginSim(SimCenterP, SimBounds, globalinterval);
 
         CameraP = World.subtract(new World.WorldPosition(Camera.position), new World.WorldPosition(SimCenterP));
-//        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(ScreenBounds), new Vector4f(1.0f, 1.0f, 0.0f, 1.0f), EntityType.DEBUG);
-//        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(SimBounds), new Vector4f(0.0f, 1.0f, 1.0f, 1.0f), EntityType.DEBUG);
-//        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(gameMemory.simRegion.Bounds), new Vector4f(1.0f, 0.0f, 1.0f, 1.0f), EntityType.DEBUG);
+        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(ScreenBounds), new Vector4f(1.0f, 1.0f, 0.0f, 1.0f), EntityType.DEBUG);
+        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(SimBounds), new Vector4f(0.0f, 1.0f, 1.0f, 1.0f), EntityType.DEBUG);
+        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(gameMemory.simRegion.Bounds), new Vector4f(1.0f, 0.0f, 1.0f, 1.0f), EntityType.DEBUG);
         entityService.pushToRender(renderGroup);
     }
 }

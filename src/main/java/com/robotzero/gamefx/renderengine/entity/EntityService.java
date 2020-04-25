@@ -393,9 +393,6 @@ public class EntityService {
                         case ("monstar"): {
 
                         } break;
-                        default: {
-                            throw new RuntimeException("Invalid code path");
-                        }
                     }
 
                     if (!IsSet(entity, SimEntityFlag.NONSPATIAL) && MoveSpec != null && IsSet(entity, SimEntityFlag.MOVEABLE)) {
@@ -410,7 +407,7 @@ public class EntityService {
                             loadedBitmap.texture = Renderer2D.texture;
                             loadedBitmap.Width = 60;
                             loadedBitmap.Height = 60;
-                            loadedBitmap.WidthOverHeight = 1;
+                            loadedBitmap.WidthOverHeight = loadedBitmap.Width / loadedBitmap.Height;
                             renderGroupService.pushBitmap(renderGroup, loadedBitmap, 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1, 0.5f, 0f, 1f), entity.Type);
                         } break;
                         case ("hero"): {
@@ -418,7 +415,7 @@ public class EntityService {
                             loadedBitmap.texture = Renderer2D.texture;
                             loadedBitmap.Width = 60;
                             loadedBitmap.Height = 60;
-                            loadedBitmap.WidthOverHeight = 1;
+                            loadedBitmap.WidthOverHeight = loadedBitmap.Width / loadedBitmap.Height;
                             float HeroSizeC = 2.5f;
                             renderGroupService.pushBitmap(renderGroup, loadedBitmap, HeroSizeC * 0.4f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
                         } break;
@@ -724,7 +721,7 @@ public class EntityService {
     }
 
     public RenderGroup initRenderGroup() {
-        return renderGroupService.AllocateRenderGroup(1000000, DisplayManager.WIDTH, DisplayManager.HEIGHT);
+        return renderGroupService.AllocateRenderGroup(1000000);
     }
 
     public RenderEntryCoordinateSystem CoordinateSystem(RenderGroup Group, Vector2f Origin, Vector2f XAxis, Vector2f YAxis, Vector4f Color) {
