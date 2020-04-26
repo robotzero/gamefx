@@ -281,25 +281,28 @@ public class RenderGroupService {
             List<RenderEntry> renderEntryClear = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.CLEAR);
             List<RenderEntry> renderEntryPoints = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.COORDINATE);
 
-            renderEntryBitmap.forEach(entry -> {
+            renderEntryBitmap.stream().filter(entry -> {
+                RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
+                return bitmap.entityType == EntityType.HERO;
+            }).forEach(entry -> {
                 RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
                 Vector3f Max = new Vector3f(bitmap.P).add(new Vector3f(bitmap.Size, 0f));
-//                return CompletableFuture.runAsync(() -> {
-                renderer2D.drawTextureRegion(bitmap.P.x, bitmap.P.y, Max.x, Max.y, 0, 0, 1, 1, bitmap.entityType == EntityType.HERO ? 1.0f : 0.0f, new Color(bitmap.Color.x, bitmap.Color.y, bitmap.Color.z));
-//                }, this.executorService);
+                renderer2D.drawTextureRegion(bitmap.P.x, bitmap.P.y, Max.x, Max.y, 0, 0, 1, 1, 1.0f, new Color(bitmap.Color.x, bitmap.Color.y, bitmap.Color.z));
+            });
+
+            renderEntryBitmap.stream().filter(entry -> {
+                RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
+                return bitmap.entityType != EntityType.HERO;
+            }).forEach(entry -> {
+                RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
+                Vector3f Max = new Vector3f(bitmap.P).add(new Vector3f(bitmap.Size, 0f));
+                renderer2D.drawTextureRegion(bitmap.P.x, bitmap.P.y, Max.x, Max.y, 0, 0, 1, 1, 0.0f, new Color(bitmap.Color.x, bitmap.Color.y, bitmap.Color.z));
             });
 
             renderEntryRectangle.forEach(entry -> {
                 RenderEntryRectangle rectangle = (RenderEntryRectangle) entry;
                 Vector3f Max = new Vector3f(rectangle.P).add(new Vector3f(rectangle.Dim, 0));
-//                return CompletableFuture.runAsync(() -> {
-//                    glfwMakeContextCurrent(DisplayManager.getW());
                 renderer2D.drawTextureRegion(rectangle.P.x, rectangle.P.y, Max.x, Max.y, 0, 0, 1, 1, 0.0f, new Color(rectangle.Color.x, rectangle.Color.y, rectangle.Color.z));
-//                }, this.executorService);
-//            }).collect(Collectors.toList());
-
-//            collect.addAll(collect1);
-//            sequence(collect).join();
             });
             renderer2D.end();
         }

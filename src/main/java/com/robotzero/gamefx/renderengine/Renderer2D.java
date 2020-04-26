@@ -47,7 +47,7 @@ public class Renderer2D {
      */
     public void init() {
         /* Setup shader programs */
-        texture = Texture.loadTexture(this.getClass().getClassLoader().getResource("bird.png").getFile());
+        texture = Texture.loadTexture(this.getClass().getClassLoader().getResource("fred_01.png").getFile());
         setupShaderProgram();
     }
 
@@ -55,7 +55,7 @@ public class Renderer2D {
      * Clears the drawing area.
      */
     public void clear() {
-        glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 

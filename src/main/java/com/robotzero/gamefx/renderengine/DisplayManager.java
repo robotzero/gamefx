@@ -18,6 +18,7 @@ import static org.lwjgl.opengl.GL11.GL_TRUE;
 import static org.lwjgl.opengl.GL11.glBlendFunc;
 import static org.lwjgl.opengl.GL11.glClearColor;
 import static org.lwjgl.opengl.GL11.glEnable;
+import static org.lwjgl.opengl.GL11.glViewport;
 import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.system.MemoryUtil.memAddress;
@@ -81,6 +82,7 @@ public class DisplayManager {
             if (width > 0 && height > 0 && (WIDTH != width || HEIGHT != height)) {
                 WIDTH = width;
                 HEIGHT = height;
+                glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
             }
         });
 
@@ -106,6 +108,7 @@ public class DisplayManager {
         GL.createCapabilities();
         GLUtil.setupDebugMessageCallback();
 
+        glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
 //        glDepthFunc(GL_NEVER);
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_BLEND);
@@ -148,9 +151,5 @@ public class DisplayManager {
 
     public void setWindowTitle(String title) {
         glfwSetWindowTitle(window, title);
-    }
-
-    public static long getW() {
-        return window;
     }
 }

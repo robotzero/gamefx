@@ -417,7 +417,7 @@ public class EntityService {
                             loadedBitmap.Height = 60;
                             loadedBitmap.WidthOverHeight = loadedBitmap.Width / loadedBitmap.Height;
                             float HeroSizeC = 2.5f;
-                            renderGroupService.pushBitmap(renderGroup, loadedBitmap, HeroSizeC * 0.4f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
+                            renderGroupService.pushBitmap(renderGroup, loadedBitmap, HeroSizeC * 1.0f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
                         } break;
                         case ("space"): {
                             for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
