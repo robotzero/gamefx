@@ -3,6 +3,7 @@ package com.robotzero.gamefx;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Renderer2D;
+import com.robotzero.gamefx.renderengine.assets.AssetService;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
 import com.robotzero.gamefx.renderengine.utils.Timer;
@@ -29,7 +30,8 @@ public class Robot {
             Renderer2D renderer2D = new Renderer2D(camera);
             RenderGroupService renderGroupService = new RenderGroupService(renderer2D, executor);
             EntityService entityService = new EntityService(gameMemory, world, renderGroupService, executor);
-            GameApp gameApp = new GameApp(displayManager, renderer2D, timer, entityService, gameMemory, renderGroupService);
+            AssetService assetService = new AssetService(executor, gameMemory);
+            GameApp gameApp = new GameApp(displayManager, renderer2D, timer, entityService, gameMemory, renderGroupService, assetService);
             gameApp.run();
         } catch (Throwable t) {
             System.out.println(t.toString());

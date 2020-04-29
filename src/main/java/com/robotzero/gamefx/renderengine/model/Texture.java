@@ -7,6 +7,7 @@ import org.lwjgl.system.MemoryStack;
 import static com.jogamp.opengl.GL.GL_NEAREST;
 import static com.jogamp.opengl.GL.GL_RGBA;
 import static com.jogamp.opengl.GL.GL_RGBA8;
+import static com.jogamp.opengl.GL.GL_TEXTURE;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
@@ -51,6 +52,13 @@ public class Texture {
      */
     public void bind() {
         glBindTexture(GL_TEXTURE_2D, id);
+    }
+
+    /**
+     * Unbinds the texture
+     */
+    public void unbind() {
+        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     /**

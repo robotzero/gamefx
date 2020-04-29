@@ -36,7 +36,6 @@ public class Renderer2D {
     private int numVertices;
     private boolean drawing;
     private final Camera camera;
-    public static Texture texture;
 
     public Renderer2D(Camera camera) {
         this.camera = camera;
@@ -47,7 +46,6 @@ public class Renderer2D {
      */
     public void init() {
         /* Setup shader programs */
-        texture = Texture.loadTexture(this.getClass().getClassLoader().getResource("fred_01.png").getFile());
         setupShaderProgram();
     }
 
@@ -304,7 +302,6 @@ public class Renderer2D {
         }
         vbo.delete();
         program.delete();
-        texture.delete();
     }
 
     /**

@@ -365,7 +365,7 @@ public class EntityService {
     }
 
     public void pushToRender(RenderGroup renderGroup) {
-        if (gameMemory.simRegion == null || Renderer2D.texture == null) {
+        if (gameMemory.simRegion == null) {
             return;
         }
 
@@ -404,7 +404,7 @@ public class EntityService {
                     switch(entity.Type.name().toLowerCase()) {
                         case ("wall"): {
                             LoadedBitmap loadedBitmap = new LoadedBitmap();
-                            loadedBitmap.texture = Renderer2D.texture;
+                            loadedBitmap.texture = gameMemory.gameAssets.get("fred_01.png").getTexture();
                             loadedBitmap.Width = 60;
                             loadedBitmap.Height = 60;
                             loadedBitmap.WidthOverHeight = loadedBitmap.Width / loadedBitmap.Height;
@@ -412,11 +412,11 @@ public class EntityService {
                         } break;
                         case ("hero"): {
                             LoadedBitmap loadedBitmap = new LoadedBitmap();
-                            loadedBitmap.texture = Renderer2D.texture;
-                            loadedBitmap.Width = 60;
-                            loadedBitmap.Height = 60;
+                            loadedBitmap.texture = gameMemory.gameAssets.get("fred_01.png").getTexture();
+                            loadedBitmap.Width = 32;
+                            loadedBitmap.Height = 32;
                             loadedBitmap.WidthOverHeight = loadedBitmap.Width / loadedBitmap.Height;
-                            float HeroSizeC = 2.5f;
+                            float HeroSizeC = 1.0f;
                             renderGroupService.pushBitmap(renderGroup, loadedBitmap, HeroSizeC * 1.0f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
                         } break;
                         case ("space"): {

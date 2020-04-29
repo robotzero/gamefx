@@ -3,6 +3,7 @@ package com.robotzero.gamefx;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Renderer2D;
+import com.robotzero.gamefx.renderengine.assets.AssetService;
 import com.robotzero.gamefx.renderengine.entity.ControlledHero;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
@@ -58,8 +59,9 @@ public class GameApp implements Runnable {
     public static RenderGroup renderGroup;
     public static World.WorldPosition SimCenterP;
     public static Vector3f CameraP;
+    private final AssetService assetService;
 
-    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g, RenderGroupService renderGroupService) {
+    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g, RenderGroupService renderGroupService, AssetService assetService) {
         this.displayManager = displayManager;
         this.renderer2D = renderer2D;
         this.timer = timer;
@@ -67,6 +69,7 @@ public class GameApp implements Runnable {
         this.gameMemory = g;
         this.entityService = entityService;
         this.renderGroupService = renderGroupService;
+        this.assetService = assetService;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
         entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null);
@@ -94,7 +97,8 @@ public class GameApp implements Runnable {
         renderer2D.init();
         lastFps = timer.getTime();
         fps = 0;
-
+        assetService.LoadAssets("assets");
+        gameMemory.gameAssets.get("fred_01.png").createTexture();
         World.WorldPosition NewCameraP = entityService.ChunkPositionFromTilePosition(
                 WorldGenerator.CameraTileX,
                 WorldGenerator.CameraTileY,
@@ -232,6 +236,7 @@ public class GameApp implements Runnable {
     }
 
     protected void cleanup() {
+        assetService.cleanUp();
         renderer2D.dispose();
         gameMemory.free();
         glfwDestroyWindow(this.displayManager.getWindow());

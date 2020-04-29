@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.world;
 
+import com.robotzero.gamefx.renderengine.assets.Asset;
 import com.robotzero.gamefx.renderengine.entity.ControlledHero;
 import com.robotzero.gamefx.renderengine.entity.LowEntity;
 import com.robotzero.gamefx.renderengine.entity.SimEntityCollisionVolumeGroup;
@@ -14,6 +15,7 @@ import org.lwjgl.system.StructBuffer;
 import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GameMemory {
     public static final int OBJECT_SHELL_SIZE   = 8;
@@ -46,6 +48,7 @@ public class GameMemory {
     public SimRegion simRegion;
     public ControlledHero ControlledHero;
     public SimEntityCollisionVolumeGroup StandardRoomCollision;
+    public ConcurrentHashMap<String, Asset> gameAssets = new ConcurrentHashMap<>();
 
     public GameMemory() {
         mainStorage = org.lwjgl.system.MemoryUtil.memAlloc(PermanentStorageSize + TransientStorageSize);
