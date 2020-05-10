@@ -28,7 +28,7 @@ public class Robot {
             World world = new World();
             Camera camera = new Camera();
             Renderer2D renderer2D = new Renderer2D(camera);
-            RenderGroupService renderGroupService = new RenderGroupService(renderer2D, executor);
+            RenderGroupService renderGroupService = new RenderGroupService(renderer2D, executor, gameMemory);
             EntityService entityService = new EntityService(gameMemory, world, renderGroupService, executor);
             AssetService assetService = new AssetService(executor, gameMemory);
             GameApp gameApp = new GameApp(displayManager, renderer2D, timer, entityService, gameMemory, renderGroupService, assetService);

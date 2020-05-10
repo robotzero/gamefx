@@ -98,7 +98,6 @@ public class GameApp implements Runnable {
         lastFps = timer.getTime();
         fps = 0;
         assetService.LoadAssets("assets");
-        gameMemory.gameAssets.get("fred_01.png").createTexture();
         World.WorldPosition NewCameraP = entityService.ChunkPositionFromTilePosition(
                 WorldGenerator.CameraTileX,
                 WorldGenerator.CameraTileY,

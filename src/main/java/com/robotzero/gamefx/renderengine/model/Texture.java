@@ -2,12 +2,12 @@ package com.robotzero.gamefx.renderengine.model;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+
 import org.lwjgl.system.MemoryStack;
 
 import static com.jogamp.opengl.GL.GL_NEAREST;
 import static com.jogamp.opengl.GL.GL_RGBA;
 import static com.jogamp.opengl.GL.GL_RGBA8;
-import static com.jogamp.opengl.GL.GL_TEXTURE;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
@@ -167,6 +167,7 @@ public class Texture {
 
         texture.uploadData(GL_RGBA8, width, height, GL_RGBA, data);
 
+        texture.unbind();
         return texture;
     }
 
@@ -204,5 +205,9 @@ public class Texture {
         }
 
         return createTexture(width, height, image);
+    }
+
+    public boolean isCreated() {
+        return this.id == 0;
     }
 }
