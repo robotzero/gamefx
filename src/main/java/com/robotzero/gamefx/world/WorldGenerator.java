@@ -19,15 +19,15 @@ public class WorldGenerator {
         boolean doorRight = false;
         boolean doorTop = false;
         boolean doorBottom = false;
+        RandomSeries Series = RandomSeed(1234);
 
         for (int screenIndex = 0;
-             screenIndex < 2000;
+             screenIndex < 1;
              ++screenIndex) {
 
-            int randomChoice;
-            randomChoice = Random.randomNumberTable[randomNumberIndex++] % 2;
+            int DoorDirection = RandomChoice(Series, doorLeft || doorRight ? 2 : 4);
 
-            if (randomChoice == 1) {
+            if (DoorDirection == 1) {
                 doorRight = true;
             } else {
                 doorTop = true;
@@ -76,13 +76,39 @@ public class WorldGenerator {
             doorRight = false;
             doorTop = false;
 
-            if (randomChoice == 2) {
+            if (DoorDirection == 2) {
 
-            } else if (randomChoice == 1) {
+            } else if (DoorDirection == 1) {
                 screenX += 1;
             } else {
                 screenY += 1;
             }
         }
+    }
+
+    private static int RandomNextUInt32(RandomSeries series) {
+        int Result = Random.randomNumberTable[series.Index++];
+        if (series.Index >= Random.randomNumberTable.length) {
+            series.Index = 0;
+        }
+        return Result;
+    }
+
+    private static int RandomChoice(RandomSeries Series, int ChoiceCount) {
+        int Result = RandomNextUInt32(Series) & ChoiceCount;
+        return Result;
+    }
+
+    private static RandomSeries RandomSeed(int Value)
+    {
+        RandomSeries Series = new RandomSeries();
+
+        Series.Index = (Value % Random.randomNumberTable.length);
+
+        return(Series);
+    }
+
+    private static class RandomSeries {
+        public int Index;
     }
 }
