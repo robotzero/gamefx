@@ -28,7 +28,7 @@ public class AssetService {
     public void LoadAssets(String path) {
         URL resources = this.getClass().getClassLoader().getResource(path);
         try {
-            final var resourcesPath = Paths.get(resources.toURI().getPath());
+            final var resourcesPath = Paths.get(resources.toURI());
             Stream<Path> files = Files.list(resourcesPath);
             RenderGroupService.sequence(files.map(asset -> {
                 return CompletableFuture.supplyAsync(() -> {

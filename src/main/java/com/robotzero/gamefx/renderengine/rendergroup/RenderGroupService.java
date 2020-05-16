@@ -10,6 +10,7 @@ import com.robotzero.gamefx.world.GameMemory;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.opengl.WGLARBContextFlushControl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+
+import static org.lwjgl.opengl.GL11.glFlush;
 
 public class RenderGroupService {
     private final Renderer2D renderer2D;
@@ -305,12 +308,12 @@ public class RenderGroupService {
             }).forEach(entry -> {
                 RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
                 if (bitmap.Bitmap.texture == null) {
-                    gameMemory.gameAssets.get("fred_01.png").createTexture();
-                    bitmap.Bitmap.texture = gameMemory.gameAssets.get("fred_01.png").getTexture();
+                    gameMemory.gameAssets.get("bird.png").createTexture();
+                    bitmap.Bitmap.texture = gameMemory.gameAssets.get("bird.png").getTexture();
                 }
                 bitmap.Bitmap.texture.bind();
                 Vector3f Max = new Vector3f(bitmap.P).add(new Vector3f(bitmap.Size, 0f));
-                renderer2D.drawTextureRegion(bitmap.P.x, bitmap.P.y, Max.x, Max.y, 0, 0, 1, 1, 0.0f, new Color(bitmap.Color.x, bitmap.Color.y, bitmap.Color.z));
+                renderer2D.drawTextureRegion(bitmap.P.x, bitmap.P.y, Max.x, Max.y, 0, 0, 1, 1, 1.0f, new Color(bitmap.Color.x, bitmap.Color.y, bitmap.Color.z));
                 bitmap.Bitmap.texture.unbind();
 
             });

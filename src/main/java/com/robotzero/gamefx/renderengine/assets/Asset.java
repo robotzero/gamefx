@@ -25,7 +25,7 @@ public class Asset {
     public void loadAsset(String path) {
         String OS = System.getProperty("os.name").toLowerCase();
         if ((OS.contains("win"))) {
-            path = path.replaceFirst("/", "");
+            path = path.replaceFirst("/", "\\\\");
         }
         fileName = Paths.get(path).getFileName().toString();
         try (MemoryStack stack = MemoryStack.stackPush()) {
