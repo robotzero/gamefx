@@ -4,13 +4,9 @@ import com.robotzero.gamefx.GameApp;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Renderer2D;
+import com.robotzero.gamefx.renderengine.assets.Asset;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
-import com.robotzero.gamefx.renderengine.rendergroup.LoadedBitmap;
-import com.robotzero.gamefx.renderengine.rendergroup.RenderBasis;
-import com.robotzero.gamefx.renderengine.rendergroup.RenderEntryCoordinateSystem;
-import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
-import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupEntryType;
-import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
+import com.robotzero.gamefx.renderengine.rendergroup.*;
 import com.robotzero.gamefx.renderengine.translations.MoveSpec;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
@@ -399,25 +395,36 @@ public class EntityService {
                         moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
                     }
 
-                    renderGroup.Transform.OffsetP = GetEntityGroundPoint(entity);
+                    ObjectTransform EntityTransform = DefaultFlatTransform();
+                    EntityTransform.OffsetP = GetEntityGroundPoint(entity);
 
                     switch(entity.Type.name().toLowerCase()) {
                         case ("wall"): {
                             LoadedBitmap loadedBitmap = new LoadedBitmap();
-                            loadedBitmap.texture = gameMemory.gameAssets.get("fred_01.png").getTexture();
-                            loadedBitmap.Width = 60;
-                            loadedBitmap.Height = 60;
-                            loadedBitmap.WidthOverHeight = loadedBitmap.Width / loadedBitmap.Height;
-                            renderGroupService.pushBitmap(renderGroup, loadedBitmap, 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1, 0.5f, 0f, 1f), entity.Type);
+                            loadedBitmap.texture = gameMemory.gameAssets.get("tree00.bmp").getTexture();
+                            if (loadedBitmap.texture == null) {
+                                gameMemory.gameAssets.get("tree00.bmp").createTexture();
+                                loadedBitmap.texture = gameMemory.gameAssets.get("tree00.bmp").getTexture();
+                            }
+                            loadedBitmap.Width = gameMemory.gameAssets.get("tree00.bmp").getWidth();
+                            loadedBitmap.Height = gameMemory.gameAssets.get("tree00.bmp").getHeight();
+                            loadedBitmap.WidthOverHeight = (float) loadedBitmap.Width / (float) loadedBitmap.Height;
+                            loadedBitmap.AlignPercentage = new Vector2f(1, 1);
+                            renderGroupService.pushBitmap(renderGroup, EntityTransform, loadedBitmap, 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1, 0.5f, 0f, 1f), 1.0f, entity.Type);
                         } break;
                         case ("hero"): {
                             LoadedBitmap loadedBitmap = new LoadedBitmap();
                             loadedBitmap.texture = gameMemory.gameAssets.get("fred_01.png").getTexture();
-                            loadedBitmap.Width = 32;
-                            loadedBitmap.Height = 32;
-                            loadedBitmap.WidthOverHeight = loadedBitmap.Width / loadedBitmap.Height;
+                            if (loadedBitmap.texture == null) {
+                                gameMemory.gameAssets.get("fred_01.png").createTexture();
+                                loadedBitmap.texture = gameMemory.gameAssets.get("fred_01.png").getTexture();
+                            }
+                            loadedBitmap.Width = gameMemory.gameAssets.get("fred_01.png").getWidth();
+                            loadedBitmap.Height = gameMemory.gameAssets.get("fred_01.png").getHeight();
+                            loadedBitmap.WidthOverHeight = (float) loadedBitmap.Width / (float) loadedBitmap.Height;
+                            loadedBitmap.AlignPercentage = new Vector2f(1, 1);
                             float HeroSizeC = 1.0f;
-                            renderGroupService.pushBitmap(renderGroup, loadedBitmap, HeroSizeC * 1.0f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), entity.Type);
+                            renderGroupService.pushBitmap(renderGroup, EntityTransform, loadedBitmap, HeroSizeC * 1.0f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), 1.0f, entity.Type);
                         } break;
                         case ("space"): {
                             for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
@@ -647,6 +654,8 @@ public class EntityService {
                 }
             }
         }
+
+        GameApp.renderGroup.clear();
     }
 
     public boolean IsSet(SimEntity Entity, SimEntityFlag Flag) {
@@ -720,8 +729,14 @@ public class EntityService {
         return Group;
     }
 
-    public RenderGroup initRenderGroup() {
-        return renderGroupService.AllocateRenderGroup(1000000);
+    public RenderGroup BeginRenderGroup(Map<String, Asset> assets, GameRenderCommands Commands, boolean rendersInBackground) {
+        RenderGroup renderGroup = new RenderGroup();
+        renderGroup.Assets = assets;
+        renderGroup.RendersInBackground = rendersInBackground;
+        renderGroup.gameRenderCommands = Commands;
+
+        return renderGroup;
+//        return renderGroupService.AllocateRenderGroup(1000000);
     }
 
     public RenderEntryCoordinateSystem CoordinateSystem(RenderGroup Group, Vector2f Origin, Vector2f XAxis, Vector2f YAxis, Vector4f Color) {
@@ -750,5 +765,22 @@ public class EntityService {
                 C.Points[PIndex++] = new Vector2f(X, Y);
             }
         }
+    }
+
+    public static ObjectTransform DefaultUprightTransform() {
+        ObjectTransform objectTransform = new ObjectTransform();
+        objectTransform.Scale = 1.0f;
+        objectTransform.Upright = true;
+
+        return objectTransform;
+    }
+
+    public static ObjectTransform DefaultFlatTransform() {
+        ObjectTransform objectTransform = new ObjectTransform();
+        objectTransform.Scale = 1.0f;
+        objectTransform.Upright = false;
+        objectTransform.OffsetP = new Vector3f(0, 0, 0);
+
+        return objectTransform;
     }
 }

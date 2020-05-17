@@ -5,7 +5,6 @@ import com.robotzero.gamefx.renderengine.entity.ControlledHero;
 import com.robotzero.gamefx.renderengine.entity.LowEntity;
 import com.robotzero.gamefx.renderengine.entity.SimEntityCollisionVolumeGroup;
 import com.robotzero.gamefx.renderengine.entity.SimRegion;
-import com.robotzero.gamefx.renderengine.rendergroup.LoadedBitmap;
 import org.joml.Vector3f;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.system.MemoryUtil;
@@ -30,7 +29,6 @@ public class GameMemory {
     public static final int FLOAT_FIELD_SIZE    = 4;
     public static final Vector3f InvalidP = new Vector3f(100000.0f, 100000.0f, 1000000f);
     public static float ZOffset = 0.0f;
-    public LoadedBitmap loadedBitmap;
 
     private boolean isInitialized;
     private PointerBuffer PermanentStorage;

@@ -68,56 +68,6 @@ public class Renderer2D {
         numVertices = 0;
     }
 
-//    public void render(RenderGroup RenderGroup) {
-////        final var entityStates = entityService.getModelMatrix();
-////        final var debugStates = entityService.getDebug();
-//        if (!entityStates.isEmpty()) {
-//            clear();
-//            begin();
-//
-//            Vector2f ScreenDim = new Vector2f(DisplayManager.WIDTH, DisplayManager.HEIGHT);
-//
-//            List<RenderEntry> renderEntryBitmap = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.BITMAP);
-//            List<RenderEntry> renderEntryRectangle = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.RECTANGLE);
-//            List<RenderEntry> renderEntryClear = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.CLEAR);
-//            List<RenderEntry> renderEntryPoints = GameApp.renderGroup.PushBufferBase.get(RenderGroupEntryType.COORDINATE);
-//
-//
-//            renderEntryBitmap.stream().map(entry -> {
-//                RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
-//                EntityBasisPResult P = GetRenderEntityBasisP(RenderGroup, bitmap.EntityBasis, ScreenDim);
-//                return Map.of(bitmap.entityType, new RenderData(new Vector3f(P.P, 0), new Vector3f(P.P, 0).add(new Vector3f(bitmap.Size.x, bitmap.Size.y, 0).mul(P.Scale)), bitmap.Color));
-//            }).flatMap(matrixes -> matrixes.entrySet().stream()).collect(Collectors.groupingBy(a -> {
-//                return a.getKey();
-//            }, Collectors.mapping(a -> a.getValue(), Collectors.toList())));
-//
-//
-//
-//            final var hero = entityStates.get(EntityType.HERO).get(0);
-//            drawTextureRegion(hero.getMin().x, hero.getMin().y, hero.getMax().x, hero.getMax().y, 0, 0, 1, 1, 1.0f, Color.WHITE);
-//            entityStates.get(EntityType.WALL).forEach(wall -> {
-//                drawTextureRegion(wall.getMin().x, wall.getMin().y, wall.getMax().x, wall.getMax().y, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
-//            });
-//            entityStates.get(EntityType.DEBUG).forEach(a -> {
-//                drawTextureRegion(a.getMin().x, a.getMin().y, a.getMax().x, a.getMax().y, 0, 0, 1, 1,0.0f, new Color(a.getColor().x, a.getColor().y, a.getColor().z));
-//            });
-////            debugStates.forEach((a, b) -> {
-////                Vector3f Min = b.get(0);
-////                Vector3f Max = b.get(1);
-////
-////                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Min.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-////                drawTextureRegion(Min.x - 2.0f, Max.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-////                drawTextureRegion(Min.x - 2.0f, Min.y - 2.0f, Min.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-////                drawTextureRegion(Max.x - 2.0f, Min.y - 2.0f, Max.x + 2.0f, Max.y + 2.0f, 0, 0, 1, 1, 0.0f, Color.BLACK);
-////
-////            });
-////            entityStates.get(EntityType.DEBUG).forEach(a -> {
-////                drawTextureRegion(a.x, a.y, a.x + World.TileSideInPixels, a.y + World.TileSideInPixels, 0, 0, 1, 1, 0.0f, new Color(1.0f, 0.5f, 0.0f, 1.0f));
-////            });
-//            end();
-//        }
-//    }
-
     /**
      * End rendering.
      */
@@ -190,7 +140,7 @@ public class Renderer2D {
         float s2 = 1f;
         float t2 = 1f;
 
-        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, 1.0f, c);
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
     }
 
     /**
@@ -205,8 +155,8 @@ public class Renderer2D {
      * @param regWidth  Width of the texture region
      * @param regHeight Height of the texture region
      */
-    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight, float isTexture) {
-        drawTextureRegion(texture, x, y, regX, regY, regWidth, regHeight, isTexture, Color.WHITE);
+    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight) {
+        drawTextureRegion(texture, x, y, regX, regY, regWidth, regHeight, Color.WHITE);
     }
 
     /**
@@ -222,7 +172,7 @@ public class Renderer2D {
      * @param regHeight Height of the texture region
      * @param c         The color to use
      */
-    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight, float isTexture, Color c) {
+    public void drawTextureRegion(Texture texture, float x, float y, float regX, float regY, float regWidth, float regHeight, Color c) {
         /* Vertex positions */
         float x1 = x;
         float y1 = y;
@@ -235,7 +185,7 @@ public class Renderer2D {
         float s2 = (regX + regWidth) / texture.getWidth();
         float t2 = (regY + regHeight) / texture.getHeight();
 
-        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, isTexture, c);
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, c);
     }
 
     /**
@@ -251,8 +201,8 @@ public class Renderer2D {
      * @param s2 Top right s coordinate
      * @param t2 Top right t coordinate
      */
-    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, float isTexture) {
-        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, isTexture, Color.WHITE);
+    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2) {
+        drawTextureRegion(x1, y1, x2, y2, s1, t1, s2, t2, Color.WHITE);
     }
 
     /**
@@ -269,8 +219,8 @@ public class Renderer2D {
      * @param t2 Top right t coordinate
      * @param c  The color to use
      */
-    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, float isTexture, Color c) {
-        if (vertices.remaining() < 8 * 6) {
+    public void drawTextureRegion(float x1, float y1, float x2, float y2, float s1, float t1, float s2, float t2, Color c) {
+        if (vertices.remaining() < 7 * 6) {
             /* We need more space in the buffer, so flush it */
             flush();
         }
@@ -280,13 +230,13 @@ public class Renderer2D {
         float b = c.getBlue();
         float a = c.getAlpha();
 
-        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1).put(isTexture);
-        vertices.put(x1).put(y2).put(r).put(g).put(b).put(a).put(s1).put(t2).put(isTexture);
-        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2).put(isTexture);
+        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
+        vertices.put(x1).put(y2).put(r).put(g).put(b).put(a).put(s1).put(t2);
+        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
 
-        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1).put(isTexture);
-        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2).put(isTexture);
-        vertices.put(x2).put(y1).put(r).put(g).put(b).put(a).put(s2).put(t1).put(isTexture);
+        vertices.put(x1).put(y1).put(r).put(g).put(b).put(a).put(s1).put(t1);
+        vertices.put(x2).put(y2).put(r).put(g).put(b).put(a).put(s2).put(t2);
+        vertices.put(x2).put(y1).put(r).put(g).put(b).put(a).put(s2).put(t1);
 
         numVertices += 6;
     }
@@ -383,20 +333,16 @@ public class Renderer2D {
         /* Specify Vertex Pointer */
         int posAttrib = program.getAttributeLocation("position");
         program.enableVertexAttribute(posAttrib);
-        program.pointVertexAttribute(posAttrib, 2, 9 * Float.BYTES, 0);
+        program.pointVertexAttribute(posAttrib, 2, 8 * Float.BYTES, 0);
 
         /* Specify Color Pointer */
         int colAttrib = program.getAttributeLocation("color");
         program.enableVertexAttribute(colAttrib);
-        program.pointVertexAttribute(colAttrib, 4, 9 * Float.BYTES, 2 * Float.BYTES);
+        program.pointVertexAttribute(colAttrib, 4, 8 * Float.BYTES, 2 * Float.BYTES);
 
         /* Specify Texture Pointer */
         int texAttrib = program.getAttributeLocation("texcoord");
         program.enableVertexAttribute(texAttrib);
-        program.pointVertexAttribute(texAttrib, 2, 9 * Float.BYTES, 6 * Float.BYTES);
-
-        int boolAttib = program.getAttributeLocation("renderTexture");
-        program.enableVertexAttribute(boolAttib);
-        program.pointVertexAttribute(boolAttib, 1, 9 * Float.BYTES, 8 * Float.BYTES);
+        program.pointVertexAttribute(texAttrib, 2, 8 * Float.BYTES, 6 * Float.BYTES);
     }
 }

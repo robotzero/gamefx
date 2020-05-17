@@ -78,4 +78,9 @@ public class Calc {
 
         return(Result);
     }
+
+    public static Vector3f Hadamard(Vector3f A, Vector3f B) {
+        Vector3f Result = new Vector3f(A.x * B.x, A.y * B.y, A.z * B.z);
+        return Result;
+    }
 }

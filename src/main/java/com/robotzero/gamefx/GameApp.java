@@ -9,6 +9,7 @@ import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
+import com.robotzero.gamefx.renderengine.rendergroup.GameRenderCommands;
 import com.robotzero.gamefx.renderengine.rendergroup.LoadedBitmap;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
@@ -93,11 +94,15 @@ public class GameApp implements Runnable {
     private void init() throws Exception {
         displayManager.createDisplay();
         timer.init();
-        renderGroup = entityService.initRenderGroup();
+        assetService.LoadAssets("assets");
+        GameRenderCommands gameRenderCommands = new GameRenderCommands();
+        gameRenderCommands.Width = DisplayManager.WIDTH;
+        gameRenderCommands.Height = DisplayManager.HEIGHT;
+        GameRenderCommands.allocate(gameRenderCommands);
+        renderGroup = entityService.BeginRenderGroup(gameMemory.gameAssets, gameRenderCommands, false);
         renderer2D.init();
         lastFps = timer.getTime();
         fps = 0;
-        assetService.LoadAssets("assets");
         World.WorldPosition NewCameraP = entityService.ChunkPositionFromTilePosition(
                 WorldGenerator.CameraTileX,
                 WorldGenerator.CameraTileY,
@@ -163,7 +168,7 @@ public class GameApp implements Runnable {
             fps = 0;
         }
         fps++;
-        renderGroupService.render(renderGroup, gameMemory.loadedBitmap, null, 1);
+        renderGroupService.render(renderGroup,null, 1);
         displayManager.updateDisplay();
     }
 
@@ -243,16 +248,17 @@ public class GameApp implements Runnable {
     }
 
     private void update(float interval) {
-        renderGroup = entityService.initRenderGroup();
+        GameRenderCommands gameRenderCommands = new GameRenderCommands();
+        gameRenderCommands.Width = DisplayManager.WIDTH;
+        gameRenderCommands.Height = DisplayManager.HEIGHT;
+        GameRenderCommands.allocate(gameRenderCommands);
+        entityService.BeginRenderGroup(gameMemory.gameAssets, gameRenderCommands, false);
         float WidthOfMonitor = 0.635f;
         float MetersToPixels = DisplayManager.WIDTH * WidthOfMonitor;
         float FocalLength = 0.6f;
         float DistanceAboveGround = 9.0f;
         renderGroupService.Perspective(renderGroup, DisplayManager.WIDTH, DisplayManager.HEIGHT, MetersToPixels, FocalLength, DistanceAboveGround);
-        gameMemory.loadedBitmap = new LoadedBitmap();
-        gameMemory.loadedBitmap.Width = DisplayManager.WIDTH;
-        gameMemory.loadedBitmap.Height = DisplayManager.HEIGHT;
-        ScreenCenter = new Vector2f(0.5f * gameMemory.loadedBitmap.Width, 0.5f * gameMemory.loadedBitmap.Height);
+        ScreenCenter = new Vector2f(0.5f * gameRenderCommands.Width, 0.5f * gameRenderCommands.Height);
         globalinterval = interval;
         Rectangle ScreenBounds = renderGroupService.GetCameraRectangleAtTarget(renderGroup);
         Rectangle CameraBoundsInMeters = Rectangle.RectMinMax(new Vector3f(ScreenBounds.getMin()), new Vector3f(ScreenBounds.getMax()));
@@ -266,9 +272,9 @@ public class GameApp implements Runnable {
         gameMemory.simRegion = entityService.BeginSim(SimCenterP, SimBounds, globalinterval);
 
         CameraP = World.subtract(new World.WorldPosition(Camera.position), new World.WorldPosition(SimCenterP));
-        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(ScreenBounds), new Vector4f(1.0f, 1.0f, 0.0f, 1.0f), EntityType.DEBUG);
-        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(SimBounds), new Vector4f(0.0f, 1.0f, 1.0f, 1.0f), EntityType.DEBUG);
-        renderGroupService.PushRectOutline(renderGroup, new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(gameMemory.simRegion.Bounds), new Vector4f(1.0f, 0.0f, 1.0f, 1.0f), EntityType.DEBUG);
+        renderGroupService.PushRectOutline(renderGroup, EntityService.DefaultFlatTransform(), new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(ScreenBounds), new Vector4f(1.0f, 1.0f, 0.0f, 1.0f), EntityType.DEBUG);
+        renderGroupService.PushRectOutline(renderGroup, EntityService.DefaultFlatTransform(), new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(SimBounds), new Vector4f(0.0f, 1.0f, 1.0f, 1.0f), EntityType.DEBUG);
+        renderGroupService.PushRectOutline(renderGroup, EntityService.DefaultFlatTransform(), new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(gameMemory.simRegion.Bounds), new Vector4f(1.0f, 0.0f, 1.0f, 1.0f), EntityType.DEBUG);
         entityService.pushToRender(renderGroup);
     }
 }
