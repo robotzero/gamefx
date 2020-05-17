@@ -80,8 +80,8 @@ public class DisplayManager {
 
         glfwSetFramebufferSizeCallback(window, (window, width, height) -> {
             if (width > 0 && height > 0 && (WIDTH != width || HEIGHT != height)) {
-                WIDTH = width;
-                HEIGHT = height;
+                DisplayManager.WIDTH = width;
+                DisplayManager.HEIGHT = height;
                 glViewport(0, 0, DisplayManager.WIDTH, DisplayManager.HEIGHT);
             }
         });

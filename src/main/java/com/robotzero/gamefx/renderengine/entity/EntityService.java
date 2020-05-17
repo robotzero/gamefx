@@ -410,7 +410,7 @@ public class EntityService {
                             loadedBitmap.Height = gameMemory.gameAssets.get("tree00.bmp").getHeight();
                             loadedBitmap.WidthOverHeight = (float) loadedBitmap.Width / (float) loadedBitmap.Height;
                             loadedBitmap.AlignPercentage = new Vector2f(1, 1);
-                            renderGroupService.pushBitmap(renderGroup, EntityTransform, loadedBitmap, 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1, 0.5f, 0f, 1f), 1.0f, entity.Type);
+                            renderGroupService.pushBitmap(renderGroup, EntityTransform, loadedBitmap, 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), 1.0f, entity.Type);
                         } break;
                         case ("hero"): {
                             LoadedBitmap loadedBitmap = new LoadedBitmap();

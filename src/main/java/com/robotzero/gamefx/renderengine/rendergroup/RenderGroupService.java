@@ -225,7 +225,6 @@ public class RenderGroupService {
                 renderer2D.drawTextureRegion(bitmap.P.x, bitmap.P.y, Max.x, Max.y, 0, 0, 1, 1, new Color(bitmap.Color.x, bitmap.Color.y, bitmap.Color.z));
                 bitmap.Bitmap.texture.unbind();
             });
-            renderer2D.flush();
 
             renderEntryBitmap.stream().filter(entry -> {
                 RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;

@@ -10,7 +10,6 @@ import com.robotzero.gamefx.renderengine.entity.EntityType;
 import com.robotzero.gamefx.renderengine.entity.SimEntity;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.renderengine.rendergroup.GameRenderCommands;
-import com.robotzero.gamefx.renderengine.rendergroup.LoadedBitmap;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
 import com.robotzero.gamefx.renderengine.utils.Random;
