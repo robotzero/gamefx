@@ -158,7 +158,7 @@ public class Texture {
 
         texture.uploadData(GL_RGBA8, width, height, GL_RGBA, data);
 
-//        texture.unbind();
+        texture.unbind();
         return texture;
     }
 

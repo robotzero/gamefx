@@ -142,10 +142,10 @@ public class DisplayManager {
     }
 
     public boolean isClosing() {
-        return glfwWindowShouldClose(this.window);
+        return glfwWindowShouldClose(window);
     }
 
-    public long getWindow() {
+    public static long getWindow() {
         return window;
     }
 

@@ -179,70 +179,52 @@ public class RenderGroupService {
         return(Result);
     }
 
-//    public void TiledRenderGroupToOutput(RenderGroup renderGroup, LoadedBitmap OutputTarget, int Even) {
-//        renderer2D.clear();
-//        renderer2D.begin();
-//        int TileCountX = 4;
-//        int TileCountY = 4;
-//
-//        // TODO(casey): Make sure that allocator allocates enough space so we can round these?
-//        // TODO(casey): Round to 4??
-//        int TileWidth = OutputTarget.Width / TileCountX;
-//        int TileHeight = OutputTarget.Height / TileCountY;
-//        for(int TileY = 0; TileY < TileCountY; ++TileY) {
-//            for(int TileX = 0; TileX < TileCountX; ++TileX)
-//            {
-//                float MinX = TileX * TileWidth + 4;
-//                float MaxX = MinX + TileWidth - 4;
-//                float MinY = TileY * TileHeight + 4;
-//                float MaxY = MinY + TileHeight - 4;
-//
-//                Rectangle ClipRect = new Rectangle(new Vector3f(MinX, MinY, 0), new Vector3f(MaxX, MaxY, 0));
-//
-//                render(renderGroup, OutputTarget, ClipRect, Even);
-//            }
-//        }
-//        renderer2D.end();
-//    }
-
     public void render(RenderGroup RenderGroup, Rectangle ClipRect, int Even) {
         if (RenderGroup != null && !RenderGroup.gameRenderCommands.PushBuffer.isEmpty()) {
             renderer2D.clear();
-            renderer2D.begin();
 
             List<RenderEntry> renderEntryBitmap = GameApp.renderGroup.gameRenderCommands.PushBuffer.get(RenderGroupEntryType.BITMAP);
             List<RenderEntry> renderEntryRectangle = GameApp.renderGroup.gameRenderCommands.PushBuffer.get(RenderGroupEntryType.RECTANGLE);
             List<RenderEntry> renderEntryClear = GameApp.renderGroup.gameRenderCommands.PushBuffer.get(RenderGroupEntryType.CLEAR);
             List<RenderEntry> renderEntryPoints = GameApp.renderGroup.gameRenderCommands.PushBuffer.get(RenderGroupEntryType.COORDINATE);
 
+            RenderGroup.Assets.get("fred_01.png").getTexture().bind();
+            renderer2D.begin();
             renderEntryBitmap.stream().filter(entry -> {
                 RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
                 return bitmap.entityType == EntityType.HERO;
-            }).forEach(entry -> {
+            }).findFirst().ifPresent(entry -> {
                 RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
                 Vector3f Max = new Vector3f(bitmap.P).add(new Vector3f(bitmap.Size, 0f));
-                bitmap.Bitmap.texture.bind();
                 renderer2D.drawTextureRegion(bitmap.P.x, bitmap.P.y, Max.x, Max.y, 0, 0, 1, 1, new Color(bitmap.Color.x, bitmap.Color.y, bitmap.Color.z));
-                bitmap.Bitmap.texture.unbind();
             });
+
+            renderer2D.end();
+            RenderGroup.Assets.get("tree00.bmp").getTexture().bind();
+            renderer2D.begin();
 
             renderEntryBitmap.stream().filter(entry -> {
                 RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
                 return bitmap.entityType != EntityType.HERO;
             }).forEach(entry -> {
                 RenderEntryBitmap bitmap = (RenderEntryBitmap) entry;
-                bitmap.Bitmap.texture.bind();
                 Vector3f Max = new Vector3f(bitmap.P).add(new Vector3f(bitmap.Size, 0f));
                 renderer2D.drawTextureRegion(bitmap.P.x, bitmap.P.y, Max.x, Max.y, 0, 0, 1, 1, new Color(bitmap.Color.x, bitmap.Color.y, bitmap.Color.z));
-                bitmap.Bitmap.texture.unbind();
-            });
-
-            renderEntryRectangle.forEach(entry -> {
-                RenderEntryRectangle rectangle = (RenderEntryRectangle) entry;
-                Vector3f Max = new Vector3f(rectangle.P).add(new Vector3f(rectangle.Dim, 0));
-                renderer2D.drawTextureRegion(rectangle.P.x, rectangle.P.y, Max.x, Max.y, 0, 0, 1, 1, new Color(rectangle.Color.x, rectangle.Color.y, rectangle.Color.z));
             });
             renderer2D.end();
+
+            RenderGroup.Assets.get("fred_01.png").getTexture().unbind();
+            RenderGroup.Assets.get("tree00.bmp").getTexture().unbind();
+            //DISABLE TEXTURE HERE
+//            renderer2D.begin();
+//
+//            renderEntryRectangle.forEach(entry -> {
+//                RenderEntryRectangle rectangle = (RenderEntryRectangle) entry;
+//                Vector3f Max = new Vector3f(rectangle.P).add(new Vector3f(rectangle.Dim, 0));
+//                renderer2D.drawTextureRegion(rectangle.P.x, rectangle.P.y, Max.x, Max.y, 0, 0, 1, 1, new Color(rectangle.Color.x, rectangle.Color.y, rectangle.Color.z));
+//            });
+//            renderer2D.end();
+            //ENABLE TEXTURE HERE
         }
     }
 

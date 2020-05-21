@@ -39,6 +39,19 @@ public class AssetService {
             }).collect(Collectors.toList())).join().parallelStream().forEach(asset -> {
                 gameMemory.gameAssets.put(asset.getFileName(), asset);
             });
+
+//            files.map(asset -> {
+//                    Asset asset1 = new Asset();
+////                    if (asset.getFileName().toString().contains("bird")) {
+//                        asset1.loadAsset(resourcesPath + "/" + asset.getFileName().toString());
+//                        return asset1;
+////                    }
+////                    return null;
+//            }).collect(Collectors.toList()).parallelStream().forEach(asset -> {
+//                if (asset != null) {
+//                    gameMemory.gameAssets.put(asset.getFileName(), asset);
+//                }
+//            });
         } catch (IOException | NullPointerException | URISyntaxException e) {
             e.printStackTrace();
             throw new RuntimeException("Failed to load assets");

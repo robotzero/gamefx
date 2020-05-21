@@ -1,15 +1,26 @@
 package com.robotzero.gamefx.renderengine.assets;
 
+import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.model.Texture;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.WGL;
+import org.lwjgl.opengl.WGLARBCreateContext;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.nio.file.Paths;
 
+import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
+import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
+import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
+import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
+import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.stb.STBImage.stbi_failure_reason;
 import static org.lwjgl.stb.STBImage.stbi_load;
 import static org.lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class Asset {
     private int width, height;
@@ -18,7 +29,7 @@ public class Asset {
     private AssetState assetState;
     private Texture texture;
 
-    public void createTexture() {
+    private void createTexture() {
         this.texture = Texture.createTexture(width, height, assetData);
     }
 
@@ -46,10 +57,20 @@ public class Asset {
             width = w.get();
             height = h.get();
         }
+        createOpenGLContextForWorkerThread();
+        createTexture();
+        glfwMakeContextCurrent(DisplayManager.getWindow());
     }
 
     public Texture getTexture() {
         return texture;
+    }
+
+    private void createOpenGLContextForWorkerThread() {
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        long sharedWindow = glfwCreateWindow(10, 10, "", NULL, DisplayManager.getWindow());
+        glfwMakeContextCurrent(sharedWindow);
+
     }
 
     public int getWidth() {
