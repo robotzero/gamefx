@@ -57,20 +57,11 @@ public class Asset {
             width = w.get();
             height = h.get();
         }
-        createOpenGLContextForWorkerThread();
         createTexture();
-        glfwMakeContextCurrent(DisplayManager.getWindow());
     }
 
     public Texture getTexture() {
         return texture;
-    }
-
-    private void createOpenGLContextForWorkerThread() {
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-        long sharedWindow = glfwCreateWindow(10, 10, "", NULL, DisplayManager.getWindow());
-        glfwMakeContextCurrent(sharedWindow);
-
     }
 
     public int getWidth() {
