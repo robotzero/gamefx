@@ -3,10 +3,14 @@ package com.robotzero.gamefx.renderengine.entity;
 import com.robotzero.gamefx.GameApp;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
-import com.robotzero.gamefx.renderengine.Renderer2D;
 import com.robotzero.gamefx.renderengine.assets.Asset;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
-import com.robotzero.gamefx.renderengine.rendergroup.*;
+import com.robotzero.gamefx.renderengine.rendergroup.GameRenderCommands;
+import com.robotzero.gamefx.renderengine.rendergroup.LoadedBitmap;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderEntryCoordinateSystem;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupEntryType;
+import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
 import com.robotzero.gamefx.renderengine.translations.MoveSpec;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.World;
@@ -21,6 +25,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.IntStream;
 
@@ -400,24 +405,32 @@ public class EntityService {
 
                     switch(entity.Type.name().toLowerCase()) {
                         case ("wall"): {
-                            LoadedBitmap loadedBitmap = new LoadedBitmap();
-                            loadedBitmap.texture = gameMemory.gameAssets.get("tree00.bmp").getTexture();
-                            loadedBitmap.Width = gameMemory.gameAssets.get("tree00.bmp").getWidth();
-                            loadedBitmap.Height = gameMemory.gameAssets.get("tree00.bmp").getHeight();
-                            loadedBitmap.WidthOverHeight = (float) loadedBitmap.Width / (float) loadedBitmap.Height;
-                            loadedBitmap.AlignPercentage = new Vector2f(1, 1);
-                            renderGroupService.pushBitmap(renderGroup, EntityTransform, loadedBitmap, 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), 1.0f, entity.Type);
+                            Optional.ofNullable(renderGroup.Assets.get("tree00.bmp")).ifPresentOrElse(tree -> {
+                                LoadedBitmap loadedBitmap = new LoadedBitmap();
+                                loadedBitmap.texture = gameMemory.gameAssets.get("tree00.bmp").getTexture();
+                                loadedBitmap.Width = gameMemory.gameAssets.get("tree00.bmp").getWidth();
+                                loadedBitmap.Height = gameMemory.gameAssets.get("tree00.bmp").getHeight();
+                                loadedBitmap.WidthOverHeight = (float) loadedBitmap.Width / (float) loadedBitmap.Height;
+                                loadedBitmap.AlignPercentage = new Vector2f(1, 1);
+                                renderGroupService.pushBitmap(renderGroup, EntityTransform, loadedBitmap, 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(1f, 1f, 1f, 1f), 1.0f, entity.Type);
+                            }, () -> {
+                                System.out.println("Asset not loaded");
+                            });
                         } break;
                         case ("hero"): {
-                            LoadedBitmap loadedBitmap = new LoadedBitmap();
-                            loadedBitmap.texture = gameMemory.gameAssets.get("bird.png").getTexture();
-                            loadedBitmap.Width = gameMemory.gameAssets.get("bird.png").getWidth();
-                            loadedBitmap.Height = gameMemory.gameAssets.get("bird.png").getHeight();
-                            loadedBitmap.WidthOverHeight = (float) loadedBitmap.Width / (float) loadedBitmap.Height;
-                            loadedBitmap.WidthOverHeight = 1.0f;
-                            loadedBitmap.AlignPercentage = new Vector2f(1, 1);
-                            float HeroSizeC = 1.0f;
-                            renderGroupService.pushBitmap(renderGroup, EntityTransform, loadedBitmap, HeroSizeC * 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(0.5f, 0.5f, 0.5f, 1f), 1.0f, entity.Type);
+                            Optional.ofNullable(renderGroup.Assets.get("fred_01.png")).ifPresentOrElse(hero -> {
+                                LoadedBitmap loadedBitmap = new LoadedBitmap();
+                                loadedBitmap.texture = gameMemory.gameAssets.get("fred_01.png").getTexture();
+                                loadedBitmap.Width = gameMemory.gameAssets.get("fred_01.png").getWidth();
+                                loadedBitmap.Height = gameMemory.gameAssets.get("fred_01.png").getHeight();
+                                loadedBitmap.WidthOverHeight = (float) loadedBitmap.Width / (float) loadedBitmap.Height;
+                                loadedBitmap.WidthOverHeight = 1.0f;
+                                loadedBitmap.AlignPercentage = new Vector2f(1, 1);
+                                float HeroSizeC = 1.0f;
+                                renderGroupService.pushBitmap(renderGroup, EntityTransform, loadedBitmap, HeroSizeC * 1.5f, new Vector3f(0.0f, 0.0f, 0.0f), new Vector4f(0.5f, 0.5f, 0.5f, 1f), 1.0f, entity.Type);
+                            }, () -> {
+                                System.out.println("Asset not loaded");
+                            });
                         } break;
                         case ("space"): {
                             for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {

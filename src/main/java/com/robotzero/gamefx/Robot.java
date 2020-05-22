@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 public class Robot {
     public static void main(String[] args) {
         GameMemory gameMemory = null;
-        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() + 1);
+        ExecutorService executor = Executors.newCachedThreadPool();
         try {
             Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
                 throw new RuntimeException("There was an unhandled exception in thread " + t.getName(), e);
@@ -30,7 +30,7 @@ public class Robot {
             Renderer2D renderer2D = new Renderer2D(camera);
             RenderGroupService renderGroupService = new RenderGroupService(renderer2D, executor, gameMemory);
             EntityService entityService = new EntityService(gameMemory, world, renderGroupService, executor);
-            AssetService assetService = new AssetService(executor, gameMemory);
+            AssetService assetService = new AssetService(executor, gameMemory, displayManager);
             GameApp gameApp = new GameApp(displayManager, renderer2D, timer, entityService, gameMemory, renderGroupService, assetService);
             gameApp.run();
         } catch (Throwable t) {

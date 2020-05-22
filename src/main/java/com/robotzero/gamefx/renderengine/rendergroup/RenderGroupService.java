@@ -180,7 +180,7 @@ public class RenderGroupService {
     }
 
     public void render(RenderGroup RenderGroup, Rectangle ClipRect, int Even) {
-        if (RenderGroup != null && !RenderGroup.gameRenderCommands.PushBuffer.isEmpty()) {
+        if (RenderGroup != null && !RenderGroup.gameRenderCommands.PushBuffer.isEmpty() && !RenderGroup.Assets.isEmpty()) {
             renderer2D.clear();
 
             List<RenderEntry> renderEntryBitmap = GameApp.renderGroup.gameRenderCommands.PushBuffer.get(RenderGroupEntryType.BITMAP);

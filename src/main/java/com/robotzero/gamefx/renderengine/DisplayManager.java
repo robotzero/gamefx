@@ -28,7 +28,7 @@ public class DisplayManager {
     public static int HEIGHT = 1080;
     public static float refreshRate = 60f;
     public static String TITLE = "Fred64";
-    private static long window;
+    private long window;
     private static long sharedWindow;
 
 
@@ -146,11 +146,16 @@ public class DisplayManager {
         return glfwWindowShouldClose(window);
     }
 
-    public static long getWindow() {
+    public long getWindow() {
         return window;
     }
 
     public void setWindowTitle(String title) {
         glfwSetWindowTitle(window, title);
+    }
+
+    public long createOpenGLContextForWorkerThread() {
+        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        return glfwCreateWindow(1, 1, "", NULL, window);
     }
 }

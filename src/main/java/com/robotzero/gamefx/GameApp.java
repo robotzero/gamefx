@@ -242,8 +242,8 @@ public class GameApp implements Runnable {
         assetService.cleanUp();
         renderer2D.dispose();
         gameMemory.free();
-        glfwDestroyWindow(DisplayManager.getWindow());
-        glfwDestroyWindow(AssetService.sharedWindow);
+        glfwDestroyWindow(displayManager.getWindow());
+        glfwDestroyWindow(assetService.getSharedWindow());
         glfwTerminate();
     }
 
