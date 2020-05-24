@@ -12,10 +12,7 @@ import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupEntryType;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
 import com.robotzero.gamefx.renderengine.translations.MoveSpec;
-import com.robotzero.gamefx.world.GameMemory;
-import com.robotzero.gamefx.world.World;
-import com.robotzero.gamefx.world.WorldChunk;
-import com.robotzero.gamefx.world.WorldEntityBlock;
+import com.robotzero.gamefx.world.*;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -33,64 +30,71 @@ public class EntityService {
     private final GameMemory gameMemory;
     private final World world;
     private final RenderGroupService renderGroupService;
-    private final ExecutorService executorService;
+    private final GameModeWorld gameModeWorld;
     public static final float PlayerHeight = 1.0f;
     public static final float PlayerWidth = 1.0f;
     public static final float FamiliarHeight = 0.5f;
     public static final float FamiliarWidth = 1.0f;
 
-    public EntityService(GameMemory gameMemory, World world, RenderGroupService renderGroupService, ExecutorService executorService) {
+    public EntityService(GameMemory gameMemory, World world, RenderGroupService renderGroupService, GameModeWorld gameModeWorld) {
         this.gameMemory = gameMemory;
         this.world = world;
         this.renderGroupService = renderGroupService;
-        this.executorService = executorService;
+        this.gameModeWorld = gameModeWorld;
     }
 
     public World getWorld() {
         return world;
     }
 
-    public AddLowEntityResult AddPlayer() {
-        World.WorldPosition P = Camera.position;
-        AddLowEntityResult entity = AddGroundedEntity(EntityType.HERO, P, null, EntityFlag.COLLIDES, EntityFlag.MOVEABLE);
+    public Entity AddPlayer() {
+        World.WorldPosition P = gameModeWorld.CameraP;
+        Entity entity = BeginGroundedEntity(EntityType.HERO);
+        AddFlag(entity, EntityFlag.COLLIDES);
+        AddFlag(entity, EntityFlag.MOVEABLE);
 
         if (gameMemory.CameraFollowingEntityIndex == 0) {
-            gameMemory.CameraFollowingEntityIndex = entity.LowIndex;
+            gameMemory.CameraFollowingEntityIndex = entity.StorageIndex;
         }
+
+        EndEntity(gameModeWorld, entity, P);
 
         return entity;
     }
 
-    public AddLowEntityResult AddLowEntity(EntityType Type, World.WorldPosition P, EntityCollisionVolumeGroup Collision, EntityFlag...flags) {
+    public Entity BeginLowEntity(EntityType Type) {
         int EntityIndex = gameMemory.LowEntityCount;
         gameMemory.LowEntityCount = EntityIndex + 1;
 
-        gameMemory.LowEntities[EntityIndex] = new LowEntity();
-        gameMemory.LowEntities[EntityIndex].Sim = new Entity();
-        gameMemory.LowEntities[EntityIndex].Sim.Type = Type;
-        gameMemory.LowEntities[EntityIndex].Sim.P = new Vector3f();
-        gameMemory.LowEntities[EntityIndex].Sim.Collision = Collision;
-        gameMemory.LowEntities[EntityIndex].P = NullPosition();
-        if (flags != null && flags.length > 0) {
-            for (int i = 0; i < flags.length; ++i) {
-                AddFlag(gameMemory.LowEntities[EntityIndex].Sim, flags[i]);
-            }
-        }
+        World.CreationBuffer[World.CreationBufferIndex] = new Entity();
+        World.CreationBuffer[World.CreationBufferIndex].Type = Type;
+        World.CreationBuffer[World.CreationBufferIndex].P = new Vector3f();
+        World.CreationBuffer[World.CreationBufferIndex].Collision = world.NullCollision();
+//        World.CreationBuffer[World.CreationBufferIndex].P = NullPosition();
+//        if (flags != null && flags.length > 0) {
+//            for (int i = 0; i < flags.length; ++i) {
+//                AddFlag(gameMemory.LowEntities[EntityIndex].Sim, flags[i]);
+//            }
+//        }
+        Entity EntityLow = World.CreationBuffer[World.CreationBufferIndex];
+        EntityLow.StorageIndex = World.LastUsedEntityStorageIndex + 1;
+        World.LastUsedEntityStorageIndex = World.LastUsedEntityStorageIndex + 1;
+        World.CreationBufferIndex = World.CreationBufferIndex + 1;
 
-        ChangeEntityLocation(EntityIndex, gameMemory.LowEntities[EntityIndex], P);
-
-        AddLowEntityResult addLowEntityResult = new AddLowEntityResult();
-        addLowEntityResult.Low = gameMemory.LowEntities[EntityIndex];
-        addLowEntityResult.LowIndex = EntityIndex;
-        return addLowEntityResult;
+        return EntityLow;
     }
 
-    public AddLowEntityResult AddWall(int ChunkX, int ChunkY) {
-        Vector3f Dim = new Vector3f(World.TileSideInMeters, World.TileSideInMeters, World.TileDepthInMeters);
-        World.WorldPosition P = ChunkPositionFromTilePosition(ChunkX, ChunkY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult entity = AddGroundedEntity(EntityType.WALL, P, null, EntityFlag.COLLIDES);
+    public void EndEntity(GameModeWorld WorldMode, Entity Entity, World.WorldPosition P)
+    {
+        --World.CreationBufferIndex;
+        PackEntityIntoWorld(WorldMode, EntityLow, P);
+    }
 
-        return entity;
+    public void AddWall(GameModeWorld gameModeWorld, int ChunkX, int ChunkY) {
+        World.WorldPosition P = ChunkPositionFromTilePosition(ChunkX, ChunkY, new Vector3f(0.0f, 0.0f, 0.0f));
+        Entity entity = BeginGroundedEntity(EntityType.WALL, World.WallCollision);
+        AddFlag(entity, EntityFlag.COLLIDES);
+        EndEntity(gameModeWorld, entity, P);
     }
 
     public World.WorldPosition ChunkPositionFromTilePosition(int AbsTileX, int AbsTileY, Vector3f AdditionalOffset) {
@@ -193,76 +197,11 @@ public class EntityService {
         }
     }
 
-    public AddLowEntityResult AddMonstar(int AbsTileX, int AbsTileY) {
-        World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult Entity = AddGroundedEntity(EntityType.MONSTAR, P, null, EntityFlag.COLLIDES, EntityFlag.MOVEABLE);
+    public Entity BeginGroundedEntity(EntityType Type, EntityCollisionVolumeGroup Collision) {
+        Entity Entity = BeginLowEntity(Type);
+        Entity.Collision = Collision;
 
         return(Entity);
-    }
-
-    public AddLowEntityResult AddFamiliar(int AbsTileX, int AbsTileY) {
-        World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult Entity = AddGroundedEntity(EntityType.FAMILIAR, P, null, EntityFlag.COLLIDES, EntityFlag.MOVEABLE);
-
-        return(Entity);
-    }
-
-    public AddLowEntityResult AddGroundedEntity(EntityType Type, World.WorldPosition P, EntityCollisionVolumeGroup Collision, EntityFlag...flags) {
-//        World.WorldPosition OffsetP = world.MapIntoChunkSpace(P, new Vector3f(0, 0, 0));
-        AddLowEntityResult Entity = AddLowEntity(Type, P, Collision, flags);
-
-        return(Entity);
-    }
-
-    public AddLowEntityResult AddStandardRoom(int AbsTileX, int AbsTileY) {
-        World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult Entity = AddGroundedEntity(
-                EntityType.SPACE,
-                P,
-                gameMemory.StandardRoomCollision,
-                EntityFlag.TRAVERSABLE
-        );
-
-        return(Entity);
-    }
-
-
-    public void UpdateFamiliar(SimRegion simRegion, Entity Entity, float dt) {
-        com.robotzero.gamefx.renderengine.entity.Entity ClosestHero = null;
-        float ClosestHeroDSq = (float) Math.pow(10.0f, 2);
-            com.robotzero.gamefx.renderengine.entity.Entity TestEntity = simRegion.simEntities[0];
-            // @TODO huh, index is moved but not looping through all entities
-            for (int testEntityIndex = 0; testEntityIndex < simRegion.EntityCount; ++testEntityIndex) {
-                assert (TestEntity != null);
-                if (TestEntity.Type == EntityType.HERO) {
-                    float TestDSq = new Vector3f(TestEntity.P).sub(new Vector3f(Entity.P)).lengthSquared();
-                    if (TestEntity.Type == EntityType.HERO) {
-                        TestDSq *= 0.75f;
-                    }
-
-                    if (ClosestHeroDSq > TestDSq) {
-                        ClosestHero = TestEntity;
-                        ClosestHeroDSq = TestDSq;
-                    }
-                }
-            }
-
-        Vector3f ddP = new Vector3f();
-        if (ClosestHero != null && ClosestHeroDSq > Math.pow(3.0f, 2.0f)) {
-            float Acceleration = 0.5f;
-            float OneOverLength = (float) (Acceleration / Math.sqrt(ClosestHeroDSq));
-            ddP = new Vector3f(ClosestHero.P).sub(new Vector3f(Entity.P)).mul(OneOverLength);
-        }
-
-        MoveSpec moveSpec = new MoveSpec();
-        moveSpec.UnitMaxAccelVector = true;
-        moveSpec.Speed = GameApp.playerSpeed;
-        moveSpec.Drag = 8.0f;
-
-        moveEntity(simRegion, Entity, ddP, dt, moveSpec);
-    }
-
-    public void UpdateMonstar(Entity entity, float dt) {
     }
 
     public MoveSpec DefaultMoveSpec() {
@@ -480,16 +419,16 @@ public class EntityService {
         return blah;
     }
 
-    public Vector3f GetSimSpaceP(SimRegion simRegion, LowEntity stored) {
+    public Vector3f GetSimSpaceP(SimRegion simRegion, Entity stored) {
         Vector3f Result = GameMemory.InvalidP;
-        if (!IsSet(stored.Sim, EntityFlag.NONSPATIAL)) {
-            return World.subtract(stored.P, simRegion.Origin);
+        if (!IsSet(stored, EntityFlag.NONSPATIAL)) {
+            return World.subtract(stored.ChunkP, simRegion.Origin);
         }
 
         return Result;
     }
 
-    public Entity AddEntity(SimRegion simRegion, int StorageIndex, LowEntity Source, Vector3f SimP) {
+    public Entity AddEntity(SimRegion simRegion, int StorageIndex, Entity Source, Vector3f SimP) {
         Entity Dest = AddEntityRaw(simRegion, StorageIndex, Source);
         if (Dest != null) {
             if (SimP != null) {
@@ -503,7 +442,7 @@ public class EntityService {
         return Dest;
     }
 
-    Entity AddEntityRaw(SimRegion simRegion, int StorageIndex, LowEntity Source) {
+    Entity AddEntityRaw(SimRegion simRegion, int StorageIndex, Entity Source) {
         Entity Entity = null;
         EntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
         if (Entry.Ptr == null) {
@@ -522,12 +461,12 @@ public class EntityService {
                 if (Source != null) {
                     // TODO(casey): This should really be a decompression step, not
                     // a copy!
-                    Entity = new Entity(Source.Sim);
+                    Entity = new Entity(Source);
                     simRegion.simEntities[EntityCount] = Entity;
                     Entry.Ptr = Entity;
 
-                    assert (!IsSet(Source.Sim, EntityFlag.SIMMING));
-                    AddFlag(Source.Sim, EntityFlag.SIMMING);
+                    assert (!IsSet(Source, EntityFlag.SIMMING));
+                    AddFlag(Source, EntityFlag.SIMMING);
                     simRegion.simEntities[EntityCount] = Entity;
 //                LoadEntityReference(simRegion, Entity.Sword);
                 }
@@ -619,21 +558,24 @@ public class EntityService {
 
         for (int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
             for (int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
-                WorldChunk Chunk = world.GetWorldChunk(ChunkX, ChunkY, false);
+                WorldChunk Chunk = world.RemoveWorldChunk(ChunkX, ChunkY, false);
                 if (Chunk != null) {
                     List<WorldEntityBlock> First = Chunk.getFirstBlock(false);
                     for (WorldEntityBlock Block : First) {
-                        for (int EntityIndexIndex = 0; EntityIndexIndex < Block.EntityCount; ++EntityIndexIndex) {
-                            int LowEntityIndex = Block.LowEntityIndex[EntityIndexIndex];
-                            LowEntity Low = gameMemory.LowEntities[LowEntityIndex];
-                            if (!IsSet(Low.Sim, EntityFlag.NONSPATIAL)) {
+                        for (int EntityIndex = 0; EntityIndex < Block.EntityCount; ++EntityIndex) {
+                            Entity Low = Block.EntityData[EntityIndex];
+                            if (!IsSet(Low, EntityFlag.NONSPATIAL)) {
                                 Vector3f SimSpaceP = GetSimSpaceP(simRegion, Low);
-                                if (EntityOverlapsRectangle(SimSpaceP, Low.Sim.Dim, simRegion.Bounds)) {
-                                    AddEntity(simRegion, LowEntityIndex, Low, SimSpaceP);
+                                if (EntityOverlapsRectangle(SimSpaceP, Low.Dim, simRegion.Bounds)) {
+                                    AddEntity(simRegion, Low.StorageIndex, Low, SimSpaceP);
                                 }
                             }
                         }
+                        world_entity_block *NextBlock = Block->Next;
+                        AddBlockToFreeList(World, Block);
+                        Block = NextBlock;
                     }
+                    AddChunkToFreeList(World, Chunk);
                 }
             }
         }
@@ -645,20 +587,14 @@ public class EntityService {
             Entity Entity = Region.simEntities[0];
 
             for(int EntityIndex = 0; EntityIndex < Region.EntityCount; ++EntityIndex, Entity = Region.simEntities[EntityIndex]) {
-                LowEntity Stored = gameMemory.LowEntities[Entity.StorageIndex];
-                assert (IsSet(Stored.Sim, EntityFlag.SIMMING));
-                Stored.Sim = new Entity(Entity);
-                assert (!IsSet(Stored.Sim, EntityFlag.SIMMING));
-//                StoreEntityReference(Stored.Sim.Sword);
-
-                World.WorldPosition NewP = IsSet(Entity, EntityFlag.NONSPATIAL) ? null : world.MapIntoChunkSpace(Region.Origin, Entity.P);
-                ChangeEntityLocation(Entity.StorageIndex, Stored, NewP);
+                World.WorldPosition ChunkP = MapChunkIntoSpace(Entity.P);
 
                 if (Entity.StorageIndex == gameMemory.CameraFollowingEntityIndex) {
                     World.WorldPosition NewCameraP = new World.WorldPosition(Stored.P);
-                    Camera.position = Stored.P;
+                    Camera.position = Entity.ChunkP;
                 }
             }
+            PackEntityIntoWorld(World, Entity, ChunkP);
         }
 
         GameApp.renderGroup.clear();

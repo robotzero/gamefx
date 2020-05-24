@@ -1,5 +1,6 @@
 package com.robotzero.gamefx.renderengine.entity;
 
+import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldChunk;
 import org.joml.Vector3f;
 
@@ -12,6 +13,7 @@ public class Entity {
     public Vector3f P = null;
     public Vector3f Dim = new Vector3f(0.0f, 0.0f, 0.0f);
     public WorldChunk OldChunk;
+    public World.WorldPosition ChunkP;
     public EntityType Type;
     public float tBob;
     public Vector3f dP = new Vector3f(0.0f, 0.0f, 0.0f);
@@ -39,6 +41,7 @@ public class Entity {
             Hash = new HashMap<>(sim.Hash);
         }
         OldChunk = sim.OldChunk;
+        ChunkP = sim.ChunkP;
     }
 
     public Entity() {

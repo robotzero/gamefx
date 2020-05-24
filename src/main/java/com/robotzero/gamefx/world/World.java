@@ -1,10 +1,12 @@
 package com.robotzero.gamefx.world;
 
 import com.robotzero.gamefx.renderengine.DisplayManager;
+import com.robotzero.gamefx.renderengine.entity.Entity;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import org.joml.Vector3f;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class World {
@@ -19,6 +21,11 @@ public class World {
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
     public static WorldEntityBlock firstFree = null;
     private static final int tileChunkHashSize = 4096;
+    public static List<WorldChunk> firstFreeChunk;
+    public static List<WorldEntityBlock> firstFreeBlock;
+    public static int CreationBufferIndex;
+    public static Entity[] CreationBuffer = new Entity[4];
+    public static int LastUsedEntityStorageIndex;
 
     private Map<Long, WorldChunk> tileChunkHash = new LinkedHashMap<>(tileChunkHashSize);
 
@@ -136,6 +143,10 @@ public class World {
     {
         int Result = (Value >= 0) ? 1 : -1;
         return(Result);
+    }
+
+    public WorldChunk RemoveWorldChunk(int chunkX, int chunkY, boolean b) {
+        return null;
     }
 
     public static class WorldPosition {
