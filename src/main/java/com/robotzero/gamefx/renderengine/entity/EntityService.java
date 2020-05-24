@@ -52,7 +52,7 @@ public class EntityService {
 
     public AddLowEntityResult AddPlayer() {
         World.WorldPosition P = Camera.position;
-        AddLowEntityResult entity = AddGroundedEntity(EntityType.HERO, P, null, SimEntityFlag.COLLIDES, SimEntityFlag.MOVEABLE);
+        AddLowEntityResult entity = AddGroundedEntity(EntityType.HERO, P, null, EntityFlag.COLLIDES, EntityFlag.MOVEABLE);
 
         if (gameMemory.CameraFollowingEntityIndex == 0) {
             gameMemory.CameraFollowingEntityIndex = entity.LowIndex;
@@ -61,12 +61,12 @@ public class EntityService {
         return entity;
     }
 
-    public AddLowEntityResult AddLowEntity(EntityType Type, World.WorldPosition P, SimEntityCollisionVolumeGroup Collision, SimEntityFlag ...flags) {
+    public AddLowEntityResult AddLowEntity(EntityType Type, World.WorldPosition P, EntityCollisionVolumeGroup Collision, EntityFlag...flags) {
         int EntityIndex = gameMemory.LowEntityCount;
         gameMemory.LowEntityCount = EntityIndex + 1;
 
         gameMemory.LowEntities[EntityIndex] = new LowEntity();
-        gameMemory.LowEntities[EntityIndex].Sim = new SimEntity();
+        gameMemory.LowEntities[EntityIndex].Sim = new Entity();
         gameMemory.LowEntities[EntityIndex].Sim.Type = Type;
         gameMemory.LowEntities[EntityIndex].Sim.P = new Vector3f();
         gameMemory.LowEntities[EntityIndex].Sim.Collision = Collision;
@@ -88,7 +88,7 @@ public class EntityService {
     public AddLowEntityResult AddWall(int ChunkX, int ChunkY) {
         Vector3f Dim = new Vector3f(World.TileSideInMeters, World.TileSideInMeters, World.TileDepthInMeters);
         World.WorldPosition P = ChunkPositionFromTilePosition(ChunkX, ChunkY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult entity = AddGroundedEntity(EntityType.WALL, P, null, SimEntityFlag.COLLIDES);
+        AddLowEntityResult entity = AddGroundedEntity(EntityType.WALL, P, null, EntityFlag.COLLIDES);
 
         return entity;
     }
@@ -106,7 +106,7 @@ public class EntityService {
         World.WorldPosition OldP = null;
         World.WorldPosition NewP = null;
 
-        if (!IsSet(LowEntity.Sim, SimEntityFlag.NONSPATIAL) && isValid(LowEntity.P)) {
+        if (!IsSet(LowEntity.Sim, EntityFlag.NONSPATIAL) && isValid(LowEntity.P)) {
             OldP = new World.WorldPosition(LowEntity.P);
         }
 
@@ -118,10 +118,10 @@ public class EntityService {
 
         if (NewP != null) {
             LowEntity.P = new World.WorldPosition(NewP);
-            ClearFlag(LowEntity.Sim, SimEntityFlag.NONSPATIAL);
+            ClearFlag(LowEntity.Sim, EntityFlag.NONSPATIAL);
         } else {
             LowEntity.P = null;
-            AddFlag(LowEntity.Sim, SimEntityFlag.NONSPATIAL);
+            AddFlag(LowEntity.Sim, EntityFlag.NONSPATIAL);
         }
     }
 
@@ -195,19 +195,19 @@ public class EntityService {
 
     public AddLowEntityResult AddMonstar(int AbsTileX, int AbsTileY) {
         World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult Entity = AddGroundedEntity(EntityType.MONSTAR, P, null, SimEntityFlag.COLLIDES, SimEntityFlag.MOVEABLE);
+        AddLowEntityResult Entity = AddGroundedEntity(EntityType.MONSTAR, P, null, EntityFlag.COLLIDES, EntityFlag.MOVEABLE);
 
         return(Entity);
     }
 
     public AddLowEntityResult AddFamiliar(int AbsTileX, int AbsTileY) {
         World.WorldPosition P = ChunkPositionFromTilePosition(AbsTileX, AbsTileY, new Vector3f(0.0f, 0.0f, 0.0f));
-        AddLowEntityResult Entity = AddGroundedEntity(EntityType.FAMILIAR, P, null, SimEntityFlag.COLLIDES, SimEntityFlag.MOVEABLE);
+        AddLowEntityResult Entity = AddGroundedEntity(EntityType.FAMILIAR, P, null, EntityFlag.COLLIDES, EntityFlag.MOVEABLE);
 
         return(Entity);
     }
 
-    public AddLowEntityResult AddGroundedEntity(EntityType Type, World.WorldPosition P, SimEntityCollisionVolumeGroup Collision, SimEntityFlag ...flags) {
+    public AddLowEntityResult AddGroundedEntity(EntityType Type, World.WorldPosition P, EntityCollisionVolumeGroup Collision, EntityFlag...flags) {
 //        World.WorldPosition OffsetP = world.MapIntoChunkSpace(P, new Vector3f(0, 0, 0));
         AddLowEntityResult Entity = AddLowEntity(Type, P, Collision, flags);
 
@@ -220,17 +220,17 @@ public class EntityService {
                 EntityType.SPACE,
                 P,
                 gameMemory.StandardRoomCollision,
-                SimEntityFlag.TRAVERSABLE
+                EntityFlag.TRAVERSABLE
         );
 
         return(Entity);
     }
 
 
-    public void UpdateFamiliar(SimRegion simRegion, SimEntity Entity, float dt) {
-        SimEntity ClosestHero = null;
+    public void UpdateFamiliar(SimRegion simRegion, Entity Entity, float dt) {
+        com.robotzero.gamefx.renderengine.entity.Entity ClosestHero = null;
         float ClosestHeroDSq = (float) Math.pow(10.0f, 2);
-            SimEntity TestEntity = simRegion.simEntities[0];
+            com.robotzero.gamefx.renderengine.entity.Entity TestEntity = simRegion.simEntities[0];
             // @TODO huh, index is moved but not looping through all entities
             for (int testEntityIndex = 0; testEntityIndex < simRegion.EntityCount; ++testEntityIndex) {
                 assert (TestEntity != null);
@@ -262,7 +262,7 @@ public class EntityService {
         moveEntity(simRegion, Entity, ddP, dt, moveSpec);
     }
 
-    public void UpdateMonstar(SimEntity entity, float dt) {
+    public void UpdateMonstar(Entity entity, float dt) {
     }
 
     public MoveSpec DefaultMoveSpec() {
@@ -274,8 +274,8 @@ public class EntityService {
         return moveSpec;
     }
 
-    public void moveEntity(SimRegion simRegion, SimEntity entity, Vector3f ddP, float interval, MoveSpec moveSpec) {
-        assert(!IsSet(entity, SimEntityFlag.NONSPATIAL));
+    public void moveEntity(SimRegion simRegion, Entity entity, Vector3f ddP, float interval, MoveSpec moveSpec) {
+        assert(!IsSet(entity, EntityFlag.NONSPATIAL));
 
         if (moveSpec.UnitMaxAccelVector) {
             float ddPLength = new Vector3f(ddP).lengthSquared();
@@ -309,14 +309,14 @@ public class EntityService {
                     tMin[0] = DistanceRemaining / PlayerDeltaLength;
                 }
                 Vector3f WallNormal = new Vector3f(0.0f, 0.0f, 0.0f);
-                SimEntity HitEntity = null;
+                Entity HitEntity = null;
                 Vector3f DesiredPosition = new Vector3f(entity.P).add(new Vector3f(playerDelta));
-                boolean StopOnCollision = IsSet(entity, SimEntityFlag.COLLIDES);
-                if (!IsSet(entity, SimEntityFlag.NONSPATIAL)) {
+                boolean StopOnCollision = IsSet(entity, EntityFlag.COLLIDES);
+                if (!IsSet(entity, EntityFlag.NONSPATIAL)) {
                     for (int TestHighEntityIndex = 1; TestHighEntityIndex < simRegion.EntityCount; ++TestHighEntityIndex) {
-                        SimEntity TestEntity = simRegion.simEntities[TestHighEntityIndex];
+                        Entity TestEntity = simRegion.simEntities[TestHighEntityIndex];
                         if (TestEntity != entity) {
-                            if (TestEntity.flags.contains(SimEntityFlag.COLLIDES) && !entity.flags.contains(SimEntityFlag.NONSPATIAL)) {
+                            if (TestEntity.flags.contains(EntityFlag.COLLIDES) && !entity.flags.contains(EntityFlag.NONSPATIAL)) {
                                 Vector3f MinkowskiDiameter = new Vector3f(TestEntity.Dim.x() + entity.Dim.x(), TestEntity.Dim.y() + entity.Dim.y(), 2.0f * World.TileDepthInMeters);
                                 Vector3f MinCorner = MinkowskiDiameter.mul(-0.5f);
                                 Vector3f MaxCorner = MinkowskiDiameter.mul(0.5f);
@@ -371,7 +371,7 @@ public class EntityService {
         }
 
         IntStream.range(0, gameMemory.simRegion.EntityCount).forEach(HighEntityIndex -> {
-                SimEntity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
+                Entity entity = gameMemory.simRegion.simEntities[HighEntityIndex];
                 if (entity.Updatable) {
                     MoveSpec MoveSpec = null;
                     switch (entity.Type.name().toLowerCase()) {
@@ -396,7 +396,7 @@ public class EntityService {
                         } break;
                     }
 
-                    if (!IsSet(entity, SimEntityFlag.NONSPATIAL) && MoveSpec != null && IsSet(entity, SimEntityFlag.MOVEABLE)) {
+                    if (!IsSet(entity, EntityFlag.NONSPATIAL) && MoveSpec != null && IsSet(entity, EntityFlag.MOVEABLE)) {
                         moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
                     }
 
@@ -434,7 +434,7 @@ public class EntityService {
                         } break;
                         case ("space"): {
                             for (int VolumeIndex = 0; VolumeIndex < entity.Collision.VolumeCount; ++VolumeIndex) {
-                                SimEntityCollisionVolume Volume = entity.Collision.Volumes[VolumeIndex];
+                                EntityCollisionVolume Volume = entity.Collision.Volumes[VolumeIndex];
 //                                    renderGroupService.PushRectOutline(GameApp.renderGroup, new Vector3f(Volume.OffsetP).sub(new Vector3f(0, 0, 0.5f * Volume.Dim.z)) , new Vector2f(Volume.Dim.x, Volume.Dim.y), new Vector4f(0, 0.5f, 1.0f, 1.0f), entity.Type);
                             }
                         } break;
@@ -482,15 +482,15 @@ public class EntityService {
 
     public Vector3f GetSimSpaceP(SimRegion simRegion, LowEntity stored) {
         Vector3f Result = GameMemory.InvalidP;
-        if (!IsSet(stored.Sim, SimEntityFlag.NONSPATIAL)) {
+        if (!IsSet(stored.Sim, EntityFlag.NONSPATIAL)) {
             return World.subtract(stored.P, simRegion.Origin);
         }
 
         return Result;
     }
 
-    public SimEntity AddEntity(SimRegion simRegion, int StorageIndex, LowEntity Source, Vector3f SimP) {
-        SimEntity Dest = AddEntityRaw(simRegion, StorageIndex, Source);
+    public Entity AddEntity(SimRegion simRegion, int StorageIndex, LowEntity Source, Vector3f SimP) {
+        Entity Dest = AddEntityRaw(simRegion, StorageIndex, Source);
         if (Dest != null) {
             if (SimP != null) {
                 Dest.P = new Vector3f(SimP);
@@ -503,16 +503,16 @@ public class EntityService {
         return Dest;
     }
 
-    SimEntity AddEntityRaw(SimRegion simRegion, int StorageIndex, LowEntity Source) {
-        SimEntity Entity = null;
-        SimEntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
+    Entity AddEntityRaw(SimRegion simRegion, int StorageIndex, LowEntity Source) {
+        Entity Entity = null;
+        EntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
         if (Entry.Ptr == null) {
             if (simRegion.EntityCount < simRegion.MaxEntityCount) {
                 int EntityCount = simRegion.EntityCount;
                 Entity = simRegion.simEntities[EntityCount];
                 simRegion.EntityCount = simRegion.EntityCount + 1;
                 if (Entity == null) {
-                    Entity = new SimEntity();
+                    Entity = new Entity();
                     simRegion.simEntities[EntityCount] = Entity;
                 }
 
@@ -522,12 +522,12 @@ public class EntityService {
                 if (Source != null) {
                     // TODO(casey): This should really be a decompression step, not
                     // a copy!
-                    Entity = new SimEntity(Source.Sim);
+                    Entity = new Entity(Source.Sim);
                     simRegion.simEntities[EntityCount] = Entity;
                     Entry.Ptr = Entity;
 
-                    assert (!IsSet(Source.Sim, SimEntityFlag.SIMMING));
-                    AddFlag(Source.Sim, SimEntityFlag.SIMMING);
+                    assert (!IsSet(Source.Sim, EntityFlag.SIMMING));
+                    AddFlag(Source.Sim, EntityFlag.SIMMING);
                     simRegion.simEntities[EntityCount] = Entity;
 //                LoadEntityReference(simRegion, Entity.Sword);
                 }
@@ -542,29 +542,29 @@ public class EntityService {
         return(Entity);
     }
 
-    public void MapStorageIndexToEntity(SimRegion simRegion, int StorageIndex, SimEntity Entity) {
-        SimEntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
+    public void MapStorageIndexToEntity(SimRegion simRegion, int StorageIndex, Entity Entity) {
+        EntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
         assert((Entry.Index == 0) || (Entry.Index == StorageIndex));
         Entry.Index = StorageIndex;
         Entry.Ptr = Entity;
     }
 
-    public SimEntity GetEntityByStorageIndex(SimRegion simRegion, int StorageIndex) {
-        SimEntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
-        SimEntity Result = Entry.Ptr;
+    public Entity GetEntityByStorageIndex(SimRegion simRegion, int StorageIndex) {
+        EntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
+        Entity Result = Entry.Ptr;
         return(Result);
     }
 
-    public SimEntityHash GetHashFromStorageIndex(SimRegion simRegion, int StorageIndex) {
+    public EntityHash GetHashFromStorageIndex(SimRegion simRegion, int StorageIndex) {
         assert (StorageIndex != 0);
 
         int HashValue = StorageIndex;
         for (int Offset = 0; Offset < simRegion.Hash.length; ++Offset) {
             int HashMask = simRegion.Hash.length - 1;
             int HashIndex = ((HashValue + Offset) & HashMask);
-            SimEntityHash Entry = simRegion.Hash[HashIndex];
+            EntityHash Entry = simRegion.Hash[HashIndex];
             if (Entry == null) {
-                simRegion.Hash[HashIndex] = new SimEntityHash();
+                simRegion.Hash[HashIndex] = new EntityHash();
                 Entry = simRegion.Hash[HashIndex];
             }
             if ((Entry.Index == 0) || (Entry.Index == StorageIndex)) {
@@ -612,7 +612,7 @@ public class EntityService {
 
         simRegion.MaxEntityCount = 4096;
         simRegion.EntityCount = 0;
-        simRegion.simEntities = new SimEntity[simRegion.MaxEntityCount];
+        simRegion.simEntities = new Entity[simRegion.MaxEntityCount];
 
         World.WorldPosition MinChunkP = world.MapIntoChunkSpace(simRegion.Origin, Rectangle.GetMinCorner(simRegion.Bounds));
         World.WorldPosition MaxChunkP = world.MapIntoChunkSpace(simRegion.Origin, Rectangle.GetMaxCorner(simRegion.Bounds));
@@ -626,7 +626,7 @@ public class EntityService {
                         for (int EntityIndexIndex = 0; EntityIndexIndex < Block.EntityCount; ++EntityIndexIndex) {
                             int LowEntityIndex = Block.LowEntityIndex[EntityIndexIndex];
                             LowEntity Low = gameMemory.LowEntities[LowEntityIndex];
-                            if (!IsSet(Low.Sim, SimEntityFlag.NONSPATIAL)) {
+                            if (!IsSet(Low.Sim, EntityFlag.NONSPATIAL)) {
                                 Vector3f SimSpaceP = GetSimSpaceP(simRegion, Low);
                                 if (EntityOverlapsRectangle(SimSpaceP, Low.Sim.Dim, simRegion.Bounds)) {
                                     AddEntity(simRegion, LowEntityIndex, Low, SimSpaceP);
@@ -642,16 +642,16 @@ public class EntityService {
 
     public void EndSim(SimRegion Region) {
         if (Region != null) {
-            SimEntity Entity = Region.simEntities[0];
+            Entity Entity = Region.simEntities[0];
 
             for(int EntityIndex = 0; EntityIndex < Region.EntityCount; ++EntityIndex, Entity = Region.simEntities[EntityIndex]) {
                 LowEntity Stored = gameMemory.LowEntities[Entity.StorageIndex];
-                assert (IsSet(Stored.Sim, SimEntityFlag.SIMMING));
-                Stored.Sim = new SimEntity(Entity);
-                assert (!IsSet(Stored.Sim, SimEntityFlag.SIMMING));
+                assert (IsSet(Stored.Sim, EntityFlag.SIMMING));
+                Stored.Sim = new Entity(Entity);
+                assert (!IsSet(Stored.Sim, EntityFlag.SIMMING));
 //                StoreEntityReference(Stored.Sim.Sword);
 
-                World.WorldPosition NewP = IsSet(Entity, SimEntityFlag.NONSPATIAL) ? null : world.MapIntoChunkSpace(Region.Origin, Entity.P);
+                World.WorldPosition NewP = IsSet(Entity, EntityFlag.NONSPATIAL) ? null : world.MapIntoChunkSpace(Region.Origin, Entity.P);
                 ChangeEntityLocation(Entity.StorageIndex, Stored, NewP);
 
                 if (Entity.StorageIndex == gameMemory.CameraFollowingEntityIndex) {
@@ -664,25 +664,25 @@ public class EntityService {
         GameApp.renderGroup.clear();
     }
 
-    public boolean IsSet(SimEntity Entity, SimEntityFlag Flag) {
+    public boolean IsSet(Entity Entity, EntityFlag Flag) {
         return Entity.flags.contains(Flag);
     }
 
-    public void AddFlag(SimEntity Entity, SimEntityFlag Flag) {
+    public void AddFlag(Entity Entity, EntityFlag Flag) {
         Entity.flags.add(Flag);
     }
 
-    public void ClearFlag(SimEntity Entity, SimEntityFlag Flag) {
+    public void ClearFlag(Entity Entity, EntityFlag Flag) {
         Entity.flags.remove(Flag);
     }
 
-    public void MakeEntityNonSpatial(SimEntity Entity) {
-        AddFlag(Entity, SimEntityFlag.NONSPATIAL);
+    public void MakeEntityNonSpatial(Entity Entity) {
+        AddFlag(Entity, EntityFlag.NONSPATIAL);
         Entity.P = GameMemory.InvalidP;
     }
 
-    public void MakeEntitySpatial(SimEntity Entity, Vector3f P, Vector3f dP) {
-        ClearFlag(Entity, SimEntityFlag.NONSPATIAL);
+    public void MakeEntitySpatial(Entity Entity, Vector3f P, Vector3f dP) {
+        ClearFlag(Entity, EntityFlag.NONSPATIAL);
         Entity.P = P;
         Entity.dP = dP;
     }
@@ -717,17 +717,17 @@ public class EntityService {
         return P != null && P.ChunkX != Integer.MAX_VALUE;
     }
 
-    public Vector3f GetEntityGroundPoint(SimEntity Entity) {
+    public Vector3f GetEntityGroundPoint(Entity Entity) {
         Vector3f Result = new Vector3f(Entity.P);
 
         return(Result);
     }
 
-    public SimEntityCollisionVolumeGroup MakeSimpleGroundedCollision(float DimX, float DimY, float DimZ) {
-        SimEntityCollisionVolumeGroup Group = new SimEntityCollisionVolumeGroup();
+    public EntityCollisionVolumeGroup MakeSimpleGroundedCollision(float DimX, float DimY, float DimZ) {
+        EntityCollisionVolumeGroup Group = new EntityCollisionVolumeGroup();
         Group.VolumeCount = 1;
-        Group.Volumes = new SimEntityCollisionVolume[1];
-        Group.TotalVolume = new SimEntityCollisionVolume();
+        Group.Volumes = new EntityCollisionVolume[1];
+        Group.TotalVolume = new EntityCollisionVolume();
         Group.TotalVolume.OffsetP = new Vector3f(0, 0, 0.5f * DimZ);
         Group.TotalVolume.Dim = new Vector3f(DimX, DimY, DimZ);
         Group.Volumes[0] = Group.TotalVolume;

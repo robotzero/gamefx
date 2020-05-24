@@ -7,7 +7,7 @@ import com.robotzero.gamefx.renderengine.assets.AssetService;
 import com.robotzero.gamefx.renderengine.entity.ControlledHero;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.entity.EntityType;
-import com.robotzero.gamefx.renderengine.entity.SimEntity;
+import com.robotzero.gamefx.renderengine.entity.Entity;
 import com.robotzero.gamefx.renderengine.math.Rectangle;
 import com.robotzero.gamefx.renderengine.rendergroup.GameRenderCommands;
 import com.robotzero.gamefx.renderengine.rendergroup.RenderGroup;
@@ -53,7 +53,7 @@ public class GameApp implements Runnable {
     public static float ZoomRate = 1.0f;
     public static int playerSpeed;
     private int LowIndex;
-    private SimEntity monstar;
+    private Entity monstar;
     public static float globalinterval;
     public static Vector2f ScreenCenter;
     public static RenderGroup renderGroup;

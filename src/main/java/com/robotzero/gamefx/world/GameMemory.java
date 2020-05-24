@@ -3,7 +3,7 @@ package com.robotzero.gamefx.world;
 import com.robotzero.gamefx.renderengine.assets.Asset;
 import com.robotzero.gamefx.renderengine.entity.ControlledHero;
 import com.robotzero.gamefx.renderengine.entity.LowEntity;
-import com.robotzero.gamefx.renderengine.entity.SimEntityCollisionVolumeGroup;
+import com.robotzero.gamefx.renderengine.entity.EntityCollisionVolumeGroup;
 import com.robotzero.gamefx.renderengine.entity.SimRegion;
 import org.joml.Vector3f;
 import org.lwjgl.PointerBuffer;
@@ -44,7 +44,7 @@ public class GameMemory {
     public int HighEntityCount = 0;
     public SimRegion simRegion;
     public ControlledHero ControlledHero;
-    public SimEntityCollisionVolumeGroup StandardRoomCollision;
+    public EntityCollisionVolumeGroup StandardRoomCollision;
     public ConcurrentHashMap<String, Asset> gameAssets = new ConcurrentHashMap<>();
 
     public GameMemory() {

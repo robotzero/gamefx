@@ -1,6 +1,6 @@
 package com.robotzero.gamefx.renderengine.entity;
 
 public class EntityReference {
-    public SimEntity Ptr;
+    public Entity Ptr;
     public int Index;
 }

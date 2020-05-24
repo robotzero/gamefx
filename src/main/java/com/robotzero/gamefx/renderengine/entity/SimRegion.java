@@ -9,8 +9,8 @@ public class SimRegion {
     public Rectangle UpdatableBounds;
     public int MaxEntityCount = 4096;
     public int EntityCount = 0;
-    public SimEntity[] simEntities;
-    public SimEntityHash[] Hash = new SimEntityHash[4096];
+    public Entity[] simEntities;
+    public EntityHash[] Hash = new EntityHash[4096];
     public float MaxEntityRadius;
     public float MaxEntityVelocity;
 }

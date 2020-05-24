@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimEntity {
+public class Entity {
     public Vector3f P = null;
     public Vector3f Dim = new Vector3f(0.0f, 0.0f, 0.0f);
     public WorldChunk OldChunk;
@@ -16,13 +16,13 @@ public class SimEntity {
     public float tBob;
     public Vector3f dP = new Vector3f(0.0f, 0.0f, 0.0f);
     public int StorageIndex;
-    public Map<Integer, SimEntity> Hash;
-    public List<SimEntityFlag> flags = new ArrayList<>();
+    public Map<Integer, Entity> Hash;
+    public List<EntityFlag> flags = new ArrayList<>();
     public boolean Updatable = false;
     public float DistanceLimit = 0.0f;
-    public SimEntityCollisionVolumeGroup Collision;
+    public EntityCollisionVolumeGroup Collision;
 
-    public SimEntity(SimEntity sim) {
+    public Entity(Entity sim) {
 //        P = sim.P;
         P = new Vector3f(0.0f, 0.0f, 0.0f);
         Dim = sim.Dim;
@@ -41,7 +41,7 @@ public class SimEntity {
         OldChunk = sim.OldChunk;
     }
 
-    public SimEntity() {
+    public Entity() {
 
     }
 }
