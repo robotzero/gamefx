@@ -37,7 +37,6 @@ public class GameMemory {
     private int PermanentStorageSize = Megabytes(64);
     private int TransientStorageSize = Gigabytes(1);
     private ByteBuffer mainStorage;
-    private PointerBuffer b;
     private static Map<Long, ByteBuffer> tiles = new LinkedHashMap<>();
     public LowEntity[] LowEntities = new LowEntity[100000];
     public int CameraFollowingEntityIndex = 0;

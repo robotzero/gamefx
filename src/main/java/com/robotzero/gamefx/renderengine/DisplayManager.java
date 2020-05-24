@@ -96,7 +96,8 @@ public class DisplayManager {
 
 
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        glfwSetWindowPos(window, (vidmode.width() - WIDTH) / 2, (vidmode.height() - HEIGHT) / 2);
+//        glfwSetWindowPos(window, (vidmode.width() - WIDTH) / 2, (vidmode.height() - HEIGHT) / 2);
+        glfwSetWindowPos(window, vidmode.width() - WIDTH, 300);
         // Make the OpenGL context current
         glfwMakeContextCurrent(window);
 

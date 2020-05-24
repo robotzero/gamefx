@@ -212,8 +212,6 @@ public class GameApp implements Runnable {
         if (displayManager.isKeyPressed(GLFW_KEY_B, true)) {
             ZoomRate = -1.0f;
         }
-
-        GameMemory.ZOffset = GameMemory.ZOffset + ZoomRate * globalinterval;
     }
 
     private void sync() {

@@ -47,22 +47,25 @@ public class AssetService {
                     gameMemory.gameAssets.put(asset1.getFileName(), asset1);
                 });
             }, executorService).whenComplete((void_, throwable) -> {
+                glfwSwapBuffers(sharedWindow);
                Optional.ofNullable(throwable).ifPresent(t -> {
                    t.printStackTrace();
                    throw new RuntimeException("Failed to load assets");
                });
             });
-            Thread t = new Thread(() -> {
-                glfwInit();
-                glfwMakeContextCurrent(sharedWindow);
-                GL.createCapabilities();
-                files.forEach(asset -> {
-                    Asset asset1 = new Asset();
-                    asset1.loadAsset(resourcesPath + "/" + asset.getFileName().toString());
-                    gameMemory.gameAssets.put(asset1.getFileName(), asset1);
-                });
-            });
-//            t.start();
+//            Thread t = new Thread(() -> {
+//                glfwInit();
+//                glfwMakeContextCurrent(sharedWindow);
+//                GL.createCapabilities();
+//                files.forEach(asset -> {
+//                    Asset asset1 = new Asset();
+//                    asset1.loadAsset(resourcesPath + "/" + asset.getFileName().toString());
+//                    gameMemory.gameAssets.put(asset1.getFileName(), asset1);
+//                });
+//            });
+////            t.start();
+//            executorService.submit(t);
+//            executorService.shutdown();
             glfwMakeContextCurrent(displayManager.getWindow());
         } catch (IOException | NullPointerException | URISyntaxException e) {
             e.printStackTrace();
