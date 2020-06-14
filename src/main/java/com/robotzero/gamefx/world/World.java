@@ -5,6 +5,7 @@ import com.robotzero.gamefx.renderengine.entity.Entity;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import org.joml.Vector3f;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,12 +34,25 @@ public class World {
         WorldGenerator.renderWorld(entityService);
     }
 
+    public WorldChunk GetWorldChunkInternal(int ChunkX, int ChunkY, long HashSlot) {
+
+
+        WorldChunk Chunk = tileChunkHash.get(HashSlot);
+        if (Chunk != null && !((ChunkX == Chunk.getChunkX() && ChunkY == Chunk.getChunkY()))) {
+            Chunk = null;
+        }
+
+        return Chunk;
+    }
+
     public WorldChunk GetWorldChunk(int TileChunkX, int TileChunkY, boolean initialize) {
         long HashValue = 19 * TileChunkX + 7 * TileChunkY;
         long HashSlot = HashValue & (tileChunkHashSize - 1);
         assert (HashSlot < tileChunkHashSize);
 
-        if (initialize) {
+        WorldChunk Chunk = GetWorldChunkInternal(TileChunkX, TileChunkY, HashSlot);
+
+        if (Chunk == null && initialize) {
             WorldChunk worldChunk = tileChunkHash.computeIfAbsent(HashSlot, (v) -> {
                 WorldChunk t = new WorldChunk();
                 t.setTileChunkX(TileChunkX);
@@ -160,6 +174,47 @@ public class World {
 
         public int ChunkX = 0;
         public int ChunkY = 0;
+    }
+
+    public void PackEntityIntoWorld(Entity Source, WorldPosition At) {
+        WorldChunk Chunk = GetWorldChunk(At.ChunkX, At.ChunkY,true);
+        assert(Chunk != null);
+        PackEntityIntoChunk(Source, Chunk);
+    }
+
+    public void PackEntityIntoChunk(Entity Source, WorldChunk Chunk) {
+        //u32 PackSize = sizeof(*Source);
+
+        if (Chunk.getFirstBlock() == null) {
+            if (GameModeWorld.FirstFreeBlock == null) {
+                GameModeWorld.FirstFreeBlock = new WorldEntityBlock();
+                GameModeWorld.FirstFreeBlock.next = 0;
+            }
+
+            int index = Chunk.setFirstBlock(GameModeWorld.FirstFreeBlock);
+            GameModeWorld.FirstFreeBlock = Chunk.getFirstBlock().listIterator(index).next();
+
+            ClearWorldEntityBlock(Chunk.getFirstBlock().peekFirst());
+        }
+
+        WorldEntityBlock Block = Chunk.getFirstBlock().peekFirst();
+
+//        Assert(HasRoomFor(Block, PackSize));
+        Block.entityData[Block.EntityCount + 1] = new Entity(Source);
+        Block.EntityCount = Block.EntityCount + 1;
+    }
+
+    private void ClearWorldEntityBlock(WorldEntityBlock Block) {
+        Block.EntityCount = 0;
+        Arrays.fill(Block.entityData, null);
+    }
+
+    public void AddBlockToFreeList(WorldEntityBlock worldEntityBlock) {
+        GameModeWorld.FirstFreeBlock = worldEntityBlock;
+    }
+
+    public void AddChunkToFreeList(WorldChunk Old) {
+
     }
 }
 

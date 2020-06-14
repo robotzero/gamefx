@@ -72,7 +72,7 @@ public class GameApp implements Runnable {
         this.assetService = assetService;
         Camera.position.Offset.x = 0;
         Camera.position.Offset.y = 0;
-        entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null);
+//        entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null);
         gameMemory.HighEntityCount = 1;
         gameMemory.StandardRoomCollision = entityService.MakeSimpleGroundedCollision(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters, 0.9f * World.TileDepthInMeters);
         World.renderWorld(entityService);
@@ -116,7 +116,7 @@ public class GameApp implements Runnable {
 //                entityService.AddFamiliar(WorldGenerator.CameraTileX + FamiliarOffsetX, WorldGenerator.CameraTileY + FamiliarOffsetY);
             }
         }
-        LowIndex =  entityService.AddPlayer().LowIndex;
+        LowIndex = entityService.AddPlayer().StorageIndex;
         gameMemory.ControlledHero = new ControlledHero();
         gameMemory.ControlledHero.ddP = new Vector3f(0.0f, 0.0f, 0.0f);
         gameMemory.ControlledHero.EntityIndex = LowIndex;

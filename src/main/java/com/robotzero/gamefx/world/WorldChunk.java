@@ -24,11 +24,16 @@ public class WorldChunk {
         return ChunkY;
     }
 
-    public LinkedList<WorldEntityBlock> getFirstBlock(boolean initialize) {
-        if (FirstBlock.isEmpty() && initialize) {
-            FirstBlock.add(new WorldEntityBlock());
-        }
+    public LinkedList<WorldEntityBlock> getFirstBlock() {
+//        if (FirstBlock.isEmpty() && initialize) {
+//            FirstBlock.add(new WorldEntityBlock());
+//        }
         return FirstBlock;
+    }
+
+    public int setFirstBlock(WorldEntityBlock worldEntityBlock) {
+        FirstBlock.add(worldEntityBlock);
+        return FirstBlock.indexOf(worldEntityBlock);
     }
 
     @Override
