@@ -182,10 +182,14 @@ public class World {
         PackEntityIntoChunk(Source, Chunk);
     }
 
+    public boolean hasRoomFor(WorldEntityBlock worldEntityBlock) {
+        return worldEntityBlock.entityData.length <= worldEntityBlock.EntityCount + 1;
+    }
+
     public void PackEntityIntoChunk(Entity Source, WorldChunk Chunk) {
         //u32 PackSize = sizeof(*Source);
 
-        if (Chunk.getFirstBlock() == null) {
+        if (Chunk.getFirstBlock().isEmpty() || !hasRoomFor(Chunk.getFirstBlock().getFirst())) {
             if (GameModeWorld.FirstFreeBlock == null) {
                 GameModeWorld.FirstFreeBlock = new WorldEntityBlock();
                 GameModeWorld.FirstFreeBlock.next = 0;
