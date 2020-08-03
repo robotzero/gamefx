@@ -386,38 +386,38 @@ public class EntityService {
 //        DrawPoints();
     }
 
-    public Map<Integer, List<Vector3f>> getDebug() {
-        float ScreenWidthInMeters = DisplayManager.WIDTH;
-        float ScreenHeightInMeters = DisplayManager.HEIGHT;
-        Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
-                new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
-
-        // Debug drawing
-        World.WorldPosition MinChunkP = world.MapIntoChunkSpace(Camera.position, Rectangle.GetMinCorner(CameraBoundsInMeters));
-        World.WorldPosition MaxChunkP = world.MapIntoChunkSpace(Camera.position, Rectangle.GetMaxCorner(CameraBoundsInMeters));
-        Vector2f ScreenCenter = new Vector2f(DisplayManager.WIDTH * 0.5f, DisplayManager.HEIGHT * 0.5f);
-
-        Map<Integer, List<Vector3f>> blah = new HashMap<>();
-        for(int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
-            for(int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
-                World.WorldPosition ChunkCenterP = world.CenteredChunkPoint(ChunkX, ChunkY);
-                Vector3f RelP = World.subtract(ChunkCenterP, Camera.position);
-//                Vector2f ScreenP = new Vector2f(ScreenCenter.x + World.MetersToPixels * RelP.x, ScreenCenter.y - World.MetersToPixels * RelP.y);
-//                Vector2f ScreenDim = new Vector2f(World.MetersToPixels * World.WorldChunkDimInMeters.x, World.MetersToPixels * World.WorldChunkDimInMeters.y);
-
-//                blah.put(ChunkX + ChunkY, List.of(
-//                        new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)), 0),
-//                        new Vector3f(new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)), 0)
-//                ));
-            }
-        }
-
-//        blah.put(10000, List.of(
-//                new Vector3f(0.0f, 0.0f, 0.0f),
-//                new Vector3f(DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f)
-//        ));
-        return blah;
-    }
+//    public Map<Integer, List<Vector3f>> getDebug() {
+//        float ScreenWidthInMeters = DisplayManager.WIDTH;
+//        float ScreenHeightInMeters = DisplayManager.HEIGHT;
+//        Rectangle CameraBoundsInMeters = Rectangle.RectCenterDim(new Vector3f(0, 0, 0),
+//                new Vector3f(ScreenWidthInMeters, ScreenHeightInMeters, 0.0f));
+//
+//        // Debug drawing
+//        World.WorldPosition MinChunkP = world.MapIntoChunkSpace(Camera.position, Rectangle.GetMinCorner(CameraBoundsInMeters));
+//        World.WorldPosition MaxChunkP = world.MapIntoChunkSpace(Camera.position, Rectangle.GetMaxCorner(CameraBoundsInMeters));
+//        Vector2f ScreenCenter = new Vector2f(DisplayManager.WIDTH * 0.5f, DisplayManager.HEIGHT * 0.5f);
+//
+//        Map<Integer, List<Vector3f>> blah = new HashMap<>();
+//        for(int ChunkY = MinChunkP.ChunkY; ChunkY <= MaxChunkP.ChunkY; ++ChunkY) {
+//            for(int ChunkX = MinChunkP.ChunkX; ChunkX <= MaxChunkP.ChunkX; ++ChunkX) {
+//                World.WorldPosition ChunkCenterP = world.CenteredChunkPoint(ChunkX, ChunkY);
+//                Vector3f RelP = World.subtract(ChunkCenterP, Camera.position);
+////                Vector2f ScreenP = new Vector2f(ScreenCenter.x + World.MetersToPixels * RelP.x, ScreenCenter.y - World.MetersToPixels * RelP.y);
+////                Vector2f ScreenDim = new Vector2f(World.MetersToPixels * World.WorldChunkDimInMeters.x, World.MetersToPixels * World.WorldChunkDimInMeters.y);
+//
+////                blah.put(ChunkX + ChunkY, List.of(
+////                        new Vector3f(new Vector2f(ScreenP).sub(new Vector2f(ScreenDim).mul(0.5f)), 0),
+////                        new Vector3f(new Vector2f(ScreenP).add(new Vector2f(ScreenDim).mul(0.5f)), 0)
+////                ));
+//            }
+//        }
+//
+////        blah.put(10000, List.of(
+////                new Vector3f(0.0f, 0.0f, 0.0f),
+////                new Vector3f(DisplayManager.WIDTH, DisplayManager.HEIGHT, 0.0f)
+////        ));
+//        return blah;
+//    }
 
     public Vector3f GetSimSpaceP(SimRegion simRegion, Entity stored) {
         Vector3f Result = GameMemory.InvalidP;
@@ -600,7 +600,8 @@ public class EntityService {
 
                     if (Entity.StorageIndex == gameMemory.CameraFollowingEntityIndex) {
                         World.WorldPosition NewCameraP = new World.WorldPosition(EntityP);
-                        Camera.position = EntityP;
+//                        Camera.position = EntityP;
+                        gameModeWorld.CameraP = NewCameraP;
                     }
                     Entity.P = new Vector3f(ChunkDelta).add(Entity.P);
                     world.PackEntityIntoWorld(Entity, Entity.ChunkP);

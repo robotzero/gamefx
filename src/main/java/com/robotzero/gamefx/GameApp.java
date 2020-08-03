@@ -15,6 +15,7 @@ import com.robotzero.gamefx.renderengine.rendergroup.RenderGroupService;
 import com.robotzero.gamefx.renderengine.utils.Random;
 import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
+import com.robotzero.gamefx.world.GameModeWorld;
 import com.robotzero.gamefx.world.World;
 import com.robotzero.gamefx.world.WorldGenerator;
 import org.joml.Vector2f;
@@ -60,8 +61,9 @@ public class GameApp implements Runnable {
     public static World.WorldPosition SimCenterP;
     public static Vector3f CameraP;
     private final AssetService assetService;
+    private final GameModeWorld gameModeWorld;
 
-    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g, RenderGroupService renderGroupService, AssetService assetService) {
+    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g, RenderGroupService renderGroupService, AssetService assetService, GameModeWorld gameModeWorld) {
         this.displayManager = displayManager;
         this.renderer2D = renderer2D;
         this.timer = timer;
@@ -70,8 +72,12 @@ public class GameApp implements Runnable {
         this.entityService = entityService;
         this.renderGroupService = renderGroupService;
         this.assetService = assetService;
-        Camera.position.Offset.x = 0;
-        Camera.position.Offset.y = 0;
+        this.gameModeWorld = gameModeWorld;
+        gameModeWorld.CameraP = new World.WorldPosition();
+//        Camera.position.Offset.x = 0;
+//        Camera.position.Offset.y = 0;
+        gameModeWorld.CameraP.Offset.x = 0;
+        gameModeWorld.CameraP.Offset.y = 0;
 //        entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null);
         gameMemory.HighEntityCount = 1;
         gameMemory.StandardRoomCollision = entityService.MakeSimpleGroundedCollision(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters, 0.9f * World.TileDepthInMeters);
@@ -108,7 +114,8 @@ public class GameApp implements Runnable {
                 new Vector3f(0.0f, 0.0f, 0.5f * World.TileDepthInMeters)
         );
 //        entityService.AddMonstar(WorldGenerator.CameraTileX + 2, WorldGenerator.CameraTileY + 2);
-        Camera.position = NewCameraP;
+//        Camera.position = NewCameraP;
+        gameModeWorld.CameraP = NewCameraP;
         for (int FamiliarIndex = 0; FamiliarIndex < 1; ++FamiliarIndex) {
             int FamiliarOffsetX = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 7;
             int FamiliarOffsetY = (Random.randomNumberTable[WorldGenerator.randomNumberIndex++] % 10) - 3;
@@ -266,10 +273,12 @@ public class GameApp implements Runnable {
 
         Vector3f SimBoundsExpansion = new Vector3f(15.0f, 15.0f, 0.0f);
         Rectangle SimBounds = entityService.AddRadiusTo(CameraBoundsInMeters, SimBoundsExpansion);
-        SimCenterP = new World.WorldPosition(Camera.position);
+//        SimCenterP = new World.WorldPosition(Camera.position);
+        SimCenterP = new World.WorldPosition(gameModeWorld.CameraP);
         gameMemory.simRegion = entityService.BeginSim(SimCenterP, SimBounds, globalinterval);
 
-        CameraP = World.subtract(new World.WorldPosition(Camera.position), new World.WorldPosition(SimCenterP));
+//        CameraP = World.subtract(new World.WorldPosition(Camera.position), new World.WorldPosition(SimCenterP));
+        CameraP = World.subtract(new World.WorldPosition(gameModeWorld.CameraP), new World.WorldPosition(SimCenterP));
         renderGroupService.PushRectOutline(renderGroup, EntityService.DefaultFlatTransform(), new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(ScreenBounds), new Vector4f(1.0f, 1.0f, 0.0f, 1.0f), EntityType.DEBUG);
         renderGroupService.PushRectOutline(renderGroup, EntityService.DefaultFlatTransform(), new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(SimBounds), new Vector4f(0.0f, 1.0f, 1.0f, 1.0f), EntityType.DEBUG);
         renderGroupService.PushRectOutline(renderGroup, EntityService.DefaultFlatTransform(), new Vector3f(0.0f, 0.0f, 0.0f), Rectangle.GetDimV2(gameMemory.simRegion.Bounds), new Vector4f(1.0f, 0.0f, 1.0f, 1.0f), EntityType.DEBUG);

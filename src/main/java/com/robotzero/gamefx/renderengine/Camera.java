@@ -4,7 +4,7 @@ import com.robotzero.gamefx.world.World;
 import org.joml.Matrix4f;
 
 public class Camera {
-    public static World.WorldPosition position = new World.WorldPosition();
+//    public static World.WorldPosition position = new World.WorldPosition();
     private final Matrix4f identity = new Matrix4f().identity();
 
     public Matrix4f getIdentity() {
