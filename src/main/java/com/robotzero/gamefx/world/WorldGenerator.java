@@ -4,12 +4,12 @@ import com.robotzero.gamefx.renderengine.entity.EntityService;
 import com.robotzero.gamefx.renderengine.utils.Random;
 
 public class WorldGenerator {
-    public static final int tilesPerWidth = 5;
-    public static final int tilesPerHeight = 3;
+    public static final int tilesPerWidth = 17;
+    public static final int tilesPerHeight = 9;
     public static final int screenBaseX = 0;
     public static final int screenBaseY = 0;
-    public static int CameraTileX = WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 5/2;
-    public static int CameraTileY = WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 3/2;
+    public static int CameraTileX = WorldGenerator.screenBaseX * WorldGenerator.tilesPerWidth + 17/2;
+    public static int CameraTileY = WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9/2;
     public static int randomNumberIndex = 0;
 
     public static void renderWorld(EntityService entityService) {

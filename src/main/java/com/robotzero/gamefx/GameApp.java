@@ -1,5 +1,6 @@
 package com.robotzero.gamefx;
 
+import com.badlogic.gdx.Game;
 import com.robotzero.gamefx.renderengine.Camera;
 import com.robotzero.gamefx.renderengine.DisplayManager;
 import com.robotzero.gamefx.renderengine.Renderer2D;
@@ -82,6 +83,8 @@ public class GameApp implements Runnable {
         gameMemory.HighEntityCount = 1;
         gameMemory.StandardRoomCollision = entityService.MakeSimpleGroundedCollision(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters, 0.9f * World.TileDepthInMeters);
         World.renderWorld(entityService);
+        World.WorldPosition newCameraP = entityService.ChunkPositionFromTilePosition(WorldGenerator.CameraTileX, WorldGenerator.CameraTileY, new Vector3f());
+        gameModeWorld.CameraP = newCameraP;
     }
 
     public void run() {

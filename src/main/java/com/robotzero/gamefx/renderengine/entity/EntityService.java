@@ -100,7 +100,12 @@ public class EntityService {
     public World.WorldPosition ChunkPositionFromTilePosition(int AbsTileX, int AbsTileY, Vector3f AdditionalOffset) {
         World.WorldPosition BasePos = new World.WorldPosition();
 
-        Vector3f Offset =  new Vector3f(AbsTileX, AbsTileY, 0.0f).mul(World.TileSideInMeters).add(AdditionalOffset);
+        float TileSideInMeters = 1.4f;
+        float TileDepthInMeters = 3.0f;
+
+        Vector3f TileDim = new Vector3f(TileSideInMeters, TileSideInMeters, TileDepthInMeters);
+        Vector3f Offset = EntityService.Hadamard(new Vector3f(TileDim), new Vector3f(AbsTileX, AbsTileY, 0));
+
         World.WorldPosition Result = world.MapIntoChunkSpace(BasePos, Offset);
         assert (world.IsCanonical(Result.Offset));
         return (Result);
@@ -129,8 +134,7 @@ public class EntityService {
         }
     }
 
-    public void
-    ChangeEntityLocationRaw(int LowEntityIndex, World.WorldPosition OldP, World.WorldPosition NewP) {
+    public void ChangeEntityLocationRaw(int LowEntityIndex, World.WorldPosition OldP, World.WorldPosition NewP) {
         assert (OldP == null || isValid(OldP));
         assert (NewP == null || isValid(NewP));
 
