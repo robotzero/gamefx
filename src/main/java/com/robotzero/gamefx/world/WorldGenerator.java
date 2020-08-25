@@ -12,7 +12,7 @@ public class WorldGenerator {
     public static int CameraTileY = WorldGenerator.screenBaseY * WorldGenerator.tilesPerHeight + 9/2;
     public static int randomNumberIndex = 0;
 
-    public static void renderWorld(EntityService entityService) {
+    public void renderWorld(EntityService entityService) {
         int screenX = screenBaseX;
         int screenY = screenBaseY;
         boolean doorLeft = false;

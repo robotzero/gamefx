@@ -5,10 +5,7 @@ import com.robotzero.gamefx.renderengine.entity.Entity;
 import com.robotzero.gamefx.renderengine.entity.EntityService;
 import org.joml.Vector3f;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class World {
     public static final int TileSideInPixels = 60;
@@ -22,21 +19,24 @@ public class World {
     public static float ScreenCenterY = 0.5f * DisplayManager.HEIGHT;
     public static WorldEntityBlock firstFree = null;
     private static final int tileChunkHashSize = 4096;
-    public static List<WorldChunk> firstFreeChunk;
+    public static List<WorldChunk> firstFreeChunk = new ArrayList<>();
     public static List<WorldEntityBlock> firstFreeBlock;
     public static int CreationBufferIndex;
     public static Entity[] CreationBuffer = new Entity[4];
     public static int LastUsedEntityStorageIndex;
+    private final WorldGenerator worldGenerator;
 
-    private Map<Long, WorldChunk> tileChunkHash = new LinkedHashMap<>(tileChunkHashSize);
+    private final Map<Long, WorldChunk> tileChunkHash = new LinkedHashMap<>(tileChunkHashSize);
 
-    public static void renderWorld(EntityService entityService) {
-        WorldGenerator.renderWorld(entityService);
+    public World(WorldGenerator worldGenerator) {
+        this.worldGenerator = worldGenerator;
+    }
+
+    public void renderWorld(EntityService entityService) {
+        this.worldGenerator.renderWorld(entityService);
     }
 
     public WorldChunk GetWorldChunkInternal(int ChunkX, int ChunkY, long HashSlot) {
-
-
         WorldChunk Chunk = tileChunkHash.get(HashSlot);
         if (Chunk != null && !((ChunkX == Chunk.getChunkX() && ChunkY == Chunk.getChunkY()))) {
             Chunk = null;
@@ -46,9 +46,7 @@ public class World {
     }
 
     public WorldChunk GetWorldChunk(int TileChunkX, int TileChunkY, boolean initialize) {
-        long HashValue = 19 * TileChunkX + 7 * TileChunkY;
-        long HashSlot = HashValue & (tileChunkHashSize - 1);
-        assert (HashSlot < tileChunkHashSize);
+        long HashSlot = calculateHash(TileChunkX, TileChunkY);
 
         WorldChunk Chunk = GetWorldChunkInternal(TileChunkX, TileChunkY, HashSlot);
 
@@ -63,6 +61,20 @@ public class World {
         }
 
         return tileChunkHash.get(HashSlot);
+    }
+
+    public WorldChunk RemoveWorldChunk(int ChunkX, int ChunkY) {
+        long HashSlot = calculateHash(ChunkX, ChunkY);
+        WorldChunk Chunk = GetWorldChunkInternal(ChunkX, ChunkY, HashSlot);
+        if (Chunk != null) {
+            tileChunkHash.remove(HashSlot, Chunk);
+        }
+        return Chunk;
+    }
+
+    private long calculateHash(int ChunkX, int ChunkY) {
+        long HashValue = 19 * ChunkX + 7 * ChunkY;
+        return HashValue & (tileChunkHashSize - 1);
     }
 
     public boolean IsCanonical(float ChunkDim, float TileRel)
@@ -153,14 +165,9 @@ public class World {
         return(Result);
     }
 
-    public int SignOf(int Value)
-    {
+    public int SignOf(int Value) {
         int Result = (Value >= 0) ? 1 : -1;
         return(Result);
-    }
-
-    public WorldChunk RemoveWorldChunk(int chunkX, int chunkY, boolean b) {
-        return null;
     }
 
     public static class WorldPosition {
@@ -183,7 +190,7 @@ public class World {
     }
 
     public boolean hasRoomFor(WorldEntityBlock worldEntityBlock) {
-        return worldEntityBlock.entityData.length <= worldEntityBlock.EntityCount + 1;
+        return worldEntityBlock.EntityCount + 1 <= worldEntityBlock.entityData.length;
     }
 
     public void PackEntityIntoChunk(Entity Source, WorldChunk Chunk) {
@@ -198,13 +205,13 @@ public class World {
             int index = Chunk.setFirstBlock(GameModeWorld.FirstFreeBlock);
             GameModeWorld.FirstFreeBlock = Chunk.getFirstBlock().listIterator(index).next();
 
-            ClearWorldEntityBlock(Chunk.getFirstBlock().peekFirst());
+            ClearWorldEntityBlock(Chunk.getFirstBlock().get(index));
         }
 
-        WorldEntityBlock Block = Chunk.getFirstBlock().peekFirst();
+        WorldEntityBlock Block = Chunk.getFirstBlock().peekLast();
 
 //        Assert(HasRoomFor(Block, PackSize));
-        Block.entityData[Block.EntityCount + 1] = new Entity(Source);
+        Block.entityData[Block.EntityCount] = new Entity(Source);
         Block.EntityCount = Block.EntityCount + 1;
     }
 
@@ -218,7 +225,21 @@ public class World {
     }
 
     public void AddChunkToFreeList(WorldChunk Old) {
+        if (tileChunkHash.containsValue(Old)) {
+            long hash = tileChunkHash.entrySet().stream().map((entry) -> {
+                if (entry.getValue().equals(Old)) {
+                  return entry.getKey();
+                }
+                return null;
+            }).filter(Objects::nonNull).findFirst().get();
+            tileChunkHash.remove(hash);
+        }
 
+        World.firstFreeChunk.add(Old);
+    }
+
+    public Map<Long, WorldChunk> getTileChunkHash() {
+        return tileChunkHash;
     }
 }
 

@@ -10,6 +10,7 @@ import com.robotzero.gamefx.renderengine.utils.Timer;
 import com.robotzero.gamefx.world.GameMemory;
 import com.robotzero.gamefx.world.GameModeWorld;
 import com.robotzero.gamefx.world.World;
+import com.robotzero.gamefx.world.WorldGenerator;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -26,14 +27,15 @@ public class Robot {
             gameMemory = new GameMemory();
             Timer timer = new Timer();
             DisplayManager displayManager = new DisplayManager();
-            World world = new World();
+            WorldGenerator worldGenerator = new WorldGenerator();
+            World world = new World(worldGenerator);
             Camera camera = new Camera();
             Renderer2D renderer2D = new Renderer2D(camera);
             RenderGroupService renderGroupService = new RenderGroupService(renderer2D, executor, gameMemory);
             GameModeWorld gameModeWorld = new GameModeWorld();
             EntityService entityService = new EntityService(gameMemory, world, renderGroupService, gameModeWorld);
             AssetService assetService = new AssetService(executor, gameMemory, displayManager);
-            GameApp gameApp = new GameApp(displayManager, renderer2D, timer, entityService, gameMemory, renderGroupService, assetService, gameModeWorld);
+            GameApp gameApp = new GameApp(displayManager, renderer2D, timer, entityService, gameMemory, renderGroupService, assetService, gameModeWorld, world);
             gameApp.run();
         } catch (Throwable t) {
             System.out.println(t.toString());

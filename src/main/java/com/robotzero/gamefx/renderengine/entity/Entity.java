@@ -13,16 +13,17 @@ public class Entity {
     public Vector3f P = null;
     public Vector3f Dim = new Vector3f(0.0f, 0.0f, 0.0f);
     public WorldChunk OldChunk;
-    public World.WorldPosition ChunkP;
     public EntityType Type;
     public float tBob;
     public Vector3f dP = new Vector3f(0.0f, 0.0f, 0.0f);
-    public int StorageIndex;
     public Map<Integer, Entity> Hash;
     public List<EntityFlag> flags = new ArrayList<>();
     public boolean Updatable = false;
     public float DistanceLimit = 0.0f;
     public EntityCollisionVolumeGroup Collision;
+    public EntityId entityId = new EntityId();
+    public Vector3f MovementFrom = new Vector3f();
+    public Vector3f MovementTo = new Vector3f();
 
     public Entity(Entity sim) {
 //        P = sim.P;
@@ -32,7 +33,6 @@ public class Entity {
         dP = sim.dP;
         flags = new ArrayList<>(sim.flags);
         tBob = sim.tBob;
-        StorageIndex = sim.StorageIndex;
         Collision = sim.Collision;
         Updatable = sim.Updatable;
         if(sim.Hash == null) {
@@ -41,7 +41,9 @@ public class Entity {
             Hash = new HashMap<>(sim.Hash);
         }
         OldChunk = sim.OldChunk;
-        ChunkP = sim.ChunkP;
+        entityId = sim.entityId;
+        MovementFrom = sim.MovementFrom;
+        MovementTo = sim.MovementTo;
     }
 
     public Entity() {

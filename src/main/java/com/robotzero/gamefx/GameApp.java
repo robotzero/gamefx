@@ -63,8 +63,9 @@ public class GameApp implements Runnable {
     public static Vector3f CameraP;
     private final AssetService assetService;
     private final GameModeWorld gameModeWorld;
+    private final World world;
 
-    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g, RenderGroupService renderGroupService, AssetService assetService, GameModeWorld gameModeWorld) {
+    public GameApp(DisplayManager displayManager, Renderer2D renderer2D, Timer timer, EntityService entityService, GameMemory g, RenderGroupService renderGroupService, AssetService assetService, GameModeWorld gameModeWorld, World world) {
         this.displayManager = displayManager;
         this.renderer2D = renderer2D;
         this.timer = timer;
@@ -74,6 +75,7 @@ public class GameApp implements Runnable {
         this.renderGroupService = renderGroupService;
         this.assetService = assetService;
         this.gameModeWorld = gameModeWorld;
+        this.world = world;
         gameModeWorld.CameraP = new World.WorldPosition();
 //        Camera.position.Offset.x = 0;
 //        Camera.position.Offset.y = 0;
@@ -82,7 +84,7 @@ public class GameApp implements Runnable {
 //        entityService.AddLowEntity(EntityType.NULL, entityService.NullPosition(), null);
         gameMemory.HighEntityCount = 1;
         gameMemory.StandardRoomCollision = entityService.MakeSimpleGroundedCollision(WorldGenerator.tilesPerWidth * World.TileSideInMeters, WorldGenerator.tilesPerHeight * World.TileSideInMeters, 0.9f * World.TileDepthInMeters);
-        World.renderWorld(entityService);
+        this.world.renderWorld(entityService);
         World.WorldPosition newCameraP = entityService.ChunkPositionFromTilePosition(WorldGenerator.CameraTileX, WorldGenerator.CameraTileY, new Vector3f());
         gameModeWorld.CameraP = newCameraP;
     }
@@ -126,7 +128,7 @@ public class GameApp implements Runnable {
 //                entityService.AddFamiliar(WorldGenerator.CameraTileX + FamiliarOffsetX, WorldGenerator.CameraTileY + FamiliarOffsetY);
             }
         }
-        LowIndex = entityService.AddPlayer().StorageIndex;
+        LowIndex = entityService.AddPlayer().Value;
         gameMemory.ControlledHero = new ControlledHero();
         gameMemory.ControlledHero.ddP = new Vector3f(0.0f, 0.0f, 0.0f);
         gameMemory.ControlledHero.EntityIndex = LowIndex;

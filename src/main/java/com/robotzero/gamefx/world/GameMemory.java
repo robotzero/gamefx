@@ -2,7 +2,6 @@ package com.robotzero.gamefx.world;
 
 import com.robotzero.gamefx.renderengine.assets.Asset;
 import com.robotzero.gamefx.renderengine.entity.ControlledHero;
-import com.robotzero.gamefx.renderengine.entity.LowEntity;
 import com.robotzero.gamefx.renderengine.entity.EntityCollisionVolumeGroup;
 import com.robotzero.gamefx.renderengine.entity.SimRegion;
 import org.joml.Vector3f;
@@ -38,9 +37,7 @@ public class GameMemory {
     private int TransientStorageSize = Gigabytes(1);
     private ByteBuffer mainStorage;
     private static Map<Long, ByteBuffer> tiles = new LinkedHashMap<>();
-    public LowEntity[] LowEntities = new LowEntity[100000];
     public int CameraFollowingEntityIndex = 0;
-    public int LowEntityCount = 0;
     public int HighEntityCount = 0;
     public SimRegion simRegion;
     public ControlledHero ControlledHero;
@@ -93,6 +90,7 @@ public class GameMemory {
             tiles.clear();
             MemoryUtil.memFree(mainStorage);
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println(e.getMessage());
         }
     }
