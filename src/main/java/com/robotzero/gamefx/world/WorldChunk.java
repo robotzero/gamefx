@@ -25,15 +25,17 @@ public class WorldChunk {
     }
 
     public LinkedList<WorldEntityBlock> getFirstBlock() {
-//        if (FirstBlock.isEmpty() && initialize) {
-//            FirstBlock.add(new WorldEntityBlock());
-//        }
         return FirstBlock;
     }
 
-    public int setFirstBlock(WorldEntityBlock worldEntityBlock) {
+    public WorldEntityBlock setFirstBlock(WorldEntityBlock worldEntityBlock) {
+        WorldEntityBlock free = null;
+        if (!FirstBlock.isEmpty()) {
+            free = FirstBlock.getFirst();
+            FirstBlock.clear();
+        }
         FirstBlock.add(worldEntityBlock);
-        return FirstBlock.indexOf(worldEntityBlock);
+        return free;
     }
 
     @Override

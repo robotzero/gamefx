@@ -22,7 +22,7 @@ public class WorldGenerator {
         RandomSeries Series = RandomSeed(1234);
 
         for (int screenIndex = 0;
-             screenIndex < 1;
+             screenIndex < 10;
              ++screenIndex) {
 
             int DoorDirection = RandomChoice(Series, doorLeft || doorRight ? 2 : 4);

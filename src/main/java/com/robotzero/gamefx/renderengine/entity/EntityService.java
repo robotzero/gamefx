@@ -40,7 +40,6 @@ public class EntityService {
         World.WorldPosition P = gameModeWorld.CameraP;
         Entity entity = BeginGroundedEntity(EntityType.HERO, MakeSimpleGroundedCollision(1.0f, 0.5f, 0.6f));
         AddFlag(entity, EntityFlag.COLLIDES);
-        AddFlag(entity, EntityFlag.MOVEABLE);
 
         if (gameMemory.CameraFollowingEntityIndex == 0) {
             gameMemory.CameraFollowingEntityIndex = entity.entityId.Value;
@@ -99,96 +98,6 @@ public class EntityService {
         return (Result);
     }
 
-//    public void ChangeEntityLocation(int LowEntityIndex, LowEntity LowEntity, World.WorldPosition NewPInit) {
-//        World.WorldPosition OldP = null;
-//        World.WorldPosition NewP = null;
-//
-//        if (!IsSet(LowEntity.Sim, EntityFlag.NONSPATIAL) && isValid(LowEntity.P)) {
-//            OldP = new World.WorldPosition(LowEntity.P);
-//        }
-//
-//        if (isValid(NewPInit)) {
-//            NewP = new World.WorldPosition(NewPInit);
-//        }
-//
-//        ChangeEntityLocationRaw(LowEntityIndex, OldP, NewP);
-//
-//        if (NewP != null) {
-//            LowEntity.P = new World.WorldPosition(NewP);
-//            ClearFlag(LowEntity.Sim, EntityFlag.NONSPATIAL);
-//        } else {
-//            LowEntity.P = null;
-//            AddFlag(LowEntity.Sim, EntityFlag.NONSPATIAL);
-//        }
-//    }
-
-//    public void ChangeEntityLocationRaw(int LowEntityIndex, World.WorldPosition OldP, World.WorldPosition NewP) {
-//        assert (OldP == null || isValid(OldP));
-//        assert (NewP == null || isValid(NewP));
-//
-//        if (OldP != null && NewP != null && world.AreInSameChunk(OldP, NewP)) {
-//            // NOTE(casey): Leave entity where it is
-//        } else {
-//            if (OldP != null) {
-//                // NOTE(casey): Pull the entity out of its old entity block
-//                WorldChunk Chunk = world.GetWorldChunk(OldP.ChunkX, OldP.ChunkY, false);
-//
-//                if (Chunk != null) {
-//                    boolean NotFound = true;
-//                    LinkedList<WorldEntityBlock> FirstBlock = Chunk.getFirstBlock();
-//                    WorldEntityBlock First = FirstBlock.getFirst();
-//                    Iterator<WorldEntityBlock> iterator = FirstBlock.listIterator();
-//                    while(iterator.hasNext() && NotFound) {
-//                        WorldEntityBlock Block = iterator.next();
-//                        for (int Index = 0; Index < Block.EntityCount && NotFound; ++Index) {
-//                            if (Block.LowEntityIndex[Index] == LowEntityIndex) {
-//                                First.EntityCount = First.EntityCount - 1;
-//                                Block.LowEntityIndex[Index] = First.LowEntityIndex[First.EntityCount];
-//                                if (First.EntityCount == 0) {
-//                                    if (FirstBlock.listIterator(FirstBlock.indexOf(First)).hasNext()) {
-//                                        WorldEntityBlock FirstFree = FirstBlock.remove(FirstBlock.indexOf(First));
-//                                        World.firstFree = FirstFree;
-//                                    }
-//                                }
-//                                NotFound = false;
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//
-//            if (NewP != null) {
-//                // NOTE(casey): Insert the entity into its new entity block
-//                WorldChunk Chunk = world.GetWorldChunk(NewP.ChunkX, NewP.ChunkY, true);
-//                WorldEntityBlock Block = Chunk.getFirstBlock().getFirst();
-//                LinkedList<WorldEntityBlock> blah = Chunk.getFirstBlock();
-//                if (Block.EntityCount == Block.LowEntityIndex.length) {
-//                    //@TODO reuse stuff
-//                    WorldEntityBlock oldBlock;
-//                    if (World.firstFree != null) {
-//                        oldBlock = World.firstFree;
-//                        World.firstFree = null;
-//                    } else {
-//                        oldBlock = new WorldEntityBlock();
-//                    }
-//                    oldBlock.EntityCount = Block.EntityCount;
-//                    int[] tmp = new int[16];
-//                    System.arraycopy(Block.LowEntityIndex, 0, tmp, 0, Block.LowEntityIndex.length);
-//                    oldBlock.LowEntityIndex = tmp;
-//                    WorldEntityBlock bn = Block.next != null ? blah.get(Block.next) : null;
-//                    tmp = new int[16];
-//                    System.arraycopy(bn != null ? bn.LowEntityIndex : new int[16], 0, tmp, 0, bn != null ? bn.LowEntityIndex.length : 16);
-//                    Block.EntityCount = 0;
-//                    Block.LowEntityIndex = new int[16];
-//                    oldBlock.next = Block.next;
-//                    blah.addLast(oldBlock);
-//                }
-//                Block.LowEntityIndex[Block.EntityCount] = LowEntityIndex;
-//                Block.EntityCount = Block.EntityCount + 1;
-//            }
-//        }
-//    }
-
     public Entity BeginGroundedEntity(EntityType Type, EntityCollisionVolumeGroup Collision) {
         Entity Entity = BeginLowEntity(Type);
         Entity.Collision = Collision;
@@ -206,8 +115,7 @@ public class EntityService {
     }
 
     public void moveEntity(SimRegion simRegion, Entity entity, Vector3f ddP, float interval, MoveSpec moveSpec) {
-        assert(!IsSet(entity, EntityFlag.NONSPATIAL));
-
+        if (moveSpec == null) {return;}
         if (moveSpec.UnitMaxAccelVector) {
             float ddPLength = new Vector3f(ddP).lengthSquared();
             if (ddPLength > 1.0f) {
@@ -243,11 +151,11 @@ public class EntityService {
                 Entity HitEntity = null;
                 Vector3f DesiredPosition = new Vector3f(entity.P).add(new Vector3f(playerDelta));
                 boolean StopOnCollision = IsSet(entity, EntityFlag.COLLIDES);
-                if (!IsSet(entity, EntityFlag.NONSPATIAL)) {
+
                     for (int TestHighEntityIndex = 1; TestHighEntityIndex < simRegion.EntityCount; ++TestHighEntityIndex) {
                         Entity TestEntity = simRegion.simEntities[TestHighEntityIndex];
                         if (TestEntity != entity) {
-                            if (TestEntity.flags.contains(EntityFlag.COLLIDES) && !entity.flags.contains(EntityFlag.NONSPATIAL)) {
+                            if (TestEntity.flags.contains(EntityFlag.COLLIDES)) {
                                 Vector3f MinkowskiDiameter = new Vector3f(TestEntity.Dim.x() + entity.Dim.x(), TestEntity.Dim.y() + entity.Dim.y(), 2.0f * World.TileDepthInMeters);
                                 Vector3f MinCorner = MinkowskiDiameter.mul(-0.5f);
                                 Vector3f MaxCorner = MinkowskiDiameter.mul(0.5f);
@@ -278,7 +186,7 @@ public class EntityService {
                             }
                         }
                     }
-                }
+
                 entity.P = new Vector3f(entity.P).add(new Vector3f(playerDelta).mul(tMin[0]));
                 DistanceRemaining = DistanceRemaining - tMin[0] * PlayerDeltaLength;
                 if (HitEntity != null) {
@@ -327,7 +235,7 @@ public class EntityService {
                         } break;
                     }
 
-                    if (!IsSet(entity, EntityFlag.NONSPATIAL) && MoveSpec != null && IsSet(entity, EntityFlag.MOVEABLE)) {
+                    if (entity.dP.lengthSquared() > 0 || gameMemory.ControlledHero.ddP.lengthSquared() > 0) {
                         moveEntity(gameMemory.simRegion, entity, gameMemory.ControlledHero.ddP, GameApp.globalinterval, MoveSpec);
                     }
 
@@ -465,10 +373,7 @@ public class EntityService {
                     simRegion.simEntities[EntityCount] = Entity;
                     Entry.Ptr = Entity;
 
-                    assert (!IsSet(Source, EntityFlag.SIMMING));
-                    AddFlag(Source, EntityFlag.SIMMING);
                     simRegion.simEntities[EntityCount] = Entity;
-//                LoadEntityReference(simRegion, Entity.Sword);
                 }
 
                 Entity.entityId = ID;
@@ -481,19 +386,6 @@ public class EntityService {
             }
         }
     }
-
-//    public void MapStorageIndexToEntity(SimRegion simRegion, int StorageIndex, Entity Entity) {
-//        EntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
-//        assert((Entry.Index == 0) || (Entry.Index == StorageIndex));
-//        Entry.Index = StorageIndex;
-//        Entry.Ptr = Entity;
-//    }
-
-//    public Entity GetEntityByStorageIndex(SimRegion simRegion, int StorageIndex) {
-//        EntityHash Entry = GetHashFromStorageIndex(simRegion, StorageIndex);
-//        Entity Result = Entry.Ptr;
-//        return(Result);
-//    }
 
     public EntityHash GetHashFromId(SimRegion simRegion, int StorageIndex) {
         assert (StorageIndex != 0);
@@ -577,8 +469,9 @@ public class EntityService {
                     World.WorldPosition EntityP = world.MapIntoChunkSpace(Region.Origin, Entity.P);
                     World.WorldPosition ChunkP = new World.WorldPosition(EntityP);
                     ChunkP.Offset = new Vector3f(0f, 0f, 0f);
-                    Vector3f temp = World.subtract(ChunkP, Region.Origin);
-                    Vector3f ChunkDelta = new Vector3f(-temp.x, -temp.y, -temp.z);
+//                    Vector3f temp = World.subtract(ChunkP, Region.Origin);
+//                    Vector3f ChunkDelta = new Vector3f(-temp.x, -temp.y, -temp.z);
+                    Vector3f ChunkDelta = new Vector3f(EntityP.Offset).sub(new Vector3f(Entity.P));
 
                     if (Entity.entityId.Value == gameMemory.CameraFollowingEntityIndex) {
                         World.WorldPosition NewCameraP = new World.WorldPosition(EntityP);
@@ -586,10 +479,11 @@ public class EntityService {
 //                        Camera.position = EntityP;
                         gameModeWorld.CameraP = NewCameraP;
                     }
+                    Vector3f OldEntityP = new Vector3f(Entity.P);
                     Entity.P = new Vector3f(ChunkDelta).add(new Vector3f(Entity.P));
-                    Entity.MovementFrom = new Vector3f(Entity.MovementFrom).add(new Vector3f(ChunkDelta));
-                    Entity.MovementTo = new Vector3f(Entity.MovementTo).add(new Vector3f(ChunkDelta));
-                    world.PackEntityIntoWorld(Entity, EntityP);
+//                    Entity.MovementFrom = new Vector3f(Entity.MovementFrom).add(new Vector3f(ChunkDelta));
+//                    Entity.MovementTo = new Vector3f(Entity.MovementTo).add(new Vector3f(ChunkDelta));
+                    world.PackEntityIntoWorld(Entity, ChunkP);
                 }
             }
         }
@@ -607,17 +501,6 @@ public class EntityService {
 
     public void ClearFlag(Entity Entity, EntityFlag Flag) {
         Entity.flags.remove(Flag);
-    }
-
-    public void MakeEntityNonSpatial(Entity Entity) {
-        AddFlag(Entity, EntityFlag.NONSPATIAL);
-        Entity.P = GameMemory.InvalidP;
-    }
-
-    public void MakeEntitySpatial(Entity Entity, Vector3f P, Vector3f dP) {
-        ClearFlag(Entity, EntityFlag.NONSPATIAL);
-        Entity.P = P;
-        Entity.dP = dP;
     }
 
     public Rectangle AddRadiusTo(Rectangle A, Vector3f Radius) {

@@ -26,8 +26,8 @@ public class Entity {
     public Vector3f MovementTo = new Vector3f();
 
     public Entity(Entity sim) {
-//        P = sim.P;
-        P = new Vector3f(0.0f, 0.0f, 0.0f);
+        P = new Vector3f(sim.P);
+//        P = new Vector3f(0.0f, 0.0f, 0.0f);
         Dim = sim.Dim;
         Type = sim.Type;
         dP = sim.dP;

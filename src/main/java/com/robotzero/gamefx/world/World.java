@@ -60,7 +60,7 @@ public class World {
             return worldChunk;
         }
 
-        return tileChunkHash.get(HashSlot);
+        return Chunk;
     }
 
     public WorldChunk RemoveWorldChunk(int ChunkX, int ChunkY) {
@@ -184,7 +184,7 @@ public class World {
     }
 
     public void PackEntityIntoWorld(Entity Source, WorldPosition At) {
-        WorldChunk Chunk = GetWorldChunk(At.ChunkX, At.ChunkY,true);
+        WorldChunk Chunk = GetWorldChunk(At.ChunkX, At.ChunkY, true);
         assert(Chunk != null);
         PackEntityIntoChunk(Source, Chunk);
     }
@@ -199,13 +199,11 @@ public class World {
         if (Chunk.getFirstBlock().isEmpty() || !hasRoomFor(Chunk.getFirstBlock().getFirst())) {
             if (GameModeWorld.FirstFreeBlock == null) {
                 GameModeWorld.FirstFreeBlock = new WorldEntityBlock();
-                GameModeWorld.FirstFreeBlock.next = 0;
             }
 
-            int index = Chunk.setFirstBlock(GameModeWorld.FirstFreeBlock);
-            GameModeWorld.FirstFreeBlock = Chunk.getFirstBlock().listIterator(index).next();
+            GameModeWorld.FirstFreeBlock = Chunk.setFirstBlock(GameModeWorld.FirstFreeBlock);
 
-            ClearWorldEntityBlock(Chunk.getFirstBlock().get(index));
+            ClearWorldEntityBlock(Chunk.getFirstBlock().getFirst());
         }
 
         WorldEntityBlock Block = Chunk.getFirstBlock().peekLast();
@@ -225,16 +223,6 @@ public class World {
     }
 
     public void AddChunkToFreeList(WorldChunk Old) {
-        if (tileChunkHash.containsValue(Old)) {
-            long hash = tileChunkHash.entrySet().stream().map((entry) -> {
-                if (entry.getValue().equals(Old)) {
-                  return entry.getKey();
-                }
-                return null;
-            }).filter(Objects::nonNull).findFirst().get();
-            tileChunkHash.remove(hash);
-        }
-
         World.firstFreeChunk.add(Old);
     }
 
